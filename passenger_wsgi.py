@@ -5,7 +5,11 @@ import os
 #    In cPanel, the root of the app is often where this file lives.
 sys.path.insert(0, os.path.dirname(__file__))
 
-# 2. Import the ASGI app
+# 2. ALSO Add the 'backend' directory to sys.path
+#    This allows imports like 'import database' inside backend/main.py to work.
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
+
+# 3. Import the ASGI app
 #    Adjust 'backend.main' if your folder structure or file name is different.
 from backend.main import app as asgi_app
 

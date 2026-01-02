@@ -327,7 +327,10 @@ def format_job_response(job: Job):
     )
 
 # Mount Static Files (Frontend)
-app.mount("/", StaticFiles(directory="../", html=True), name="static")
+# Mount Static Files (Frontend)
+# Use absolute path relative to this file to ensure it works on cPanel
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+app.mount("/", StaticFiles(directory=base_dir, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

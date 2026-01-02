@@ -23,7 +23,7 @@ CREATE TABLE `jobs` (
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `ix_jobs_id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- Table: mailboxes
@@ -42,7 +42,7 @@ CREATE TABLE `mailboxes` (
   KEY `job_id` (`job_id`),
   KEY `ix_mailboxes_id` (`id`),
   CONSTRAINT `mailboxes_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- Table: users
@@ -54,7 +54,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `ix_users_username` (`username`),
   KEY `ix_users_id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `users` VALUES 
 (1, 'phongdh', '$2b$12$mmpgKE..mryai0GQEZGMDOnjUZunbXEnhcZX/DQsJ6gkzNDNFL.3.');
