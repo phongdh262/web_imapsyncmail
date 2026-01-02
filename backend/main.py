@@ -344,20 +344,32 @@ def format_job_response(job: Job):
 # Use absolute path relative to this file to ensure it works on cPanel
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Debug Logging for 404 Error
-try:
-    with open("startup_error.log", "a") as f:
-        import datetime
-        f.write(f"[{datetime.datetime.now()}] --- APP STARTUP ---\n")
-        f.write(f"[{datetime.datetime.now()}] Base Dir calculated: {base_dir}\n")
-        if os.path.exists(base_dir):
-            f.write(f"[{datetime.datetime.now()}] Contents of Base Dir: {os.listdir(base_dir)}\n")
-        else:
-             f.write(f"[{datetime.datetime.now()}] Base Dir DOES NOT EXIST\n")
-except:
-    pass
+from fastapi.responses import FileResponse
 
-app.mount("/", StaticFiles(directory=base_dir, html=True), name="static")
+# Mount Static Assets
+app.mount("/css", StaticFiles(directory=os.path.join(base_dir, "css")), name="css")
+app.mount("/js", StaticFiles(directory=os.path.join(base_dir, "js")), name="js")
+
+# Serve HTML Files explicitly (Safer & Fixes 404)
+@app.get("/")
+async def read_root():
+    return FileResponse(os.path.join(base_dir, 'index.html'))
+
+@app.get("/login.html")
+async def read_login():
+    return FileResponse(os.path.join(base_dir, 'login.html'))
+
+@app.get("/create-job.html")
+async def read_create_job():
+    return FileResponse(os.path.join(base_dir, 'create-job.html'))
+
+@app.get("/job-detail.html")
+async def read_job_detail():
+    return FileResponse(os.path.join(base_dir, 'job-detail.html'))
+
+@app.get("/guide.html")
+async def read_guide():
+    return FileResponse(os.path.join(base_dir, 'guide.html'))
 
 if __name__ == "__main__":
     import uvicorn
