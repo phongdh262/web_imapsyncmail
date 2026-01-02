@@ -10,3 +10,4 @@ python-jose[cryptography]
 passlib[bcrypt]
 pymysql
 python-dotenv
+a2wsgi
