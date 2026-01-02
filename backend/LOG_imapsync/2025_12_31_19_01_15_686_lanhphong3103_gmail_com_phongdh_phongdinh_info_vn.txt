@@ -1,0 +1,559 @@
+Here is imapsync 2.314 /opt/homebrew/Cellar/imapsync/2.314/libexec/bin/imapsync on host phongdinh, a darwin system with 0.1/16.0 free GiB of RAM, 63.85% used by processes.
+with Perl 5.34.1 and Mail::IMAPClient 3.43
+Transfer started at Wednesday 31 December 2025-12-31 19:01:15 +0700 +07
+PID is 92261 my PPID is 92242
+Log file is LOG_imapsync/2025_12_31_19_01_15_686_lanhphong3103_gmail_com_phongdh_phongdinh_info_vn.txt ( to change it, use --logfile path ; or use --nolog to turn off logging )
+Load is 5.07 4.71 4.60 on 8 cores
+Real user id is phongdinh (uid 501)
+Effective user id is phongdinh (euid 501)
+$RCSfile: imapsync,v $ $Revision: 2.314 $ $Date: 2025/09/23 16:55:17 $ 
+Command line used, run by /usr/bin/perl5.34:
+/opt/homebrew/Cellar/imapsync/2.314/libexec/bin/imapsync --host1 imap.gmail.com --port1 993 --user1 lanhphong3103@gmail.com --passfile1 /var/folders/w5/49by2d_j65ldx_49xrtfjxmw0000gn/T/tmp_kuvwz2y --ssl1 --host2 45.252.250.31 --port2 993 --user2 phongdh@phongdinh.info.vn --passfile2 /var/folders/w5/49by2d_j65ldx_49xrtfjxmw0000gn/T/tmp07tp_vnz --ssl2 --automap --syncinternaldates --nofoldersizes
+Current directory is /Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend
+Temp directory is /Users/phongdinh/tmp ( to change it use --tmpdir dirpath )
+Creating temp directory /Users/phongdinh/tmp
+kill -QUIT 92261 # special behavior: call to sub catch_exit
+kill -TERM 92261 # special behavior: call to sub catch_exit
+kill -INT 92261 # special behavior: call to sub catch_reconnect
+kill -HUP 92261 # special behavior: call to sub catch_print
+kill -USR1 92261 # special behavior: call to sub toggle_sleep
+Logging to a logfile by default. To turn off logging, use --nolog
+Directory LOG_imapsync is writable and readable and gointoable. Good.
+File /Users/phongdinh/tmp/imapsync.pid does not exist
+PID file is /Users/phongdinh/tmp/imapsync.pid ( to change it, use --pidfile filepath ; to avoid it use --pidfile "" )
+Writing my PID 92261 in /Users/phongdinh/tmp/imapsync.pid
+Writing also my logfile name in /Users/phongdinh/tmp/imapsync.pid : LOG_imapsync/2025_12_31_19_01_15_686_lanhphong3103_gmail_com_phongdh_phongdinh_info_vn.txt
+Modules version list ( use --no-modulesversion to turn off printing this Perl modules list ):
+Authen::NTLM         1.09
+CGI                  4.48
+Compress::Zlib       2.102
+Crypt::OpenSSL::RSA  0.31
+Digest::HMAC_MD5     1.01
+Digest::HMAC_SHA1    1.03
+Digest::MD5          2.58
+Digest::SHA          6.02
+Encode               3.0801
+Encode::IMAPUTF7     1.07
+File::Copy::Recursive 0.45
+File::Spec           3.80
+Getopt::Long         2.52
+HTML::Entities       3.69
+IO::Socket           1.46
+IO::Socket::INET     1.46
+IO::Socket::INET6    2.72
+IO::Socket::IP       0.43
+IO::Socket::SSL      2.068
+IO::Tee              0.65
+JSON                 4.10
+JSON::WebToken       0.10
+LWP                  6.44
+MIME::Base64         3.16
+Mail::IMAPClient     3.43
+Net::Ping            2.74
+Net::SSLeay          1.88
+Term::ReadKey        2.38
+Test::MockObject     1.20200122
+Time::HiRes          1.9767
+Unicode::String      2.10
+
+Info: will resync flags for already transferred messages. Use --noresyncflags to not resync flags.
+SSL debug mode level is --debugssl 1 (can be set from 0 meaning no debug to 4 meaning max debug)
+Host1: SSL default mode is like --sslargs1 "SSL_verify_mode=0", meaning for host1 SSL_VERIFY_NONE, ie, do not check the server certificate.
+Host1: Use --sslargs1 SSL_verify_mode=1 to have SSL_VERIFY_PEER, ie, check the server certificate. of host1
+Host2: SSL default mode is like --sslargs2 "SSL_verify_mode=0", meaning for host2 SSL_VERIFY_NONE, ie, do not check the server certificate.
+Host2: Use --sslargs2 SSL_verify_mode=1 to have SSL_VERIFY_PEER, ie, check the server certificate. of host2
+Info: turned ON syncinternaldates, will set the internal dates (arrival dates) on host2 same as host1.
+Host1: will try to use LOGIN authentication on host1
+Host2: will try to use LOGIN authentication on host2
+Host1: imap connection timeout is 120 seconds
+Host2: imap connection timeout is 120 seconds
+Host1: imap connection keepalive is on on host1. Use --nokeepalive1 to disable it.
+Host2: imap connection keepalive is on on host2. Use --nokeepalive2 to disable it.
+Host1: IMAP server [imap.gmail.com] port [993] user [lanhphong3103@gmail.com]
+Host2: IMAP server [45.252.250.31] port [993] user [phongdh@phongdinh.info.vn]
+Host1: connecting and login on host1 [imap.gmail.com] port [993] with user [lanhphong3103@gmail.com]
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+Host1 IP address: 74.125.68.109 Local IP address: 10.8.0.6
+Host1 banner: * OK Gimap ready for requests from 103.221.220.224 41be03b00d2f7-c31f435ab5emb342256895a12
+Host1 capability before authentication: IMAP4rev1 UNSELECT IDLE NAMESPACE QUOTA ID XLIST CHILDREN X-GM-EXT-1 XYZZY SASL-IR AUTH=XOAUTH2 AUTH=PLAIN AUTH=PLAIN-CLIENTTOKEN AUTH=OAUTHBEARER AUTH
+Host1: success login on [imap.gmail.com] with user [lanhphong3103@gmail.com] auth [LOGIN] or [LOGIN]
+Host2: connecting and login on host2 [45.252.250.31] port [993] with user [phongdh@phongdinh.info.vn]
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+Host2 IP address: 45.252.250.31 Local IP address: 10.8.0.6
+Host2 banner: * OK [CAPABILITY IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE NAMESPACE LITERAL+ AUTH=PLAIN AUTH=LOGIN] Dovecot ready.
+Host2 capability before authentication: IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE NAMESPACE LITERAL+ AUTH=PLAIN AUTH=LOGIN AUTH
+Host2: 45.252.250.31 says it has CAPABILITY for AUTHENTICATE LOGIN
+Host2: success login on [45.252.250.31] with user [phongdh@phongdinh.info.vn] auth [LOGIN] or [LOGIN]
+Host1: state Authenticated
+Host2: state Authenticated
+Host1 capability once authenticated: IMAP4rev1 UNSELECT IDLE NAMESPACE QUOTA ID XLIST CHILDREN X-GM-EXT-1 UIDPLUS COMPRESS=DEFLATE ENABLE MOVE CONDSTORE ESEARCH UTF8=ACCEPT LIST-EXTENDED LIST-STATUS LITERAL- SPECIAL-USE APPENDLIMIT=35651584 COMPRESS UTF8 APPENDLIMIT
+Host2 capability once authenticated: IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE SORT SORT=DISPLAY THREAD=REFERENCES THREAD=REFS THREAD=ORDEREDSUBJECT MULTIAPPEND URL-PARTIAL CATENATE UNSELECT CHILDREN NAMESPACE UIDPLUS LIST-EXTENDED I18NLEVEL=1 CONDSTORE QRESYNC ESEARCH ESORT SEARCHRES WITHIN CONTEXT=SEARCH LIST-STATUS BINARY MOVE SNIPPET=FUZZY PREVIEW=FUZZY PREVIEW STATUS=SIZE SAVEDATE NAMESPACE LITERAL+ NOTIFY SPECIAL-USE COMPRESS=DEFLATE QUOTA THREAD I18NLEVEL CONTEXT SNIPPET PREVIEW STATUS COMPRESS
+Host1: found ID capability. Sending/receiving ID, presented in raw IMAP for now.
+In order to avoid sending/receiving ID, use option --noid
+Sending: 4 ID ("name" "imapsync" "version" "2.314" "os" "darwin" "vendor" "Gilles LAMIRAL" "support-url" "https://imapsync.lamiral.info/" "date" "23-Sep-2025 16:55:17 +0000" "side" "host1")
+Sent 182 bytes
+Read: 	* ID ("name" "GImap" "vendor" "Google, Inc." "support-url" "https://support.google.com/mail" "version" "gmail.imap-server_20251216.07_p0" "remote-host" "103.221.220.224")
+  	4 OK Success
+Host2: found ID capability. Sending/receiving ID, presented in raw IMAP for now.
+In order to avoid sending/receiving ID, use option --noid
+Sending: 4 ID ("name" "imapsync" "version" "2.314" "os" "darwin" "vendor" "Gilles LAMIRAL" "support-url" "https://imapsync.lamiral.info/" "date" "23-Sep-2025 16:55:17 +0000" "side" "host2")
+Sent 182 bytes
+Read: 	* ID ("name" "Dovecot")
+  	4 OK ID completed (0.001 + 0.000 secs).
+
+Host2: QUOTA capability found, presented in raw IMAP on next lines
+Sending: 5 GETQUOTAROOT INBOX
+Sent 22 bytes
+Read: 	* QUOTAROOT INBOX Mailbox
+  	* QUOTA Mailbox (MESSAGE 1 2147483647)
+  	5 OK Getquotaroot completed (0.001 + 0.000 secs).
+
+Host2: Quota current storage is 0 bytes. Limit is 0 bytes. So 0 % full
+Host1: Compression is off. Use --compress1 to allow compression on host1
+Host2: Compression is off. Use --compress2 to allow compression on host2
+Compression often generates annoying errors, especially with SSL connexions, Gmail, Office365. So, avoid it.
+Host1: found 8 folders.
+Host2: found 7 folders.
+Host1: guessing separator from folder listing: [/]
+Host1: separator given by NAMESPACE: [/]
+Host2: guessing separator from folder listing: [.]
+Host2: separator given by NAMESPACE: [.]
+Host1: guessing prefix from folder listing: []
+Host1: prefix given by NAMESPACE: []
+Host2: guessing prefix from folder listing: [INBOX.]
+Host2: prefix given by NAMESPACE: [INBOX.]
+Host1: separator and prefix: [/][]
+Host2: separator and prefix: [.][INBOX.]
+Looking at INBOX or Inbox on both sides and deciding of the mapping to apply. Use --nofixInboxINBOX to avoid this behavior.
+INBOX INBOX on both sides so no mapping applied.
+Including all folders found by default. Use --subscribed or --folder or --folderrec or --include to select specific folders. Use --exclude to unselect specific folders.
+Host1: Checking wanted folders exist. Use --nocheckfoldersexist to avoid this check (shared of public namespace targeted).
+Host1: Checking wanted folders are selectable. Use --nocheckselectable to avoid this check.
+Turned on automapping folders ( use --noautomap to turn off automapping )
+Host1: special [Gmail]/C&APM- g&Hq8-n d&HqU-u sao = \Flagged
+Host1: special [Gmail]/Th&APk-ng r&AOE-c = \Trash
+Host1: special [Gmail]/Th&AbA- nha&AwE-p = \Drafts
+Host1: special [Gmail]/Th&AbA- r&AOE-c = \Junk
+Host1: special [Gmail]/Th&AbA- &AREA4w- g&Hu0-i = \Sent
+Host1: special [Gmail]/T&HqU-t c&HqM- th&AbA- = \All
+
+Host2: special INBOX.Sent           = \Sent
+Host2: special INBOX.spam           = \Junk
+Host2: special INBOX.Drafts         = \Drafts
+Host2: special INBOX.Trash          = \Trash
+Host2: special INBOX.Archive        = \Archive
+
+
+++++ Listing folders
+All foldernames are presented between brackets like [X] where X is the foldername.
+When a foldername contains non-ASCII characters it is presented in the form
+[X] = [Y] where
+X is the imap foldername you have to use in command line options and
+Y is the utf8 output just printed for convenience, to recognize it.
+
+Host1: folders list (first the raw imap format then the [X] = [Y]):
+* LIST (\HasNoChildren) "/" "INBOX"
+* LIST (\HasChildren \Noselect) "/" "[Gmail]"
+* LIST (\Flagged \HasNoChildren) "/" "[Gmail]/C&APM- g&Hq8-n d&HqU-u sao"
+* LIST (\HasNoChildren \Important) "/" "[Gmail]/Quan tr&Hs0-ng"
+* LIST (\HasNoChildren \Trash) "/" "[Gmail]/Th&APk-ng r&AOE-c"
+* LIST (\Drafts \HasNoChildren) "/" "[Gmail]/Th&AbA- nha&AwE-p"
+* LIST (\HasNoChildren \Junk) "/" "[Gmail]/Th&AbA- r&AOE-c"
+* LIST (\HasNoChildren \Sent) "/" "[Gmail]/Th&AbA- &AREA4w- g&Hu0-i"
+* LIST (\All \HasNoChildren) "/" "[Gmail]/T&HqU-t c&HqM- th&AbA-"
+18 OK Success
+
+[INBOX]
+[[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] = [[Gmail]/Có gắn dấu sao]
+[[Gmail]/Quan tr&Hs0-ng] = [[Gmail]/Quan trọng]
+[[Gmail]/T&HqU-t c&HqM- th&AbA-] = [[Gmail]/Tất cả thư]
+[[Gmail]/Th&APk-ng r&AOE-c] = [[Gmail]/Thùng rác]
+[[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] = [[Gmail]/Thư đã gửi]
+[[Gmail]/Th&AbA- nha&AwE-p] = [[Gmail]/Thư nháp]
+[[Gmail]/Th&AbA- r&AOE-c] = [[Gmail]/Thư rác]
+
+Host2: folders list (first the raw imap format then the [X] = [Y]):
+* LIST (\HasChildren) "." INBOX
+* LIST (\HasNoChildren \Sent) "." INBOX.Sent
+* LIST (\HasNoChildren \Junk) "." INBOX.spam
+* LIST (\HasNoChildren \Drafts) "." INBOX.Drafts
+* LIST (\HasNoChildren) "." INBOX.Junk
+* LIST (\HasNoChildren \Trash) "." INBOX.Trash
+* LIST (\HasNoChildren \Archive) "." INBOX.Archive
+11 OK List completed (0.001 + 0.000 secs).
+
+[INBOX]
+[INBOX.Archive]
+[INBOX.Drafts]
+[INBOX.Junk]
+[INBOX.Sent]
+[INBOX.Trash]
+[INBOX.spam]
+
+Folders in host2 not in host1:
+[INBOX.Junk]
+[INBOX.Archive]
+
+Folders mapping from --automap feature (use --f1f2 to override any mapping):
+[[Gmail]/Th&AbA- r&AOE-c] = [[Gmail]/Thư rác] -> [INBOX.spam]                            
+[[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] = [[Gmail]/Thư đã gửi] -> [INBOX.Sent]                            
+[[Gmail]/Th&AbA- nha&AwE-p] = [[Gmail]/Thư nháp] -> [INBOX.Drafts]                          
+[[Gmail]/Th&APk-ng r&AOE-c] = [[Gmail]/Thùng rác] -> [INBOX.Trash]                           
+
+Checking SEARCH ALL works on both accounts. To avoid that check, use --nochecknoabletosearch
+Host1: checking if SEARCH ALL works on INBOX
+Host1: folder [INBOX] has 168 messages mentioned by SELECT
+Host1: folder [INBOX] has 168 messages found by SEARCH ALL
+Host1: folder [INBOX] has the same messages count (168) by SELECT and SEARCH ALL
+Host2: checking if SEARCH ALL works on INBOX
+Host2: folder [INBOX] has 1 messages mentioned by SELECT
+Host2: folder [INBOX] has 1 messages found by SEARCH ALL
+Host2: folder [INBOX] has the same messages count (1) by SELECT and SEARCH ALL
+Good! SEARCH ALL works on both accounts.
+++++ Looping on each one of 8 folders to sync
+Folder     1/8 [INBOX]                             -> [INBOX]                            
+Host1: folder [INBOX] has 168 messages in total (mentioned by SELECT)
+Host2: folder [INBOX] has 1 messages in total (mentioned by SELECT)
+Host2: folder [INBOX] permanentflags: 
+Host2: Subscribing to folder INBOX
+Host1: folder [INBOX] considering 168 messages
+Host2: folder [INBOX] considering 1 messages
+Host1: folder [INBOX] selected 168 messages, duplicates 0
+Host2: folder [INBOX] selected 1 messages, duplicates 0
+msg INBOX/2373 {4872}         copied to INBOX/2          0.48 msgs/s  2.266 KiB/s 4.758 KiB copied 
+msg INBOX/2375 {4933}         copied to INBOX/3          0.83 msgs/s  3.967 KiB/s 9.575 KiB copied 
+msg INBOX/2376 {23898}        copied to INBOX/4          1.10 msgs/s  12.021 KiB/s 32.913 KiB copied 
+msg INBOX/2378 {4946}         copied to INBOX/5          1.31 msgs/s  12.323 KiB/s 37.743 KiB copied 
+msg INBOX/2379 {4927}         copied to INBOX/6          1.48 msgs/s  12.622 KiB/s 42.555 KiB copied 
+msg INBOX/2389 {3462293}      copied to INBOX/7          1.03 msgs/s  585.414 KiB/s 3.343 MiB copied 
+msg INBOX/2397 {5555}         copied to INBOX/8          1.14 msgs/s  558.194 KiB/s 3.349 MiB copied 
+msg INBOX/2402 {4937}         copied to INBOX/9          1.24 msgs/s  533.564 KiB/s 3.353 MiB copied 
+msg INBOX/2411 {4993}         copied to INBOX/10         1.34 msgs/s  510.858 KiB/s 3.358 MiB copied 
+msg INBOX/2415 {5076}         copied to INBOX/11         1.42 msgs/s  489.298 KiB/s 3.363 MiB copied 
+msg INBOX/2423 {5206}         copied to INBOX/12         1.50 msgs/s  470.033 KiB/s 3.368 MiB copied 
+msg INBOX/2426 {5116}         copied to INBOX/13         1.57 msgs/s  452.226 KiB/s 3.373 MiB copied 
+msg INBOX/2429 {24172}        copied to INBOX/14         1.64 msgs/s  438.100 KiB/s 3.396 MiB copied 
+msg INBOX/2437 {625750}       copied to INBOX/15         1.60 msgs/s  465.974 KiB/s 3.993 MiB copied 
+msg INBOX/2464 {5172}         copied to INBOX/16         1.65 msgs/s  451.216 KiB/s 3.998 MiB copied 
+msg INBOX/2465 {20592}        copied to INBOX/17         1.68 msgs/s  432.543 KiB/s 4.017 MiB copied 
+msg INBOX/2466 {19814}        copied to INBOX/18         1.71 msgs/s  416.833 KiB/s 4.036 MiB copied 
+msg INBOX/2478 {12848}        copied to INBOX/19         1.76 msgs/s  405.663 KiB/s 4.048 MiB copied 
+msg INBOX/2479 {18225}        copied to INBOX/20         1.80 msgs/s  394.935 KiB/s 4.066 MiB copied 
+msg INBOX/2491 {5441}         copied to INBOX/21         1.84 msgs/s  384.392 KiB/s 4.071 MiB copied 
+msg INBOX/2504 {26463}        copied to INBOX/22         1.88 msgs/s  375.114 KiB/s 4.096 MiB copied 
+msg INBOX/2511 {15929}        copied to INBOX/23         1.92 msgs/s  366.890 KiB/s 4.111 MiB copied 
+msg INBOX/2513 {5226}         copied to INBOX/24         1.95 msgs/s  358.011 KiB/s 4.116 MiB copied 
+msg INBOX/2516 {52269}        copied to INBOX/25         1.99 msgs/s  353.124 KiB/s 4.166 MiB copied 
+msg INBOX/2519 {5267}         copied to INBOX/26         2.02 msgs/s  345.147 KiB/s 4.171 MiB copied 
+msg INBOX/2520 {6629}         copied to INBOX/27         2.05 msgs/s  337.558 KiB/s 4.178 MiB copied 
+msg INBOX/2523 {13847}        copied to INBOX/28         2.08 msgs/s  330.863 KiB/s 4.191 MiB copied 
+msg INBOX/2528 {5438}         copied to INBOX/29         2.11 msgs/s  323.999 KiB/s 4.196 MiB copied 
+msg INBOX/2529 {5616}         copied to INBOX/30         2.14 msgs/s  317.354 KiB/s 4.201 MiB copied 
+msg INBOX/2530 {11690}        copied to INBOX/31         2.17 msgs/s  311.470 KiB/s 4.213 MiB copied 
+msg INBOX/2534 {18794}        copied to INBOX/32         2.19 msgs/s  306.326 KiB/s 4.230 MiB copied 
+msg INBOX/2535 {18794}        copied to INBOX/33         2.22 msgs/s  301.299 KiB/s 4.248 MiB copied 
+msg INBOX/2536 {35552}        copied to INBOX/34         2.24 msgs/s  297.328 KiB/s 4.282 MiB copied 
+msg INBOX/2538 {4306}         copied to INBOX/35         2.26 msgs/s  291.317 KiB/s 4.286 MiB copied 
+msg INBOX/2539 {5367}         copied to INBOX/36         2.28 msgs/s  286.102 KiB/s 4.291 MiB copied 
+msg INBOX/2540 {7271}         copied to INBOX/37         2.30 msgs/s  280.966 KiB/s 4.298 MiB copied 
+msg INBOX/2543 {4322}         copied to INBOX/38         2.32 msgs/s  275.988 KiB/s 4.303 MiB copied 
+msg INBOX/2544 {4316}         copied to INBOX/39         2.34 msgs/s  271.279 KiB/s 4.307 MiB copied 
+msg INBOX/2545 {5592}         copied to INBOX/40         2.36 msgs/s  266.700 KiB/s 4.312 MiB copied 
+msg INBOX/2546 {5250}         copied to INBOX/41         2.37 msgs/s  262.269 KiB/s 4.317 MiB copied 
+msg INBOX/2547 {5437}         copied to INBOX/42         2.39 msgs/s  257.649 KiB/s 4.322 MiB copied 
+msg INBOX/2549 {5416}         copied to INBOX/43         2.40 msgs/s  253.537 KiB/s 4.327 MiB copied 
+msg INBOX/2553 {5168}         copied to INBOX/44         2.42 msgs/s  249.630 KiB/s 4.332 MiB copied 
+msg INBOX/2558 {18679}        copied to INBOX/45         2.43 msgs/s  246.485 KiB/s 4.350 MiB copied 
+msg INBOX/2559 {5393}         copied to INBOX/46         2.45 msgs/s  242.653 KiB/s 4.355 MiB copied 
+msg INBOX/2560 {24133}        copied to INBOX/47         2.46 msgs/s  240.009 KiB/s 4.378 MiB copied 
+msg INBOX/2561 {5275}         copied to INBOX/48         2.48 msgs/s  236.403 KiB/s 4.383 MiB copied 
+msg INBOX/2564 {18750}        copied to INBOX/49         2.49 msgs/s  233.693 KiB/s 4.401 MiB copied 
+msg INBOX/2567 {5125}         copied to INBOX/50         2.50 msgs/s  230.403 KiB/s 4.406 MiB copied 
+msg INBOX/2568 {18177}        copied to INBOX/51         2.52 msgs/s  227.915 KiB/s 4.423 MiB copied 
+msg INBOX/2569 {5296}         copied to INBOX/52         2.53 msgs/s  224.899 KiB/s 4.428 MiB copied 
+msg INBOX/2570 {5312}         copied to INBOX/53         2.54 msgs/s  221.960 KiB/s 4.434 MiB copied 
+msg INBOX/2573 {18244}        copied to INBOX/54         2.55 msgs/s  219.600 KiB/s 4.451 MiB copied 
+msg INBOX/2579 {6226}         copied to INBOX/55         2.57 msgs/s  216.814 KiB/s 4.457 MiB copied 
+msg INBOX/2581 {6366}         copied to INBOX/56         2.57 msgs/s  213.688 KiB/s 4.463 MiB copied 
+msg INBOX/2583 {5305}         copied to INBOX/57         2.58 msgs/s  210.999 KiB/s 4.468 MiB copied 
+msg INBOX/2584 {14393}        copied to INBOX/58         2.59 msgs/s  208.297 KiB/s 4.482 MiB copied 
+msg INBOX/2585 {5140}         copied to INBOX/59         2.60 msgs/s  205.784 KiB/s 4.487 MiB copied 
+msg INBOX/2586 {14600}        copied to INBOX/60         2.60 msgs/s  202.851 KiB/s 4.501 MiB copied 
+msg INBOX/2587 {5495}         copied to INBOX/61         2.61 msgs/s  200.486 KiB/s 4.506 MiB copied 
+msg INBOX/2589 {5266}         copied to INBOX/62         2.62 msgs/s  198.170 KiB/s 4.511 MiB copied 
+msg INBOX/2590 {57167}        copied to INBOX/63         2.61 msgs/s  196.505 KiB/s 4.565 MiB copied 
+msg INBOX/2593 {5074}         copied to INBOX/64         2.62 msgs/s  194.302 KiB/s 4.570 MiB copied 
+msg INBOX/2599 {18543}        copied to INBOX/65         2.62 msgs/s  192.623 KiB/s 4.588 MiB copied 
+msg INBOX/2601 {5385}         copied to INBOX/66         2.63 msgs/s  190.537 KiB/s 4.593 MiB copied 
+msg INBOX/2602 {5258}         copied to INBOX/67         2.64 msgs/s  188.387 KiB/s 4.598 MiB copied 
+msg INBOX/2603 {5245}         copied to INBOX/68         2.65 msgs/s  186.405 KiB/s 4.603 MiB copied 
+msg INBOX/2605 {5266}         copied to INBOX/69         2.66 msgs/s  184.263 KiB/s 4.608 MiB copied 
+msg INBOX/2606 {6247}         copied to INBOX/70         2.66 msgs/s  182.380 KiB/s 4.614 MiB copied 
+msg INBOX/2607 {18883}        copied to INBOX/71         2.67 msgs/s  181.039 KiB/s 4.632 MiB copied 
+msg INBOX/2609 {11637}        copied to INBOX/72         2.68 msgs/s  179.443 KiB/s 4.643 MiB copied 
+msg INBOX/2621 {18815}        copied to INBOX/73         2.69 msgs/s  178.114 KiB/s 4.661 MiB copied 
+msg INBOX/2622 {5872}         copied to INBOX/74         2.69 msgs/s  176.329 KiB/s 4.667 MiB copied 
+msg INBOX/2623 {5688}         copied to INBOX/75         2.70 msgs/s  174.652 KiB/s 4.672 MiB copied 
+msg INBOX/2624 {18563}        copied to INBOX/76         2.70 msgs/s  172.825 KiB/s 4.690 MiB copied 
+msg INBOX/2625 {18553}        copied to INBOX/77         2.70 msgs/s  171.336 KiB/s 4.707 MiB copied 
+msg INBOX/2626 {20816}        copied to INBOX/78         2.69 msgs/s  169.295 KiB/s 4.727 MiB copied 
+msg INBOX/2628 {5122}         copied to INBOX/79         2.70 msgs/s  167.760 KiB/s 4.732 MiB copied 
+msg INBOX/2629 {35669}        copied to INBOX/80         2.70 msgs/s  167.034 KiB/s 4.766 MiB copied 
+msg INBOX/2630 {9624}         copied to INBOX/81         2.71 msgs/s  165.628 KiB/s 4.775 MiB copied 
+msg INBOX/2631 {9608}         copied to INBOX/82         2.72 msgs/s  164.308 KiB/s 4.785 MiB copied 
+msg INBOX/2633 {5245}         copied to INBOX/83         2.72 msgs/s  162.802 KiB/s 4.790 MiB copied 
+msg INBOX/2634 {5615}         copied to INBOX/84         2.73 msgs/s  161.365 KiB/s 4.795 MiB copied 
+msg INBOX/2635 {6462}         copied to INBOX/85         2.73 msgs/s  159.966 KiB/s 4.801 MiB copied 
+msg INBOX/2637 {31329}        copied to INBOX/86         2.74 msgs/s  159.373 KiB/s 4.831 MiB copied 
+msg INBOX/2639 {63402}        copied to INBOX/87         2.74 msgs/s  159.773 KiB/s 4.891 MiB copied 
+msg INBOX/2641 {35672}        copied to INBOX/88         2.75 msgs/s  159.254 KiB/s 4.925 MiB copied 
+msg INBOX/2644 {3269}         copied to INBOX/89         2.75 msgs/s  157.892 KiB/s 4.929 MiB copied 
+msg INBOX/2645 {4056}         copied to INBOX/90         2.76 msgs/s  156.571 KiB/s 4.932 MiB copied 
+msg INBOX/2647 {4679}         copied to INBOX/91         2.76 msgs/s  155.286 KiB/s 4.937 MiB copied 
+msg INBOX/2652 {50212}        copied to INBOX/92         2.77 msgs/s  155.284 KiB/s 4.985 MiB copied 
+msg INBOX/2654 {14676}        copied to INBOX/93         2.76 msgs/s  153.735 KiB/s 4.999 MiB copied 
+msg INBOX/2655 {13008}        copied to INBOX/94         2.77 msgs/s  152.769 KiB/s 5.011 MiB copied 
+msg INBOX/2658 {5278}         copied to INBOX/95         2.77 msgs/s  151.596 KiB/s 5.016 MiB copied 
+msg INBOX/2659 {5547}         copied to INBOX/96         2.78 msgs/s  150.433 KiB/s 5.021 MiB copied 
+msg INBOX/2661 {39651}        copied to INBOX/97         2.78 msgs/s  150.217 KiB/s 5.059 MiB copied 
+msg INBOX/2665 {4683}         copied to INBOX/98         2.79 msgs/s  149.101 KiB/s 5.064 MiB copied 
+msg INBOX/2670 {11565}        copied to INBOX/99         2.79 msgs/s  148.145 KiB/s 5.075 MiB copied 
+msg INBOX/2677 {5267}         copied to INBOX/100        2.80 msgs/s  147.034 KiB/s 5.080 MiB copied 
+msg INBOX/2680 {15511}        copied to INBOX/101        2.80 msgs/s  146.218 KiB/s 5.095 MiB copied 
+msg INBOX/2682 {5434}         copied to INBOX/102        2.80 msgs/s  144.904 KiB/s 5.100 MiB copied 
+msg INBOX/2687 {288793}       copied to INBOX/103        2.79 msgs/s  150.320 KiB/s 5.375 MiB copied 
+msg INBOX/2692 {10346}        copied to INBOX/104        2.79 msgs/s  149.361 KiB/s 5.385 MiB copied 
+msg INBOX/2693 {11032}        copied to INBOX/105        2.79 msgs/s  148.457 KiB/s 5.396 MiB copied 
+msg INBOX/2694 {5255}         copied to INBOX/106        2.80 msgs/s  147.445 KiB/s 5.401 MiB copied 
+msg INBOX/2701 {13757}        copied to INBOX/107        2.79 msgs/s  145.707 KiB/s 5.414 MiB copied 
+msg INBOX/2702 {5536}         copied to INBOX/108        2.79 msgs/s  144.710 KiB/s 5.419 MiB copied 
+msg INBOX/2703 {14646}        copied to INBOX/109        2.79 msgs/s  143.604 KiB/s 5.433 MiB copied 
+msg INBOX/2704 {14650}        copied to INBOX/110        2.78 msgs/s  142.397 KiB/s 5.447 MiB copied 
+msg INBOX/2705 {14719}        copied to INBOX/111        2.77 msgs/s  141.021 KiB/s 5.461 MiB copied 
+msg INBOX/2709 {5204}         copied to INBOX/112        2.78 msgs/s  140.121 KiB/s 5.466 MiB copied 
+msg INBOX/2711 {82607}        copied to INBOX/113        2.78 msgs/s  141.000 KiB/s 5.545 MiB copied 
+msg INBOX/2740 {5255}         copied to INBOX/114        2.79 msgs/s  140.115 KiB/s 5.550 MiB copied 
+msg INBOX/2748 {5379}         copied to INBOX/115        2.79 msgs/s  139.167 KiB/s 5.555 MiB copied 
+msg INBOX/2752 {5534}         copied to INBOX/116        2.79 msgs/s  138.314 KiB/s 5.560 MiB copied 
+msg INBOX/2760 {5236}         copied to INBOX/117        2.80 msgs/s  137.463 KiB/s 5.565 MiB copied 
+msg INBOX/2761 {10817}        copied to INBOX/118        2.80 msgs/s  136.739 KiB/s 5.575 MiB copied 
+msg INBOX/2762 {56316}        copied to INBOX/119        2.81 msgs/s  137.054 KiB/s 5.629 MiB copied 
+msg INBOX/2766 {5294}         copied to INBOX/120        2.81 msgs/s  136.222 KiB/s 5.634 MiB copied 
+msg INBOX/2768 {7248}         copied to INBOX/121        2.81 msgs/s  135.449 KiB/s 5.641 MiB copied 
+msg INBOX/2769 {8767}         copied to INBOX/122        2.82 msgs/s  134.705 KiB/s 5.649 MiB copied 
+msg INBOX/2778 {5617}         copied to INBOX/123        2.82 msgs/s  133.928 KiB/s 5.655 MiB copied 
+msg INBOX/2802 {5810}         copied to INBOX/124        2.83 msgs/s  133.127 KiB/s 5.660 MiB copied 
+msg INBOX/2803 {5799}         copied to INBOX/125        2.83 msgs/s  132.365 KiB/s 5.666 MiB copied 
+msg INBOX/2804 {5748}         copied to INBOX/126        2.83 msgs/s  131.618 KiB/s 5.671 MiB copied 
+msg INBOX/2805 {5601}         copied to INBOX/127        2.84 msgs/s  130.807 KiB/s 5.677 MiB copied 
+msg INBOX/2806 {5587}         copied to INBOX/128        2.84 msgs/s  130.081 KiB/s 5.682 MiB copied 
+msg INBOX/2807 {6480}         copied to INBOX/129        2.84 msgs/s  129.381 KiB/s 5.688 MiB copied 
+msg INBOX/2811 {5310}         copied to INBOX/130        2.85 msgs/s  128.664 KiB/s 5.693 MiB copied 
+msg INBOX/2812 {19102}        copied to INBOX/131        2.85 msgs/s  127.999 KiB/s 5.711 MiB copied 
+msg INBOX/2815 {5541}         copied to INBOX/132        2.85 msgs/s  127.254 KiB/s 5.717 MiB copied 
+msg INBOX/2823 {5134}         copied to INBOX/133        2.85 msgs/s  126.507 KiB/s 5.722 MiB copied 
+msg INBOX/2825 {6661}         copied to INBOX/134        2.85 msgs/s  125.849 KiB/s 5.728 MiB copied 
+msg INBOX/2832 {5263}         copied to INBOX/135        2.86 msgs/s  125.180 KiB/s 5.733 MiB copied 
+msg INBOX/2834 {5358}         copied to INBOX/136        2.86 msgs/s  124.487 KiB/s 5.738 MiB copied 
+msg INBOX/2844 {13836}        copied to INBOX/137        2.86 msgs/s  123.978 KiB/s 5.751 MiB copied 
+msg INBOX/2845 {8174}         copied to INBOX/138        2.87 msgs/s  123.390 KiB/s 5.759 MiB copied 
+msg INBOX/2848 {5142}         copied to INBOX/139        2.87 msgs/s  122.737 KiB/s 5.764 MiB copied 
+msg INBOX/2852 {5967}         copied to INBOX/140        2.87 msgs/s  122.091 KiB/s 5.770 MiB copied 
+msg INBOX/2853 {5960}         copied to INBOX/141        2.88 msgs/s  121.462 KiB/s 5.775 MiB copied 
+msg INBOX/2863 {24709}        copied to INBOX/142        2.88 msgs/s  121.204 KiB/s 5.799 MiB copied 
+msg INBOX/2865 {5533}         copied to INBOX/143        2.88 msgs/s  120.593 KiB/s 5.804 MiB copied 
+msg INBOX/2867 {5285}         copied to INBOX/144        2.88 msgs/s  119.810 KiB/s 5.809 MiB copied 
+msg INBOX/2868 {5392}         copied to INBOX/145        2.88 msgs/s  119.208 KiB/s 5.814 MiB copied 
+msg INBOX/2869 {4775}         copied to INBOX/146        2.89 msgs/s  118.613 KiB/s 5.819 MiB copied 
+msg INBOX/2870 {8007}         copied to INBOX/147        2.89 msgs/s  118.033 KiB/s 5.827 MiB copied 
+msg INBOX/2887 {6303}         copied to INBOX/148        2.89 msgs/s  117.466 KiB/s 5.833 MiB copied 
+msg INBOX/2903 {4848}         copied to INBOX/149        2.89 msgs/s  116.876 KiB/s 5.837 MiB copied 
+msg INBOX/2907 {5470}         copied to INBOX/150        2.90 msgs/s  116.298 KiB/s 5.842 MiB copied 
+msg INBOX/2909 {18544}        copied to INBOX/151        2.90 msgs/s  115.902 KiB/s 5.860 MiB copied 
+msg INBOX/2960 {5312}         copied to INBOX/152        2.90 msgs/s  115.351 KiB/s 5.865 MiB copied 
+msg INBOX/2961 {18610}        copied to INBOX/153        2.90 msgs/s  115.022 KiB/s 5.883 MiB copied 
+msg INBOX/2964 {6397}         copied to INBOX/154        2.90 msgs/s  114.494 KiB/s 5.889 MiB copied 
+msg INBOX/2968 {5267}         copied to INBOX/155        2.91 msgs/s  113.950 KiB/s 5.894 MiB copied 
+msg INBOX/2976 {4599}         copied to INBOX/156        2.91 msgs/s  113.387 KiB/s 5.899 MiB copied 
+msg INBOX/2979 {5636}         copied to INBOX/157        2.91 msgs/s  112.865 KiB/s 5.904 MiB copied 
+msg INBOX/2980 {5571}         copied to INBOX/158        2.92 msgs/s  112.355 KiB/s 5.909 MiB copied 
+msg INBOX/2981 {5665}         copied to INBOX/159        2.92 msgs/s  111.851 KiB/s 5.915 MiB copied 
+msg INBOX/2982 {5604}         copied to INBOX/160        2.92 msgs/s  111.356 KiB/s 5.920 MiB copied 
+msg INBOX/2983 {5885}         copied to INBOX/161        2.92 msgs/s  110.859 KiB/s 5.926 MiB copied 
+msg INBOX/2985 {5478}         copied to INBOX/162        2.93 msgs/s  110.367 KiB/s 5.931 MiB copied 
+msg INBOX/2989 {19733}        copied to INBOX/163        2.93 msgs/s  110.089 KiB/s 5.950 MiB copied 
+msg INBOX/2991 {1934952}      copied to INBOX/164        2.87 msgs/s  140.423 KiB/s 7.795 MiB copied 
+msg INBOX/2995 {5465}         copied to INBOX/165        2.87 msgs/s  139.772 KiB/s 7.800 MiB copied 
+msg INBOX/2998 {13104}        copied to INBOX/166        2.87 msgs/s  139.241 KiB/s 7.813 MiB copied 
+msg INBOX/3022 {80550}        copied to INBOX/167        2.87 msgs/s  139.739 KiB/s 7.889 MiB copied 
+msg INBOX/3023 {68340}        copied to INBOX/168        2.87 msgs/s  140.129 KiB/s 7.955 MiB copied 
+msg INBOX/3024 {68367}        copied to INBOX/169        2.87 msgs/s  140.537 KiB/s 8.020 MiB copied 
+Folder     2/8 [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] = [[Gmail]/Có gắn dấu sao] -> [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] = [INBOX.[Gmail].Có gắn dấu sao]
+Host1: folder [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] has 0 messages in total (mentioned by SELECT)
+Creating folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] on host2
+Creating folder [INBOX.[Gmail]] on host2
+Created folder [INBOX.[Gmail]] on host2
+Created folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] on host2
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] permanentflags: 
+Host2: Subscribing to folder INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao
+Host1: folder [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] considering 0 messages
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] considering 0 messages
+Host1: folder [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] selected 0 messages, duplicates 0
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] selected 0 messages, duplicates 0
+Folder     3/8 [[Gmail]/Quan tr&Hs0-ng] = [[Gmail]/Quan trọng] -> [INBOX.[Gmail].Quan tr&Hs0-ng] = [INBOX.[Gmail].Quan trọng]
+Host1: folder [[Gmail]/Quan tr&Hs0-ng] has 164 messages in total (mentioned by SELECT)
+Creating folder [INBOX.[Gmail].Quan tr&Hs0-ng] on host2
+Created folder [INBOX.[Gmail].Quan tr&Hs0-ng] on host2
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] permanentflags: 
+Host2: Subscribing to folder INBOX.[Gmail].Quan tr&Hs0-ng
+Host1: folder [[Gmail]/Quan tr&Hs0-ng] considering 164 messages
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] considering 0 messages
+Host1: folder [[Gmail]/Quan tr&Hs0-ng] selected 164 messages, duplicates 0
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] selected 0 messages, duplicates 0
+msg [Gmail]/Quan tr&Hs0-ng/332 {4872}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/1          2.78 msgs/s  135.376 KiB/s 8.024 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/333 {4933}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/2          2.79 msgs/s  134.804 KiB/s 8.029 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/334 {23898}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/3          2.79 msgs/s  134.522 KiB/s 8.052 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/335 {4946}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/4          2.79 msgs/s  133.954 KiB/s 8.057 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/336 {4927}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/5          2.80 msgs/s  133.402 KiB/s 8.061 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/337 {3462293}       copied to INBOX.[Gmail].Quan tr&Hs0-ng/6          2.70 msgs/s  180.816 KiB/s 11.363 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/338 {5555}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/7          2.71 msgs/s  180.072 KiB/s 11.369 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/339 {4937}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/8          2.71 msgs/s  179.338 KiB/s 11.373 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/340 {4993}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/9          2.71 msgs/s  178.584 KiB/s 11.378 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/341 {5076}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/10         2.71 msgs/s  177.663 KiB/s 11.383 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/342 {5206}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/11         2.72 msgs/s  176.950 KiB/s 11.388 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/343 {5116}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/12         2.72 msgs/s  176.238 KiB/s 11.393 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/344 {24172}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/13         2.72 msgs/s  175.801 KiB/s 11.416 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/345 {625750}        copied to INBOX.[Gmail].Quan tr&Hs0-ng/14         2.70 msgs/s  182.790 KiB/s 12.013 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/346 {20592}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/15         2.70 msgs/s  182.042 KiB/s 12.032 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/347 {19814}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/16         2.70 msgs/s  181.414 KiB/s 12.051 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/348 {12848}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/17         2.71 msgs/s  180.795 KiB/s 12.063 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/349 {18225}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/18         2.71 msgs/s  180.149 KiB/s 12.081 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/350 {5441}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/19         2.71 msgs/s  179.458 KiB/s 12.086 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/351 {26463}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/20         2.71 msgs/s  179.039 KiB/s 12.111 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/352 {15929}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/21         2.72 msgs/s  178.506 KiB/s 12.126 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/353 {5226}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/22         2.72 msgs/s  177.837 KiB/s 12.131 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/354 {52269}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/23         2.72 msgs/s  177.757 KiB/s 12.181 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/355 {5267}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/24         2.72 msgs/s  177.086 KiB/s 12.186 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/356 {6629}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/25         2.73 msgs/s  176.438 KiB/s 12.192 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/357 {13847}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/26         2.73 msgs/s  175.870 KiB/s 12.206 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/358 {5438}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/27         2.73 msgs/s  175.219 KiB/s 12.211 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/359 {5616}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/28         2.74 msgs/s  174.588 KiB/s 12.216 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/360 {11690}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/29         2.74 msgs/s  174.031 KiB/s 12.227 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/361 {18794}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/30         2.74 msgs/s  173.562 KiB/s 12.245 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/362 {18794}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/31         2.74 msgs/s  172.995 KiB/s 12.263 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/363 {35552}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/32         2.74 msgs/s  172.627 KiB/s 12.297 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/364 {4306}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/33         2.74 msgs/s  171.806 KiB/s 12.301 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/365 {5367}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/34         2.74 msgs/s  171.176 KiB/s 12.306 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/366 {7271}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/35         2.75 msgs/s  170.580 KiB/s 12.313 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/367 {4322}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/36         2.75 msgs/s  169.938 KiB/s 12.317 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/368 {4316}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/37         2.75 msgs/s  169.304 KiB/s 12.322 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/369 {5592}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/38         2.75 msgs/s  168.626 KiB/s 12.327 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/370 {5250}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/39         2.75 msgs/s  167.948 KiB/s 12.332 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/371 {5437}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/40         2.76 msgs/s  167.335 KiB/s 12.337 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/372 {5416}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/41         2.76 msgs/s  166.652 KiB/s 12.342 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/373 {5168}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/42         2.76 msgs/s  166.055 KiB/s 12.347 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/374 {18679}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/43         2.76 msgs/s  165.625 KiB/s 12.365 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/375 {5393}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/44         2.76 msgs/s  165.043 KiB/s 12.370 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/376 {24133}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/45         2.76 msgs/s  164.654 KiB/s 12.393 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/377 {5275}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/46         2.77 msgs/s  164.074 KiB/s 12.398 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/378 {18750}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/47         2.77 msgs/s  163.620 KiB/s 12.416 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/379 {5125}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/48         2.77 msgs/s  163.045 KiB/s 12.421 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/380 {18177}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/49         2.77 msgs/s  162.622 KiB/s 12.438 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/381 {5296}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/50         2.77 msgs/s  162.062 KiB/s 12.443 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/382 {5312}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/51         2.77 msgs/s  161.508 KiB/s 12.448 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/383 {18244}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/52         2.78 msgs/s  161.098 KiB/s 12.466 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/384 {6226}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/53         2.78 msgs/s  160.565 KiB/s 12.472 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/385 {6366}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/54         2.78 msgs/s  160.041 KiB/s 12.478 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/386 {5305}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/55         2.78 msgs/s  159.501 KiB/s 12.483 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/387 {14393}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/56         2.78 msgs/s  158.837 KiB/s 12.497 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/388 {5140}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/57         2.78 msgs/s  158.307 KiB/s 12.501 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/389 {14600}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/58         2.78 msgs/s  157.713 KiB/s 12.515 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/390 {5495}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/59         2.78 msgs/s  157.185 KiB/s 12.521 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/391 {5266}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/60         2.78 msgs/s  156.670 KiB/s 12.526 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/392 {57167}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/61         2.78 msgs/s  156.584 KiB/s 12.580 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/393 {5074}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/62         2.78 msgs/s  155.954 KiB/s 12.585 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/394 {18543}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/63         2.79 msgs/s  155.599 KiB/s 12.603 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/395 {5385}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/64         2.79 msgs/s  155.111 KiB/s 12.608 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/396 {5258}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/65         2.79 msgs/s  154.605 KiB/s 12.613 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/397 {5245}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/66         2.79 msgs/s  154.109 KiB/s 12.618 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/398 {5266}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/67         2.79 msgs/s  153.607 KiB/s 12.623 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/399 {6247}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/68         2.79 msgs/s  153.131 KiB/s 12.629 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/400 {18883}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/69         2.80 msgs/s  152.802 KiB/s 12.647 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/401 {11637}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/70         2.80 msgs/s  152.391 KiB/s 12.658 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/402 {18815}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/71         2.80 msgs/s  151.920 KiB/s 12.676 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/403 {5872}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/72         2.80 msgs/s  151.445 KiB/s 12.681 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/404 {5688}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/73         2.80 msgs/s  150.962 KiB/s 12.687 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/405 {18563}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/74         2.80 msgs/s  150.567 KiB/s 12.705 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/406 {18553}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/75         2.80 msgs/s  150.069 KiB/s 12.722 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/407 {20816}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/76         2.80 msgs/s  149.685 KiB/s 12.742 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/408 {5122}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/77         2.80 msgs/s  149.226 KiB/s 12.747 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/409 {35669}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/78         2.80 msgs/s  149.092 KiB/s 12.781 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/410 {9624}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/79         2.80 msgs/s  148.678 KiB/s 12.790 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/411 {9608}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/80         2.81 msgs/s  148.276 KiB/s 12.799 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/412 {5245}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/81         2.81 msgs/s  147.815 KiB/s 12.804 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/413 {5615}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/82         2.81 msgs/s  147.374 KiB/s 12.810 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/414 {6462}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/83         2.81 msgs/s  146.945 KiB/s 12.816 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/415 {31329}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/84         2.81 msgs/s  146.780 KiB/s 12.846 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/416 {63402}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/85         2.81 msgs/s  146.952 KiB/s 12.906 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/417 {35672}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/86         2.81 msgs/s  146.819 KiB/s 12.940 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/418 {3269}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/87         2.82 msgs/s  146.362 KiB/s 12.943 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/419 {4056}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/88         2.82 msgs/s  145.909 KiB/s 12.947 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/420 {4679}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/89         2.82 msgs/s  145.430 KiB/s 12.952 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/421 {50212}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/90         2.82 msgs/s  145.417 KiB/s 13.000 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/422 {14676}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/91         2.82 msgs/s  144.939 KiB/s 13.014 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/423 {13008}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/92         2.82 msgs/s  144.604 KiB/s 13.026 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/424 {5278}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/93         2.82 msgs/s  144.187 KiB/s 13.031 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/425 {5547}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/94         2.82 msgs/s  143.718 KiB/s 13.036 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/426 {39651}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/95         2.82 msgs/s  143.647 KiB/s 13.074 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/427 {4683}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/96         2.82 msgs/s  143.235 KiB/s 13.079 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/428 {11565}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/97         2.83 msgs/s  142.895 KiB/s 13.090 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/429 {5267}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/98         2.83 msgs/s  142.491 KiB/s 13.095 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/430 {15511}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/99         2.83 msgs/s  142.157 KiB/s 13.109 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/431 {5434}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/100        2.83 msgs/s  141.763 KiB/s 13.115 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/432 {288793}        copied to INBOX.[Gmail].Quan tr&Hs0-ng/101        2.82 msgs/s  143.791 KiB/s 13.390 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/433 {10346}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/102        2.82 msgs/s  143.437 KiB/s 13.400 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/434 {11032}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/103        2.82 msgs/s  143.080 KiB/s 13.410 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/435 {5255}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/104        2.83 msgs/s  142.684 KiB/s 13.415 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/436 {13757}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/105        2.82 msgs/s  142.267 KiB/s 13.429 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/437 {5536}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/106        2.83 msgs/s  141.879 KiB/s 13.434 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/438 {14646}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/107        2.82 msgs/s  141.427 KiB/s 13.448 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/439 {14650}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/108        2.82 msgs/s  140.931 KiB/s 13.462 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/440 {14719}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/109        2.82 msgs/s  140.579 KiB/s 13.476 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/441 {5204}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/110        2.82 msgs/s  140.201 KiB/s 13.481 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/442 {82607}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/111        2.82 msgs/s  140.550 KiB/s 13.560 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/443 {5255}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/112        2.83 msgs/s  140.158 KiB/s 13.565 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/444 {5379}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/113        2.83 msgs/s  139.786 KiB/s 13.570 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/445 {5534}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/114        2.83 msgs/s  139.408 KiB/s 13.575 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/446 {5236}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/115        2.83 msgs/s  139.037 KiB/s 13.580 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/447 {10817}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/116        2.83 msgs/s  138.725 KiB/s 13.590 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/448 {56316}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/117        2.83 msgs/s  138.832 KiB/s 13.644 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/449 {5294}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/118        2.83 msgs/s  138.466 KiB/s 13.649 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/450 {7248}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/119        2.83 msgs/s  138.126 KiB/s 13.656 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/451 {8767}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/120        2.84 msgs/s  137.796 KiB/s 13.664 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/452 {5617}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/121        2.84 msgs/s  137.438 KiB/s 13.670 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/459 {5810}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/122        2.84 msgs/s  137.088 KiB/s 13.675 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/460 {5799}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/123        2.84 msgs/s  136.738 KiB/s 13.681 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/461 {5748}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/124        2.84 msgs/s  136.397 KiB/s 13.686 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/462 {5601}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/125        2.84 msgs/s  136.049 KiB/s 13.692 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/463 {5587}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/126        2.84 msgs/s  135.700 KiB/s 13.697 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/464 {6480}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/127        2.85 msgs/s  135.358 KiB/s 13.703 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/465 {5310}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/128        2.85 msgs/s  135.009 KiB/s 13.708 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/466 {19102}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/129        2.84 msgs/s  134.608 KiB/s 13.726 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/467 {5541}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/130        2.85 msgs/s  134.278 KiB/s 13.732 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/468 {5134}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/131        2.85 msgs/s  133.939 KiB/s 13.737 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/469 {6661}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/132        2.85 msgs/s  133.605 KiB/s 13.743 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/470 {5263}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/133        2.85 msgs/s  133.272 KiB/s 13.748 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/471 {5358}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/134        2.85 msgs/s  132.943 KiB/s 13.753 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/472 {13836}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/135        2.85 msgs/s  132.686 KiB/s 13.766 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/473 {8174}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/136        2.85 msgs/s  132.388 KiB/s 13.774 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/474 {5142}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/137        2.85 msgs/s  132.048 KiB/s 13.779 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/475 {5967}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/138        2.86 msgs/s  131.726 KiB/s 13.785 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/476 {5960}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/139        2.86 msgs/s  131.370 KiB/s 13.790 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/477 {24709}         copied to INBOX.[Gmail].Quan tr&Hs0-ng/140        2.86 msgs/s  131.225 KiB/s 13.814 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/478 {5533}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/141        2.86 msgs/s  130.909 KiB/s 13.819 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/479 {5285}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/142        2.86 msgs/s  130.588 KiB/s 13.824 MiB copied 
+msg [Gmail]/Quan tr&Hs0-ng/480 {5392}          copied to INBOX.[Gmail].Quan tr&Hs0-ng/143        2.86 msgs/s  130.274 KiB/s 13.829 MiB copied 

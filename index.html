@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMAP Sync Dashboard</title>
+    <link rel="stylesheet" href="css/style.css?v=1.1">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                        stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M22 6L12 13L2 6" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                IMAP Sync Pro
+            </div>
+            <nav>
+                <!-- User Profile or Settings could go here -->
+            </nav>
+        </header>
+
+        <main>
+            <header>
+                <div class="logo">
+                    <i class="fas fa-sync-alt"></i> IMAP Sync Tool
+                </div>
+                <div class="action-group">
+                    <a href="guide.html" class="btn btn-secondary">
+                        <i class="fas fa-book"></i> User Guide
+                    </a>
+                    <a href="create-job.html" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Job
+                    </a>
+                    <button onclick="logout()" class="btn btn-secondary"
+                        style="border: 1px solid var(--danger); color: var(--danger);">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="grid-4 mb-4">
+                <div class="card stat-card">
+                    <span class="stat-label">Total Jobs</span>
+                    <span class="stat-value" id="stat-total-jobs">0</span>
+                </div>
+                <div class="card stat-card">
+                    <span class="stat-label">Active Jobs</span>
+                    <span class="stat-value" id="stat-active-jobs">0</span>
+                </div>
+                <div class="card stat-card">
+                    <span class="stat-label">Mailboxes Synced</span>
+                    <span class="stat-value" id="stat-completed-mailboxes">0</span>
+                </div>
+                <div class="card stat-card">
+                    <span class="stat-label">Data Transferred</span>
+                    <span class="stat-value" id="stat-data-transferred">0 GB</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex-between mb-4">
+                    <h2>Recent Jobs</h2>
+                    <button class="btn btn-secondary" onclick="refreshDashboard()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Job Name</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                                <th>Source -> Target</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-table-body">
+                            <!-- Jobs will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/app.js?v=1.3"></script>
+</body>
+
+</html>

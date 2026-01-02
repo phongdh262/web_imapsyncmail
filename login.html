@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - IMAP Sync Pro</title>
+    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card login-card">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                        stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M22 6L12 13L2 6" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </div>
+            <h1>IMAP Sync Pro</h1>
+            <p class="subtitle">Please sign in to continue</p>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" required autofocus placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required placeholder="••••••">
+            </div>
+
+            <div id="login-error" style="color: var(--danger); font-size: 0.9rem; margin-bottom: 1rem; display: none;">
+                Incorrect username or password.
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Sign In</button>
+        </form>
+    </div>
+
+    <script src="js/app.js?v=1.1"></script>
+    <script>
+        // Init Login specific logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('login-form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const btn = form.querySelector('button');
+                    const originalText = btn.textContent;
+
+                    btn.disabled = true;
+                    btn.textContent = 'Signing in...';
+                    document.getElementById('login-error').style.display = 'none';
+
+                    const success = await login(formData.get('username'), formData.get('password'));
+
+                    if (!success) {
+                        btn.disabled = false;
+                        btn.textContent = originalText;
+                        document.getElementById('login-error').style.display = 'block';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

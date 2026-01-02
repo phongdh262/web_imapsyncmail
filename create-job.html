@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Job - IMAP Sync</title>
+    <link rel="stylesheet" href="css/style.css?v=1.1">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <a href="index.html"
+                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                            stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M22 6L12 13L2 6" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    IMAP Sync Pro
+                </a>
+            </div>
+            <div style="margin-left: auto;">
+                <button onclick="logout()" class="btn btn-secondary"
+                    style="border: 1px solid var(--danger); color: var(--danger); padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div class="mb-4">
+                <a href="index.html" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+                    &larr; Back to Dashboard
+                </a>
+            </div>
+
+            <h1>Create Migration Job</h1>
+            <p class="subtitle mb-4">Configure source and destination servers for bulk migration.</p>
+
+            <form id="create-job-form">
+                <div class="grid-2">
+                    <!-- Source Server -->
+                    <div class="card">
+                        <h2>Source Server</h2>
+                        <div class="form-group">
+                            <label class="form-label">IMAP Host</label>
+                            <input type="text" name="source_host" class="form-control"
+                                placeholder="imap.old-provider.com">
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Port</label>
+                                <input type="number" name="source_port" class="form-control" value="993">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Security</label>
+                                <select class="form-control" name="source_security">
+                                    <option>SSL/TLS</option>
+                                    <option>STARTTLS</option>
+                                    <option>None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Server -->
+                    <div class="card">
+                        <h2>Target Server</h2>
+                        <div class="form-group">
+                            <label class="form-label">IMAP Host</label>
+                            <input type="text" name="target_host" class="form-control"
+                                placeholder="outlook.office365.com">
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Port</label>
+                                <input type="number" name="target_port" class="form-control" value="993">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Security</label>
+                                <select class="form-control" name="target_security">
+                                    <option>SSL/TLS</option>
+                                    <option>STARTTLS</option>
+                                    <option>None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Migration Type Tabs -->
+                <div class="tabs mb-4">
+                    <button type="button" class="tab-btn active" data-tab="bulk">
+                        Bulk Migration (CSV)
+                    </button>
+                    <button type="button" class="tab-btn" data-tab="single">
+                        Single Sync
+                    </button>
+                </div>
+
+                <!-- Global Options -->
+                <div class="card mb-4">
+                    <h2>Migration Options</h2>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Concurrency Limit (Bulk Only)</label>
+                            <input type="number" class="form-control" id="opt-concurrency" value="10" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Options</label>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <label style="font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="opt-sync-dates" checked> Sync Internal Dates
+                                </label>
+                                <label style="font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="opt-skip-trash" checked> Skip Trash
+                                </label>
+                                <label style="font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="opt-dry-run"> Dry Run
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bulk Tab -->
+                <div id="tab-bulk" class="tab-content">
+                    <div class="card">
+                        <h2>Upload CSV File</h2>
+                        <div class="form-group">
+                            <div
+                                style="border: 2px dashed var(--border); padding: 2rem; text-align: center; border-radius: 8px;">
+                                <span style="color: var(--primary);">Click to upload CSV file</span> or drag file here
+                                <input type="file" style="display: none;">
+                                <div class="subtitle" style="font-size: 0.8rem; margin-top: 0.5rem;">Format:
+                                    source_user, source_pass, target_user, target_pass</div>
+                            </div>
+                            <div id="csv-preview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Single Tab -->
+                <div id="tab-single" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h2>Single Mailbox Configuration</h2>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Source Email</label>
+                                <input type="email" id="single-source-user" name="single_source_user"
+                                    class="form-control" placeholder="user@source.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Source Password</label>
+                                <input type="password" id="single-source-pass" name="single_source_pass"
+                                    class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Target Email</label>
+                                <input type="email" id="single-target-user" name="single_target_user"
+                                    class="form-control" placeholder="user@target.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Target Password</label>
+                                <input type="password" id="single-target-pass" name="single_target_pass"
+                                    class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card"
+                    style="margin-top: 1rem; margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center;">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Start Migration Job</button>
+                </div>
+            </form>
+        </main>
+    </div>
+    <script src="js/app.js?v=1.2"></script>
+</body>
+
+</html>

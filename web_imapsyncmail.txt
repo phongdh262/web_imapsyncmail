@@ -1,0 +1,214 @@
+Dưới đây là thiết kế hoàn chỉnh, ở mức production-ready, tối ưu cho migrate số lượng lớn mailbox bằng imapsync, tập trung vào hiệu năng – ổn định – bảo mật – khả năng mở rộng. Tôi trình bày theo tư duy system design + vận hành thực tế, không phải lý thuyết.
+
+1. Mục tiêu hệ thống (Design Goals)
+
+| Tiêu chí    | Yêu cầu               |
+| ----------- | --------------------- |
+| Scale       | 10 → 10.000 mailbox   |
+| Song song   | Có kiểm soát          |
+| Resume      | Retry từng mailbox    |
+| Theo dõi    | Realtime              |
+| Bảo mật     | Không lộ credential   |
+| Dễ vận hành | Ít thao tác tay       |
+| Tái sử dụng | Tool nội bộ / dịch vụ |
+
+2. Kiến trúc tổng thể (Final Architecture)
+┌─────────────┐
+│   Web UI    │
+│ (Dashboard) │
+└─────┬───────┘
+      │ REST / WS
+┌─────▼───────┐
+│   API Core  │
+│  (FastAPI)  │
+└─────┬───────┘
+      │ enqueue
+┌─────▼──────────┐
+│   Job Queue    │
+│ (Redis + RQ)   │
+└─────┬──────────┘
+      │ fetch
+┌─────▼───────────────┐
+│   Worker Pool        │
+│ (Docker + imapsync) │
+└─────┬───────────────┘
+      │ logs / status
+┌─────▼──────────────┐
+│  PostgreSQL         │
+│  Object Storage     │
+│ (DB + Log files)   │
+└────────────────────┘
+
+
+3. Phân rã thành phần chi tiết
+3.1. Web UI (Control Panel)
+Chức năng
+
+Tạo migration job
+
+Upload CSV
+
+Theo dõi realtime
+
+Retry mailbox lỗi
+
+Export report
+
+Màn hình bắt buộc
+
+Create Job
+
+Source server
+
+Target server
+
+CSV upload
+
+Concurrency limit
+
+Job Dashboard
+
+Progress bar tổng
+
+Bảng mailbox
+
+Mailbox Detail
+
+Log chi tiết
+
+Error message
+
+3.2. API Core (FastAPI – khuyến nghị)
+Nhiệm vụ
+
+Validate input
+
+Parse CSV
+
+Tạo job & mailbox task
+
+Push queue
+
+Update trạng thái
+
+API chính
+POST   /jobs
+GET    /jobs/{id}
+GET    /jobs/{id}/mailboxes
+POST   /mailboxes/{id}/retry
+GET    /mailboxes/{id}/logs
+
+4. Database Design (Chuẩn production)
+4.1. Bảng jobs
+jobs
+----
+id (uuid)
+name
+source_host
+source_port
+source_ssl
+target_host
+target_port
+target_ssl
+status (pending/running/done/failed)
+total_mailboxes
+completed
+failed
+created_at
+
+4.2. Bảng mailboxes
+mailboxes
+---------
+id (uuid)
+job_id
+source_email
+target_email
+status (pending/running/success/failed)
+started_at
+finished_at
+error_message
+log_path
+
+⚠️ Password:
+
+KHÔNG lưu plain
+
+AES-256 encrypt
+
+Key nằm ngoài source code
+
+5.3. Worker Logic (Pseudo-code)
+def run_mailbox_task(task):
+    cmd = build_imapsync_cmd(task)
+
+    process = subprocess.Popen(
+        cmd,
+        stdout=PIPE,
+        stderr=PIPE
+    )
+
+    for line in process.stdout:
+        parse_progress(line)
+        update_db(task.id, progress)
+
+    if process.returncode == 0:
+        mark_success(task.id)
+    else:
+        mark_failed(task.id)
+
+
+5.4. imapsync Command Template (Tối ưu)
+imapsync \
+ --host1 source.example.com \
+ --user1 user@a.com \
+ --password1 ***** \
+ --ssl1 \
+ --host2 target.example.com \
+ --user2 user@b.com \
+ --password2 ***** \
+ --ssl2 \
+ --automap \
+ --syncinternaldates \
+ --nofoldersizes \
+ --exclude Trash
+
+
+ 6. Theo dõi tiến trình (Progress Tracking)
+6.1. Cách parse log
+
+Theo dõi keyword:
+
+Messages copied
+
+Folders transferred
+
+Errors
+
+6.2. Realtime update
+
+Worker → Redis pub/sub
+
+UI → WebSocket
+
+7. Bảo mật (Non-negotiable)
+Credential
+
+Encrypt password (AES)
+
+Key:
+
+ENV
+
+Vault
+
+Network
+
+Worker chạy private network
+
+Web không truy cập trực tiếp IMAP
+
+Audit
+
+Log user action
+
+IP, timestamp

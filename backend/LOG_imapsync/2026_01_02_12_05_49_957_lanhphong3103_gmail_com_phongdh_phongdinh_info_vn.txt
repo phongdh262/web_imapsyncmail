@@ -1,0 +1,332 @@
+Here is imapsync 2.314 /opt/homebrew/Cellar/imapsync/2.314/libexec/bin/imapsync on host phongdinh, a darwin system with 0.1/16.0 free GiB of RAM, 75.04% used by processes.
+with Perl 5.34.1 and Mail::IMAPClient 3.43
+Transfer started at Friday 02 January 2026-01-02 12:05:49 +0700 +07
+PID is 29721 my PPID is 29473
+Log file is LOG_imapsync/2026_01_02_12_05_49_957_lanhphong3103_gmail_com_phongdh_phongdinh_info_vn.txt ( to change it, use --logfile path ; or use --nolog to turn off logging )
+Load is 3.08 4.30 4.48 on 8 cores
+Real user id is phongdinh (uid 501)
+Effective user id is phongdinh (euid 501)
+$RCSfile: imapsync,v $ $Revision: 2.314 $ $Date: 2025/09/23 16:55:17 $ 
+Command line used, run by /usr/bin/perl5.34:
+/opt/homebrew/Cellar/imapsync/2.314/libexec/bin/imapsync --host1 imap.gmail.com --port1 993 --user1 lanhphong3103@gmail.com --passfile1 /var/folders/w5/49by2d_j65ldx_49xrtfjxmw0000gn/T/tmpboo6psql --host2 45.252.250.31 --port2 993 --user2 phongdh@phongdinh.info.vn --passfile2 /var/folders/w5/49by2d_j65ldx_49xrtfjxmw0000gn/T/tmp32h74os_ --automap --nofoldersizes --ssl1 --ssl2 --syncinternaldates --exclude Trash --exclude Bin --exclude Deleted Items
+Current directory is /Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend
+Temp directory is /Users/phongdinh/tmp ( to change it use --tmpdir dirpath )
+Creating temp directory /Users/phongdinh/tmp
+kill -QUIT 29721 # special behavior: call to sub catch_exit
+kill -TERM 29721 # special behavior: call to sub catch_exit
+kill -INT 29721 # special behavior: call to sub catch_reconnect
+kill -HUP 29721 # special behavior: call to sub catch_print
+kill -USR1 29721 # special behavior: call to sub toggle_sleep
+Logging to a logfile by default. To turn off logging, use --nolog
+Directory LOG_imapsync is writable and readable and gointoable. Good.
+File /Users/phongdinh/tmp/imapsync.pid does not exist
+PID file is /Users/phongdinh/tmp/imapsync.pid ( to change it, use --pidfile filepath ; to avoid it use --pidfile "" )
+Writing my PID 29721 in /Users/phongdinh/tmp/imapsync.pid
+Writing also my logfile name in /Users/phongdinh/tmp/imapsync.pid : LOG_imapsync/2026_01_02_12_05_49_957_lanhphong3103_gmail_com_phongdh_phongdinh_info_vn.txt
+Modules version list ( use --no-modulesversion to turn off printing this Perl modules list ):
+Authen::NTLM         1.09
+CGI                  4.48
+Compress::Zlib       2.102
+Crypt::OpenSSL::RSA  0.31
+Digest::HMAC_MD5     1.01
+Digest::HMAC_SHA1    1.03
+Digest::MD5          2.58
+Digest::SHA          6.02
+Encode               3.0801
+Encode::IMAPUTF7     1.07
+File::Copy::Recursive 0.45
+File::Spec           3.80
+Getopt::Long         2.52
+HTML::Entities       3.69
+IO::Socket           1.46
+IO::Socket::INET     1.46
+IO::Socket::INET6    2.72
+IO::Socket::IP       0.43
+IO::Socket::SSL      2.068
+IO::Tee              0.65
+JSON                 4.10
+JSON::WebToken       0.10
+LWP                  6.44
+MIME::Base64         3.16
+Mail::IMAPClient     3.43
+Net::Ping            2.74
+Net::SSLeay          1.88
+Term::ReadKey        2.38
+Test::MockObject     1.20200122
+Time::HiRes          1.9767
+Unicode::String      2.10
+
+Info: will resync flags for already transferred messages. Use --noresyncflags to not resync flags.
+SSL debug mode level is --debugssl 1 (can be set from 0 meaning no debug to 4 meaning max debug)
+Host1: SSL default mode is like --sslargs1 "SSL_verify_mode=0", meaning for host1 SSL_VERIFY_NONE, ie, do not check the server certificate.
+Host1: Use --sslargs1 SSL_verify_mode=1 to have SSL_VERIFY_PEER, ie, check the server certificate. of host1
+Host2: SSL default mode is like --sslargs2 "SSL_verify_mode=0", meaning for host2 SSL_VERIFY_NONE, ie, do not check the server certificate.
+Host2: Use --sslargs2 SSL_verify_mode=1 to have SSL_VERIFY_PEER, ie, check the server certificate. of host2
+Info: turned ON syncinternaldates, will set the internal dates (arrival dates) on host2 same as host1.
+Host1: will try to use LOGIN authentication on host1
+Host2: will try to use LOGIN authentication on host2
+Host1: imap connection timeout is 120 seconds
+Host2: imap connection timeout is 120 seconds
+Host1: imap connection keepalive is on on host1. Use --nokeepalive1 to disable it.
+Host2: imap connection keepalive is on on host2. Use --nokeepalive2 to disable it.
+Host1: IMAP server [imap.gmail.com] port [993] user [lanhphong3103@gmail.com]
+Host2: IMAP server [45.252.250.31] port [993] user [phongdh@phongdinh.info.vn]
+Host1: connecting and login on host1 [imap.gmail.com] port [993] with user [lanhphong3103@gmail.com]
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+Host1 IP address: 74.125.24.109 Local IP address: 10.8.0.6
+Host1 banner: * OK Gimap ready for requests from 103.221.220.224 d2e1a72fcca58-8053420ebcfmb439423874b3a
+Host1 capability before authentication: IMAP4rev1 UNSELECT IDLE NAMESPACE QUOTA ID XLIST CHILDREN X-GM-EXT-1 XYZZY SASL-IR AUTH=XOAUTH2 AUTH=PLAIN AUTH=PLAIN-CLIENTTOKEN AUTH=OAUTHBEARER AUTH
+Host1: success login on [imap.gmail.com] with user [lanhphong3103@gmail.com] auth [LOGIN] or [LOGIN]
+Host2: connecting and login on host2 [45.252.250.31] port [993] with user [phongdh@phongdinh.info.vn]
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+DEBUG: .../IO/Socket/SSL.pm:1177: global error: Undefined SSL object
+Host2 IP address: 45.252.250.31 Local IP address: 10.8.0.6
+Host2 banner: * OK [CAPABILITY IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE NAMESPACE LITERAL+ AUTH=PLAIN AUTH=LOGIN] Dovecot ready.
+Host2 capability before authentication: IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE NAMESPACE LITERAL+ AUTH=PLAIN AUTH=LOGIN AUTH
+Host2: 45.252.250.31 says it has CAPABILITY for AUTHENTICATE LOGIN
+Host2: success login on [45.252.250.31] with user [phongdh@phongdinh.info.vn] auth [LOGIN] or [LOGIN]
+Host1: state Authenticated
+Host2: state Authenticated
+Host1 capability once authenticated: IMAP4rev1 UNSELECT IDLE NAMESPACE QUOTA ID XLIST CHILDREN X-GM-EXT-1 UIDPLUS COMPRESS=DEFLATE ENABLE MOVE CONDSTORE ESEARCH UTF8=ACCEPT LIST-EXTENDED LIST-STATUS LITERAL- SPECIAL-USE APPENDLIMIT=35651584 COMPRESS UTF8 APPENDLIMIT
+Host2 capability once authenticated: IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE SORT SORT=DISPLAY THREAD=REFERENCES THREAD=REFS THREAD=ORDEREDSUBJECT MULTIAPPEND URL-PARTIAL CATENATE UNSELECT CHILDREN NAMESPACE UIDPLUS LIST-EXTENDED I18NLEVEL=1 CONDSTORE QRESYNC ESEARCH ESORT SEARCHRES WITHIN CONTEXT=SEARCH LIST-STATUS BINARY MOVE SNIPPET=FUZZY PREVIEW=FUZZY PREVIEW STATUS=SIZE SAVEDATE NAMESPACE LITERAL+ NOTIFY SPECIAL-USE COMPRESS=DEFLATE QUOTA THREAD I18NLEVEL CONTEXT SNIPPET PREVIEW STATUS COMPRESS
+Host1: found ID capability. Sending/receiving ID, presented in raw IMAP for now.
+In order to avoid sending/receiving ID, use option --noid
+Sending: 4 ID ("name" "imapsync" "version" "2.314" "os" "darwin" "vendor" "Gilles LAMIRAL" "support-url" "https://imapsync.lamiral.info/" "date" "23-Sep-2025 16:55:17 +0000" "side" "host1")
+Sent 182 bytes
+Read: 	* ID ("name" "GImap" "vendor" "Google, Inc." "support-url" "https://support.google.com/mail" "version" "gmail.imap-server_20251216.07_p0" "remote-host" "103.221.220.224")
+  	4 OK Success
+Host2: found ID capability. Sending/receiving ID, presented in raw IMAP for now.
+In order to avoid sending/receiving ID, use option --noid
+Sending: 4 ID ("name" "imapsync" "version" "2.314" "os" "darwin" "vendor" "Gilles LAMIRAL" "support-url" "https://imapsync.lamiral.info/" "date" "23-Sep-2025 16:55:17 +0000" "side" "host2")
+Sent 182 bytes
+Read: 	* ID ("name" "Dovecot")
+  	4 OK ID completed (0.001 + 0.000 secs).
+
+Host2: QUOTA capability found, presented in raw IMAP on next lines
+Sending: 5 GETQUOTAROOT INBOX
+Sent 22 bytes
+Read: 	* QUOTAROOT INBOX Mailbox
+  	* QUOTA Mailbox (MESSAGE 1114 2147483647)
+  	5 OK Getquotaroot completed (0.001 + 0.000 secs).
+
+Host2: Quota current storage is 0 bytes. Limit is 0 bytes. So 0 % full
+Host1: Compression is off. Use --compress1 to allow compression on host1
+Host2: Compression is off. Use --compress2 to allow compression on host2
+Compression often generates annoying errors, especially with SSL connexions, Gmail, Office365. So, avoid it.
+Host1: found 8 folders.
+Host2: found 11 folders.
+Host1: guessing separator from folder listing: [/]
+Host1: separator given by NAMESPACE: [/]
+Host2: guessing separator from folder listing: [.]
+Host2: separator given by NAMESPACE: [.]
+Host1: guessing prefix from folder listing: []
+Host1: prefix given by NAMESPACE: []
+Host2: guessing prefix from folder listing: [INBOX.]
+Host2: prefix given by NAMESPACE: [INBOX.]
+Host1: separator and prefix: [/][]
+Host2: separator and prefix: [.][INBOX.]
+Looking at INBOX or Inbox on both sides and deciding of the mapping to apply. Use --nofixInboxINBOX to avoid this behavior.
+INBOX INBOX on both sides so no mapping applied.
+Including all folders found by default. Use --subscribed or --folder or --folderrec or --include to select specific folders. Use --exclude to unselect specific folders.
+Excluding folders matching pattern Trash
+
+Excluding folders matching pattern Bin
+
+Excluding folders matching pattern Deleted Items
+
+Host1: Checking wanted folders exist. Use --nocheckfoldersexist to avoid this check (shared of public namespace targeted).
+Host1: Checking wanted folders are selectable. Use --nocheckselectable to avoid this check.
+Turned on automapping folders ( use --noautomap to turn off automapping )
+Host1: special [Gmail]/C&APM- g&Hq8-n d&HqU-u sao = \Flagged
+Host1: special [Gmail]/Th&APk-ng r&AOE-c = \Trash
+Host1: special [Gmail]/Th&AbA- nha&AwE-p = \Drafts
+Host1: special [Gmail]/Th&AbA- r&AOE-c = \Junk
+Host1: special [Gmail]/Th&AbA- &AREA4w- g&Hu0-i = \Sent
+Host1: special [Gmail]/T&HqU-t c&HqM- th&AbA- = \All
+
+Host2: special INBOX.Sent           = \Sent
+Host2: special INBOX.spam           = \Junk
+Host2: special INBOX.Drafts         = \Drafts
+Host2: special INBOX.Trash          = \Trash
+Host2: special INBOX.Archive        = \Archive
+
+
+++++ Listing folders
+All foldernames are presented between brackets like [X] where X is the foldername.
+When a foldername contains non-ASCII characters it is presented in the form
+[X] = [Y] where
+X is the imap foldername you have to use in command line options and
+Y is the utf8 output just printed for convenience, to recognize it.
+
+Host1: folders list (first the raw imap format then the [X] = [Y]):
+* LIST (\HasNoChildren) "/" "INBOX"
+* LIST (\HasChildren \Noselect) "/" "[Gmail]"
+* LIST (\Flagged \HasNoChildren) "/" "[Gmail]/C&APM- g&Hq8-n d&HqU-u sao"
+* LIST (\HasNoChildren \Important) "/" "[Gmail]/Quan tr&Hs0-ng"
+* LIST (\HasNoChildren \Trash) "/" "[Gmail]/Th&APk-ng r&AOE-c"
+* LIST (\Drafts \HasNoChildren) "/" "[Gmail]/Th&AbA- nha&AwE-p"
+* LIST (\HasNoChildren \Junk) "/" "[Gmail]/Th&AbA- r&AOE-c"
+* LIST (\HasNoChildren \Sent) "/" "[Gmail]/Th&AbA- &AREA4w- g&Hu0-i"
+* LIST (\All \HasNoChildren) "/" "[Gmail]/T&HqU-t c&HqM- th&AbA-"
+18 OK Success
+
+[INBOX]
+[[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] = [[Gmail]/Có gắn dấu sao]
+[[Gmail]/Quan tr&Hs0-ng] = [[Gmail]/Quan trọng]
+[[Gmail]/T&HqU-t c&HqM- th&AbA-] = [[Gmail]/Tất cả thư]
+[[Gmail]/Th&APk-ng r&AOE-c] = [[Gmail]/Thùng rác]
+[[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] = [[Gmail]/Thư đã gửi]
+[[Gmail]/Th&AbA- nha&AwE-p] = [[Gmail]/Thư nháp]
+[[Gmail]/Th&AbA- r&AOE-c] = [[Gmail]/Thư rác]
+
+Host2: folders list (first the raw imap format then the [X] = [Y]):
+* LIST (\HasChildren) "." INBOX
+* LIST (\HasChildren \UnMarked) "." INBOX.[Gmail]
+* LIST (\HasNoChildren) "." "INBOX.[Gmail].T&HqU-t c&HqM- th&AbA-"
+* LIST (\HasNoChildren \UnMarked) "." "INBOX.[Gmail].Quan tr&Hs0-ng"
+* LIST (\HasNoChildren \UnMarked) "." "INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao"
+* LIST (\HasNoChildren \UnMarked \Sent) "." INBOX.Sent
+* LIST (\HasNoChildren \UnMarked \Junk) "." INBOX.spam
+* LIST (\HasNoChildren \UnMarked \Drafts) "." INBOX.Drafts
+* LIST (\HasNoChildren \UnMarked) "." INBOX.Junk
+* LIST (\HasNoChildren \UnMarked \Trash) "." INBOX.Trash
+* LIST (\HasNoChildren \Archive) "." INBOX.Archive
+11 OK List completed (0.001 + 0.000 secs).
+
+[INBOX]
+[INBOX.Archive]
+[INBOX.Drafts]
+[INBOX.Junk]
+[INBOX.Sent]
+[INBOX.Trash]
+[INBOX.[Gmail]]
+[INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] = [INBOX.[Gmail].Có gắn dấu sao]
+[INBOX.[Gmail].Quan tr&Hs0-ng] = [INBOX.[Gmail].Quan trọng]
+[INBOX.[Gmail].T&HqU-t c&HqM- th&AbA-] = [INBOX.[Gmail].Tất cả thư]
+[INBOX.spam]
+
+Folders in host2 not in host1:
+[INBOX.[Gmail]]
+[INBOX.Junk]
+[INBOX.Archive]
+
+Folders mapping from --automap feature (use --f1f2 to override any mapping):
+[[Gmail]/Th&AbA- r&AOE-c] = [[Gmail]/Thư rác] -> [INBOX.spam]                            
+[[Gmail]/Th&APk-ng r&AOE-c] = [[Gmail]/Thùng rác] -> [INBOX.Trash]                           
+[[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] = [[Gmail]/Thư đã gửi] -> [INBOX.Sent]                            
+[[Gmail]/Th&AbA- nha&AwE-p] = [[Gmail]/Thư nháp] -> [INBOX.Drafts]                          
+
+Checking SEARCH ALL works on both accounts. To avoid that check, use --nochecknoabletosearch
+Host1: checking if SEARCH ALL works on INBOX
+Host1: folder [INBOX] has 168 messages mentioned by SELECT
+Host1: folder [INBOX] has 168 messages found by SEARCH ALL
+Host1: folder [INBOX] has the same messages count (168) by SELECT and SEARCH ALL
+Host2: checking if SEARCH ALL works on INBOX
+Host2: folder [INBOX] has 168 messages mentioned by SELECT
+Host2: folder [INBOX] has 168 messages found by SEARCH ALL
+Host2: folder [INBOX] has the same messages count (168) by SELECT and SEARCH ALL
+Good! SEARCH ALL works on both accounts.
+++++ Looping on each one of 8 folders to sync
+Folder     1/8 [INBOX]                             -> [INBOX]                            
+Host1: folder [INBOX] has 168 messages in total (mentioned by SELECT)
+Host2: folder [INBOX] has 168 messages in total (mentioned by SELECT)
+Host2: folder [INBOX] permanentflags: 
+Host1: folder [INBOX] considering 168 messages
+Host2: folder [INBOX] considering 168 messages
+Host1: folder [INBOX] selected 168 messages, duplicates 0
+Host2: folder [INBOX] selected 168 messages, duplicates 0
+Folder     2/8 [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] = [[Gmail]/Có gắn dấu sao] -> [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] = [INBOX.[Gmail].Có gắn dấu sao]
+Host1: folder [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] permanentflags: 
+Host1: folder [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] considering 0 messages
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] considering 0 messages
+Host1: folder [[Gmail]/C&APM- g&Hq8-n d&HqU-u sao] selected 0 messages, duplicates 0
+Host2: folder [INBOX.[Gmail].C&APM- g&Hq8-n d&HqU-u sao] selected 0 messages, duplicates 0
+Folder     3/8 [[Gmail]/Quan tr&Hs0-ng] = [[Gmail]/Quan trọng] -> [INBOX.[Gmail].Quan tr&Hs0-ng] = [INBOX.[Gmail].Quan trọng]
+Host1: folder [[Gmail]/Quan tr&Hs0-ng] has 164 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] has 164 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] permanentflags: 
+Host1: folder [[Gmail]/Quan tr&Hs0-ng] considering 164 messages
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] considering 164 messages
+Host1: folder [[Gmail]/Quan tr&Hs0-ng] selected 164 messages, duplicates 0
+Host2: folder [INBOX.[Gmail].Quan tr&Hs0-ng] selected 164 messages, duplicates 0
+Folder     4/8 [[Gmail]/T&HqU-t c&HqM- th&AbA-] = [[Gmail]/Tất cả thư] -> [INBOX.[Gmail].T&HqU-t c&HqM- th&AbA-] = [INBOX.[Gmail].Tất cả thư]
+Host1: folder [[Gmail]/T&HqU-t c&HqM- th&AbA-] has 480 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].T&HqU-t c&HqM- th&AbA-] has 480 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.[Gmail].T&HqU-t c&HqM- th&AbA-] permanentflags: 
+Host1: folder [[Gmail]/T&HqU-t c&HqM- th&AbA-] considering 480 messages
+Host2: folder [INBOX.[Gmail].T&HqU-t c&HqM- th&AbA-] considering 480 messages
+Host1: folder [[Gmail]/T&HqU-t c&HqM- th&AbA-] selected 480 messages, duplicates 0
+Host2: folder [INBOX.[Gmail].T&HqU-t c&HqM- th&AbA-] selected 480 messages, duplicates 0
+Folder     5/8 [[Gmail]/Th&APk-ng r&AOE-c] = [[Gmail]/Thùng rác] -> [INBOX.Trash]                      
+Host1: folder [[Gmail]/Th&APk-ng r&AOE-c] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.Trash] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.Trash] permanentflags: 
+Host1: folder [[Gmail]/Th&APk-ng r&AOE-c] considering 0 messages
+Host2: folder [INBOX.Trash] considering 0 messages
+Host1: folder [[Gmail]/Th&APk-ng r&AOE-c] selected 0 messages, duplicates 0
+Host2: folder [INBOX.Trash] selected 0 messages, duplicates 0
+Folder     6/8 [[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] = [[Gmail]/Thư đã gửi] -> [INBOX.Sent]                       
+Host1: folder [[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] has 302 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.Sent] has 302 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.Sent] permanentflags: 
+Host1: folder [[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] considering 302 messages
+Host2: folder [INBOX.Sent] considering 302 messages
+Host1: folder [[Gmail]/Th&AbA- &AREA4w- g&Hu0-i] selected 302 messages, duplicates 0
+Host2: folder [INBOX.Sent] selected 302 messages, duplicates 0
+Folder     7/8 [[Gmail]/Th&AbA- nha&AwE-p] = [[Gmail]/Thư nháp] -> [INBOX.Drafts]                     
+Host1: folder [[Gmail]/Th&AbA- nha&AwE-p] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.Drafts] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.Drafts] permanentflags: 
+Host1: folder [[Gmail]/Th&AbA- nha&AwE-p] considering 0 messages
+Host2: folder [INBOX.Drafts] considering 0 messages
+Host1: folder [[Gmail]/Th&AbA- nha&AwE-p] selected 0 messages, duplicates 0
+Host2: folder [INBOX.Drafts] selected 0 messages, duplicates 0
+Folder     8/8 [[Gmail]/Th&AbA- r&AOE-c] = [[Gmail]/Thư rác] -> [INBOX.spam]                       
+Host1: folder [[Gmail]/Th&AbA- r&AOE-c] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.spam] has 0 messages in total (mentioned by SELECT)
+Host2: folder [INBOX.spam] permanentflags: 
+Host1: folder [[Gmail]/Th&AbA- r&AOE-c] considering 0 messages
+Host2: folder [INBOX.spam] considering 0 messages
+Host1: folder [[Gmail]/Th&AbA- r&AOE-c] selected 0 messages, duplicates 0
+Host2: folder [INBOX.spam] selected 0 messages, duplicates 0
+++++ End looping on each folder
+++++ Statistics
+Transfer started on                     : Friday 02 January 2026-01-02 12:05:49 +0700 +07
+Transfer ended on                       : Friday 02 January 2026-01-02 12:06:06 +0700 +07
+Transfer time                           : 16.5 sec
+Folders synced                          : 8/8 synced
+Folders deleted on host2                : 0 
+Messages transferred                    : 0 
+Messages skipped                        : 1114
+Messages found duplicate on host1       : 0
+Messages found duplicate on host2       : 0
+Messages found crossduplicate on host2  : 0
+Messages void (noheader) on host1       : 0  
+Messages void (noheader) on host2       : 0
+Messages found in host1 not in host2    : 0 messages
+Messages found in host2 not in host1    : 0 messages
+Messages deleted on host1               : 0
+Messages deleted on host2               : 0
+Total bytes transferred                 : 0 (0.000 KiB)
+Total bytes skipped                     : 34580180 (32.978 MiB)
+Message rate                            : 0.0 messages/s
+Average bandwidth rate                  : 0.0 KiB/s
+Reconnections to host1                  : 0
+Reconnections to host2                  : 0
+Memory consumption at the end           : 129.9 MiB (*time 0.6 MiB*h) (started with 189.8 MiB)
+Load end is                             : 3.42 4.32 4.49 on 8 cores
+CPU time and %cpu                       : 0.96 sec 5.8 %cpu 0.7 %allcpus
+Biggest message transferred             : 0 bytes (0.000 KiB)
+Memory/biggest message ratio            : NA
+The sync looks good, all 480 identified messages in host1 are on host2.
+There is no unidentified message on host1.
+The sync is strict, all 480 identified messages in host2 are on host1.
+Detected 0 errors
+This imapsync is up to date. ( local 2.314 >= official 2.314 )( Use --noreleasecheck to avoid this release check. )
+Homepage: https://imapsync.lamiral.info/
+Exiting with return value 0 (EX_OK: successful termination) 0/50 nb_errors/max_errors PID 29721
+Removing pidfile /Users/phongdinh/tmp/imapsync.pid
+Log file is LOG_imapsync/2026_01_02_12_05_49_957_lanhphong3103_gmail_com_phongdh_phongdinh_info_vn.txt ( to change it, use --logfile filepath ; or use --nolog to turn off logging )

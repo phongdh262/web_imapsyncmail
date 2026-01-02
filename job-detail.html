@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details - IMAP Sync</title>
+    <link rel="stylesheet" href="css/style.css?v=1.1">
+</head>
+
+<body>
+    <div class="container fade-in">
+        <header>
+            <div class="logo">
+                <a href="index.html"
+                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-sync-alt"></i> IMAP Sync Pro
+                </a>
+            </div>
+            <div class="action-group">
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <button onclick="logout()" class="btn btn-secondary"
+                    style="border: 1px solid var(--danger); color: var(--danger); margin-left: 0.5rem;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Header Info -->
+            <div class="flex-between mb-4">
+                <div>
+                    <h1 id="job-name">Loading...</h1>
+                    <div class="subtitle">
+                        <span id="source-host">...</span> <span style="margin: 0 0.5rem;">&rarr;</span> <span
+                            id="target-host">...</span>
+                    </div>
+                </div>
+                <div>
+                    <span id="job-status" class="status">Loading</span>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="card mb-4"
+                style="background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.7) 100%);">
+                <div class="flex-between mb-4">
+                    <h2>Overall Progress</h2>
+                    <span id="progress-percent"
+                        style="font-size: 2rem; font-weight: 700; color: var(--primary);">0%</span>
+                </div>
+                <div class="progress-container" style="height: 12px;">
+                    <div id="main-progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="grid-3 mt-4" style="text-align: center;">
+                    <div>
+                        <div class="stat-value" id="stat-total">0</div>
+                        <div class="stat-label">Total Mailboxes</div>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="color: var(--success); -webkit-text-fill-color: initial;"
+                            id="stat-completed">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="color: var(--danger); -webkit-text-fill-color: initial;"
+                            id="stat-failed">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mailbox List -->
+            <div class="card">
+                <div class="flex-between mb-4">
+                    <h2>Mailboxes</h2>
+                    <input type="text" class="form-control" style="width: 250px;" placeholder="Search user...">
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Source User</th>
+                                <th>Target User</th>
+                                <th>Status</th>
+                                <th>Message</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mailbox-list">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Log Modal -->
+    <div id="log-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);">
+        <div class="card"
+            style="width: 80%; max-width: 800px; max-height: 80vh; display: flex; flex-direction: column; background: var(--bg-dark); border: 1px solid var(--primary);">
+            <div class="flex-between mb-4">
+                <h2 style="margin: 0;">Mailbox Logs</h2>
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+            <pre id="log-content"
+                style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; color: #4ade80; overflow: auto; flex: 1; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap;">Loading...</pre>
+        </div>
+    </div>
+
+    <script src="js/app.js?v=1.4"></script>
+</body>
+
+</html>

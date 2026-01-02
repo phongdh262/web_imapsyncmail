@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Sử Dụng - IMAP Sync Tool</title>
+    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .guide-section {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .guide-section h2 {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 5px;
+            /* Visual alignment */
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container fade-in">
+        <header>
+            <div class="logo">
+                <a href="index.html"
+                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-sync-alt"></i> IMAP Sync Pro
+                </a>
+            </div>
+            <a href="index.html" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay Lại Dashboard
+            </a>
+        </header>
+
+        <main>
+            <h1 class="mb-4">Hướng Dẫn Sử Dụng</h1>
+            <p class="subtitle mb-4">Hướng dẫn chi tiết cách sử dụng công cụ di chuyển email IMAP, từ đồng bộ đơn lẻ đến
+                di chuyển hàng loạt.</p>
+
+            <div class="guide-section">
+                <h2><i class="fas fa-rocket"></i> Bắt Đầu Nhanh</h2>
+                <p>Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP khác một cách an toàn và
+                    bảo mật. Dữ liệu của bạn được mã hóa và không bao giờ được lưu trữ lâu dài trên hệ thống này.</p>
+                <div class="alert-info">
+                    <strong>Quan trọng:</strong> Hãy đảm bảo cả máy chủ nguồn và đích đều hỗ trợ IMAP và bạn có thông
+                    tin đăng nhập chính xác trước khi bắt đầu.
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h2><i class="fas fa-users"></i> Di Chuyển Hàng Loạt (Sử dụng CSV)</h2>
+
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Chuẩn bị File CSV</h3>
+                        <p>Tạo một file CSV (Comma Separated Values) chứa danh sách các tài khoản email cần di chuyển.
+                            Định dạng bắt buộc bao gồm 4 cột:</p>
+                        <code
+                            style="background: rgba(0,0,0,0.3); padding: 0.5rem; display: block; margin: 0.5rem 0; border-radius: 4px;">
+                            source_user, source_pass, target_user, target_pass
+                        </code>
+                        <p>Ví dụ:</p>
+                        <code
+                            style="background: rgba(0,0,0,0.3); padding: 0.5rem; display: block; margin: 0.5rem 0; border-radius: 4px;">
+                            nguyen_a@cty_cu.com, matkhau123, nguyen.a@cty_moi.com, MatKhauMoi!@#<br>
+                            tran_b@cty_cu.com, pass456, tran.b@cty_moi.com, SecurePass789
+                        </code>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Cấu Hình Máy Chủ</h3>
+                        <p>Truy cập trang "Create New Job". Nhập địa chỉ máy chủ IMAP (Host) cho cả nguồn và đích. </p>
+                        <p>Ví dụ: Gmail dùng <code>imap.gmail.com</code>, Office 365 dùng
+                            <code>outlook.office365.com</code>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Tải Lên và Bắt Đầu</h3>
+                        <p>Trong tab "Bulk Migration (CSV)", tải lên file CSV bạn vừa chuẩn bị. Hệ thống sẽ kiểm tra
+                            định dạng file. Nếu hợp lệ, nhấn "Upload CSV & Start".</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h2><i class="fas fa-user"></i> Đồng Bộ Đơn Lẻ</h2>
+                <p>Thích hợp khi bạn chỉ cần di chuyển một tài khoản email duy nhất để kiểm tra hoặc sử dụng cá nhân.
+                </p>
+
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Chọn Chế Độ</h3>
+                        <p>Tại trang "Create New Job", chuyển sang tab "Single Sync".</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Nhập Thông Tin Tài Khoản</h3>
+                        <p>Nhập trực tiếp Email và Mật khẩu cho tài khoản nguồn và tài khoản đích vào các ô tương ứng.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Bắt Đầu</h3>
+                        <p>Nhấn nút "Start Migration". Hệ thống sẽ tạo một tác vụ mới và bạn sẽ được chuyển hướng đến
+                            trang chi tiết để theo dõi tiến độ.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h2><i class="fas fa-chart-line"></i> Theo Dõi và Xử Lý Lỗi</h2>
+                <p>Tại trang "Job Details", bạn có thể theo dõi tiến độ của từng hộp thư.</p>
+                <ul style="list-style: disc; margin-left: 1.5rem; color: var(--text-muted); margin-top: 1rem;">
+                    <li style="margin-bottom: 0.5rem;"><strong>Trạng Thái (Status):</strong> Xem trạng thái (Running,
+                        Success, Failed) của từng dòng.</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>Xem Log (Log):</strong> Nếu có lỗi xảy ra, nhấn nút "Log"
+                        để xem chi tiết lỗi từ <code>imapsync</code>.</li>
+                    <li style="margin-bottom: 0.5rem;"><strong>Thử Lại (Retry):</strong> Đối với các mục thất bại, bạn
+                        có thể nhấn "Retry" để chạy lại quy trình đồng bộ cho hộp thư đó.</li>
+                </ul>
+            </div>
+
+        </main>
+    </div>
+</body>
+
+</html>
