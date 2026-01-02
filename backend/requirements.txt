@@ -8,3 +8,5 @@ python-multipart
 cryptography
 python-jose[cryptography]
 passlib[bcrypt]
+pymysql
+python-dotenv

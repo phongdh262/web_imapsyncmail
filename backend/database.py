@@ -4,10 +4,18 @@ from datetime import datetime
 from cryptography.fernet import Fernet
 import os
 
-# SQLite for simplicity, can be swapped for PostgreSQL
-DATABASE_URL = "sqlite:///./imapsync.db"
+from dotenv import load_dotenv
+import os
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+load_dotenv()
+
+# MySQL Connection from Env
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    # Fallback or Error
+    DATABASE_URL = "sqlite:///./imapsync.db"
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -37,24 +45,24 @@ def decrypt_password(token: str) -> str:
 class Job(Base):
     __tablename__ = "jobs"
 
-    id = Column(String, primary_key=True, index=True)
-    name = Column(String)
-    status = Column(String, default="pending") # pending, running, completed, failed
+    id = Column(String(36), primary_key=True, index=True)
+    name = Column(String(255))
+    status = Column(String(50), default="pending") # pending, running, completed, failed
     
     # Source Config
-    source_host = Column(String)
+    source_host = Column(String(255))
     source_port = Column(Integer, default=993)
-    source_security = Column(String, default="SSL/TLS") # SSL/TLS, STARTTLS, None
+    source_security = Column(String(50), default="SSL/TLS") # SSL/TLS, STARTTLS, None
     
     # Target Config
-    target_host = Column(String)
+    target_host = Column(String(255))
     target_port = Column(Integer, default=993)
-    target_security = Column(String, default="SSL/TLS") # SSL/TLS, STARTTLS, None
+    target_security = Column(String(50), default="SSL/TLS") # SSL/TLS, STARTTLS, None
     
     # Migration Options
     options = Column(Text, nullable=True) # JSON String for flexibility
     
-    csv_path = Column(String, nullable=True)
+    csv_path = Column(String(500), nullable=True)
     
     # Stats
     total_mailboxes = Column(Integer, default=0)
@@ -70,15 +78,15 @@ class Mailbox(Base):
     __tablename__ = "mailboxes"
 
     id = Column(Integer, primary_key=True, index=True)
-    job_id = Column(String, ForeignKey("jobs.id"))
+    job_id = Column(String(36), ForeignKey("jobs.id"))
     
-    source_user = Column(String)
-    source_pass = Column(String) # Encrypted
-    target_user = Column(String)
-    target_pass = Column(String) # Encrypted
+    source_user = Column(String(255))
+    source_pass = Column(String(500)) # Encrypted
+    target_user = Column(String(255))
+    target_pass = Column(String(500)) # Encrypted
     
-    status = Column(String, default="pending") # pending, running, success, failed
-    message = Column(String, nullable=True)
+    status = Column(String(50), default="pending") # pending, running, success, failed
+    message = Column(Text, nullable=True)
     data_transferred = Column(Integer, default=0) # Bytes
     
     job = relationship("Job", back_populates="mailboxes")
@@ -86,8 +94,8 @@ class Mailbox(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    username = Column(String(100), unique=True, index=True)
+    hashed_password = Column(String(255))
 
 def init_db():
     Base.metadata.create_all(bind=engine)
