@@ -9,10 +9,25 @@ import os
 
 load_dotenv()
 
-# MySQL Connection from Env
-DATABASE_URL = os.getenv("DATABASE_URL")
+# MySQL Connection
+import urllib.parse
+
+# Try individual variables first (Safer for passwords with special chars)
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
+db_host = os.getenv("DB_HOST")
+db_name = os.getenv("DB_NAME")
+db_port = os.getenv("DB_PORT", "3306")
+
+if db_user and db_password and db_host and db_name:
+    encoded_password = urllib.parse.quote_plus(db_password)
+    DATABASE_URL = f"mysql+pymysql://{db_user}:{encoded_password}@{db_host}:{db_port}/{db_name}"
+else:
+    # Fallback to monolithic string or SQLite
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    
 if not DATABASE_URL:
-    # Fallback or Error
+    # Check if we are testing or local
     DATABASE_URL = "sqlite:///./imapsync.db"
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)

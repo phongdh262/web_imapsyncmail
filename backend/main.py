@@ -13,8 +13,20 @@ from datetime import timedelta
 from pydantic import BaseModel
 from worker import run_imapsync
 
-# Initialize DB
-init_db()
+# Initialize DB safely
+try:
+    init_db()
+    print("Database initialized successfully.")
+except Exception as e:
+    error_msg = f"Failed to initialize database: {str(e)}"
+    print(error_msg)
+    # Log to file for cPanel visibility
+    try:
+        with open("startup_error.log", "a") as f:
+            import datetime
+            f.write(f"[{datetime.datetime.now()}] {error_msg}\n")
+    except:
+        pass
 
 app = FastAPI()
 
@@ -121,7 +133,8 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, db:
 from concurrent.futures import ThreadPoolExecutor
 
 # Global Executor
-executor = ThreadPoolExecutor(max_workers=10) 
+max_workers = int(os.getenv("MAX_WORKERS", 2))
+executor = ThreadPoolExecutor(max_workers=max_workers) 
 
 @app.post("/api/jobs/{job_id}/mailboxes")
 async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
