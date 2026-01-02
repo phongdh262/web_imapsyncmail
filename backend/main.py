@@ -343,6 +343,20 @@ def format_job_response(job: Job):
 # Mount Static Files (Frontend)
 # Use absolute path relative to this file to ensure it works on cPanel
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Debug Logging for 404 Error
+try:
+    with open("startup_error.log", "a") as f:
+        import datetime
+        f.write(f"[{datetime.datetime.now()}] --- APP STARTUP ---\n")
+        f.write(f"[{datetime.datetime.now()}] Base Dir calculated: {base_dir}\n")
+        if os.path.exists(base_dir):
+            f.write(f"[{datetime.datetime.now()}] Contents of Base Dir: {os.listdir(base_dir)}\n")
+        else:
+             f.write(f"[{datetime.datetime.now()}] Base Dir DOES NOT EXIST\n")
+except:
+    pass
+
 app.mount("/", StaticFiles(directory=base_dir, html=True), name="static")
 
 if __name__ == "__main__":
