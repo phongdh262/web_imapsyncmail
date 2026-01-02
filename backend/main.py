@@ -344,32 +344,40 @@ def format_job_response(job: Job):
 # Use absolute path relative to this file to ensure it works on cPanel
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 
 # Mount Static Assets
+# Note: StaticFiles needs 'aiofiles' installed.
 app.mount("/css", StaticFiles(directory=os.path.join(base_dir, "css")), name="css")
 app.mount("/js", StaticFiles(directory=os.path.join(base_dir, "js")), name="js")
 
-# Serve HTML Files explicitly (Safer & Fixes 404)
+def serve_html(filename):
+    path = os.path.join(base_dir, filename)
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+             return HTMLResponse(content=f.read())
+    return HTMLResponse(content=f"File not found: {path} (Base: {base_dir})", status_code=404)
+
+# Serve HTML Files explicitly (Sync read is safer without aiofiles)
 @app.get("/")
 async def read_root():
-    return FileResponse(os.path.join(base_dir, 'index.html'))
+    return serve_html('index.html')
 
 @app.get("/login.html")
 async def read_login():
-    return FileResponse(os.path.join(base_dir, 'login.html'))
+    return serve_html('login.html')
 
 @app.get("/create-job.html")
 async def read_create_job():
-    return FileResponse(os.path.join(base_dir, 'create-job.html'))
+    return serve_html('create-job.html')
 
 @app.get("/job-detail.html")
 async def read_job_detail():
-    return FileResponse(os.path.join(base_dir, 'job-detail.html'))
+    return serve_html('job-detail.html')
 
 @app.get("/guide.html")
 async def read_guide():
-    return FileResponse(os.path.join(base_dir, 'guide.html'))
+    return serve_html('guide.html')
 
 if __name__ == "__main__":
     import uvicorn
