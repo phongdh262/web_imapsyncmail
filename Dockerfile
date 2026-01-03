@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libfile-copy-recursive-perl \
     libfile-tail-perl \
     libio-socket-ssl-perl \
+    libio-socket-inet6-perl \
     libio-tee-perl \
     libhtml-parser-perl \
     libjson-webtoken-perl \
@@ -30,6 +31,8 @@ RUN apt-get update && apt-get install -y \
     libtest-nowarnings-perl \
     libtest-deep-perl \
     libtest-warn-perl \
+    libnet-libidn-perl \
+    libnet-ssleay-perl \
     make \
     && rm -rf /var/lib/apt/lists/*
 
