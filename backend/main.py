@@ -39,6 +39,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Health Check ---
+@app.get("/api/health")
+def health_check():
+    """Diagnostic endpoint for cPanel deployment"""
+    import sys
+    import shutil
+    
+    # Check DB
+    db_status = "unknown"
+    try:
+        import sqlalchemy
+        db = SessionLocal()
+        db.execute(sqlalchemy.text("SELECT 1"))
+        db.close()
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+        
+    # Check imapsync
+    imapsync_path = shutil.which("imapsync")
+    
+    return {
+        "status": "ok",
+        "python": sys.version,
+        "cwd": os.getcwd(),
+        "database": db_status,
+        "imapsync": imapsync_path or "not found"
+    }
+
 # Dependency
 def get_db():
     db = SessionLocal()

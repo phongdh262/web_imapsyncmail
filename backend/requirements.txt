@@ -2,8 +2,6 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
-redis
-rq
 python-multipart
 cryptography
 python-jose[cryptography]
