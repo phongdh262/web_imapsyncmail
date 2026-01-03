@@ -7,6 +7,11 @@ import uuid
 import csv
 import io
 import os
+import sys
+
+# Add current directory to sys.path to ensure modules can be imported
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from database import SessionLocal, engine, init_db, Job, Mailbox, User
 from auth import Token, get_current_user, create_access_token, verify_password, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta
