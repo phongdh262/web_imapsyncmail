@@ -458,7 +458,7 @@ const initJobDetail = async () => {
                              <div class="action-group" style="display: flex; justify-content: flex-end; align-items: center;">
                                 <button class="btn btn-secondary" onclick="viewLogs(${mb.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-right: 10px;">Log</button>
                                 ${mb.status === 'running' ? `<button class="btn btn-danger" onclick="stopSync(${mb.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; cursor: pointer; margin-right: 10px;">Stop</button>` : ''}
-                                ${mb.status === 'failed' ? '<button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Retry</button>' : ''}
+                                ${mb.status === 'failed' ? `<button class="btn btn-primary" onclick="retrySync(${mb.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Retry</button>` : ''}
                              </div>
                         </td>
                     </tr>
@@ -488,6 +488,21 @@ window.stopSync = async (mailboxId) => {
         // The polling will update the status automatically
     } catch (e) {
         alert('Failed to stop: ' + e.message);
+    }
+};
+
+window.retrySync = async (mailboxId) => {
+    if (!confirm('Retry this mailbox sync?')) return;
+    try {
+        const res = await request(`${API_BASE}/mailboxes/${mailboxId}/retry`, { method: 'POST' });
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.detail || 'Failed to retry');
+        }
+        // Poll will update UI
+        alert('Retry started');
+    } catch (e) {
+        alert('Failed to retry: ' + e.message);
     }
 };
 

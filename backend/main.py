@@ -328,6 +328,37 @@ def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_us
         # Could be already stopped
         return {"message": "Process not found or already stopped"}
 
+@app.post("/api/mailboxes/{mailbox_id}/retry")
+def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
+    if not mb:
+        raise HTTPException(status_code=404, detail="Mailbox not found")
+        
+    if mb.status == 'running':
+         raise HTTPException(status_code=400, detail="Mailbox is already running")
+
+    # Reset Status
+    mb.status = 'pending'
+    mb.message = 'Queued for retry'
+    # Optional: Reset data transferred? 
+    # mb.data_transferred = 0 
+    
+    # Update Job stats logic if needed (e.g. decrement failed count)
+    job = db.query(Job).filter(Job.id == mb.job_id).first()
+    if job:
+        # If it was failed, decrement failed count to reflect it's active again
+        # But our real-time stats in get_job will handle it based on status count.
+        # Just ensure status is set to running if job was completed?
+        if job.status == 'completed' or job.status == 'failed':
+            job.status = 'running'
+            
+    db.commit()
+    
+    # Re-submit to executor
+    executor.submit(run_imapsync, mb.id)
+    
+    return {"message": "Mailbox retry started", "mailbox_id": mb.id}
+
 @app.get("/api/stats")
 def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     from sqlalchemy import func
