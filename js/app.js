@@ -199,6 +199,23 @@ window.refreshDashboard = async () => {
     }, 500);
 };
 
+window.deleteAllJobs = async () => {
+    window.showConfirm("Are you sure you want to delete ALL jobs and logs? This cannot be undone.", async () => {
+        try {
+            const res = await request(`${API_BASE}/jobs`, { method: 'DELETE' });
+            if (!res.ok) throw new Error("Failed to delete jobs");
+
+            window.showToast("All history deleted", "success");
+
+            // Refresh dashboard
+            await initDashboard();
+
+        } catch (e) {
+            window.showToast("Error: " + e.message, "error");
+        }
+    });
+};
+
 // 2. Create Job Logic
 const initCreateJob = () => {
     const form = document.getElementById('create-job-form');

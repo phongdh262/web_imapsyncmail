@@ -236,6 +236,32 @@ async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: Uploa
 
     return {"message": f"Started {count} mailboxes"}
 
+@app.delete("/api/jobs")
+def delete_all_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        # Delete Log Files
+        import shutil
+        log_dir = "logs"
+        if os.path.exists(log_dir):
+            for filename in os.listdir(log_dir):
+                file_path = os.path.join(log_dir, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print(f'Failed to delete {file_path}. Reason: {e}')
+
+        # Delete DB Records
+        db.query(Mailbox).delete()
+        db.query(Job).delete()
+        db.commit()
+        return {"message": "All jobs and history deleted"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/jobs", response_model=List[JobResponse])
 def list_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     jobs = db.query(Job).order_by(Job.created_at.desc()).all()
