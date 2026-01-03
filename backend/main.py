@@ -397,6 +397,10 @@ def serve_html(filename):
 async def read_root():
     return serve_html('index.html')
 
+@app.get("/index.html")
+async def read_index():
+    return serve_html('index.html')
+
 @app.get("/login.html")
 async def read_login():
     return serve_html('login.html')
