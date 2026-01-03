@@ -50,11 +50,12 @@ COPY . .
 # Create logs directory
 RUN mkdir -p backend/logs && chmod 777 backend/logs
 
+# Change WORKDIR to backend so imports work natively
+WORKDIR /app/backend
+
 # Expose the API port
 EXPOSE 8000
 
-# Add backend to PYTHONPATH so modules in backend/ can import each other easily
-ENV PYTHONPATH=/app/backend
-
 # Command to run the application
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Now running directly from /app/backend, so we use main:app instead of backend.main:app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
