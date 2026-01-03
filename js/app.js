@@ -415,7 +415,54 @@ const initCreateJob = () => {
     }
 };
 
+// --- UI Helpers ---
+window.showToast = (message, type = 'info') => {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    // Click to dismiss
+    toast.onclick = () => {
+        toast.style.animation = 'fadeOutRight 0.3s ease-out forwards';
+        setTimeout(() => toast.remove(), 300);
+    };
+
+    container.appendChild(toast);
+
+    // Auto dismiss
+    setTimeout(() => {
+        if (toast.isConnected) {
+            toast.style.animation = 'fadeOutRight 0.3s ease-out forwards';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
+};
+
+window.showConfirm = (message, callback) => {
+    const modal = document.getElementById('confirm-modal');
+    const msgEl = document.getElementById('confirm-message');
+    if (!modal) {
+        if (confirm(message)) callback();
+        return;
+    }
+
+    msgEl.textContent = message;
+    modal.style.display = 'flex';
+
+    // Cleanup old listeners
+    window.closeConfirm = (result) => {
+        modal.style.display = 'none';
+        if (result) callback();
+    };
+};
+
 // 3. Job Detail Logic
+let isJobPolling = false;
+let forcePollRestart = false;
+
 const initJobDetail = async () => {
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get('id');
@@ -424,6 +471,11 @@ const initJobDetail = async () => {
         window.location.href = 'index.html';
         return;
     }
+
+    // Prevent multiple polling loops
+    if (isJobPolling && !forcePollRestart) return;
+    isJobPolling = true;
+    forcePollRestart = false;
 
     const updateUI = async () => {
         try {
@@ -467,14 +519,25 @@ const initJobDetail = async () => {
                 tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No mailboxes found. Did you upload a CSV?</td></tr>';
             }
 
-            // Continue polling if running
-            if (job.status === 'running' || job.status === 'pending') {
+            // Continue polling if running OR if we forced a restart (e.g. from Retry)
+            // But we only want to loop if the job is actually active.
+            // If the job is 'completed' but we just retried a mailbox, the job status should update to 'running' on backend.
+            // If backend is slow, we might miss it. So we rely on the loop.
+            // Using a simple interval is safer than recursive timeout for control?
+            // Let's keep recursive but check a global flag or the job status.
+
+            if (job.status === 'running' || job.status === 'pending' || forcePollRestart) {
+                // If forced restart, we consume the flag so we don't loop forever if it becomes completed again
+                if (forcePollRestart) forcePollRestart = false;
                 setTimeout(updateUI, 2000);
+            } else {
+                isJobPolling = false; // Stopped polling
             }
 
         } catch (e) {
             console.error(e);
             document.getElementById('job-name').textContent = "Error loading job";
+            isJobPolling = false;
         }
     };
 
@@ -482,28 +545,39 @@ const initJobDetail = async () => {
 };
 
 window.stopSync = async (mailboxId) => {
-    if (!confirm('Are you sure you want to stop this sync?')) return;
-    try {
-        await request(`${API_BASE}/mailboxes/${mailboxId}/stop`, { method: 'POST' });
-        // The polling will update the status automatically
-    } catch (e) {
-        alert('Failed to stop: ' + e.message);
-    }
+    window.showConfirm('Are you sure you want to stop this sync?', async () => {
+        try {
+            await request(`${API_BASE}/mailboxes/${mailboxId}/stop`, { method: 'POST' });
+            window.showToast('Stop signal sent', 'info');
+        } catch (e) {
+            window.showToast('Failed to stop: ' + e.message, 'error');
+        }
+    });
 };
 
 window.retrySync = async (mailboxId) => {
-    if (!confirm('Retry this mailbox sync?')) return;
-    try {
-        const res = await request(`${API_BASE}/mailboxes/${mailboxId}/retry`, { method: 'POST' });
-        if (!res.ok) {
-            const data = await res.json();
-            throw new Error(data.detail || 'Failed to retry');
+    window.showConfirm('Retry this mailbox sync?', async () => {
+        try {
+            const res = await request(`${API_BASE}/mailboxes/${mailboxId}/retry`, { method: 'POST' });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.detail || 'Failed to retry');
+            }
+            window.showToast('Retry started successfully', 'success');
+
+            // Force restart polling if it stopped
+            if (!isJobPolling) {
+                forcePollRestart = true;
+                initJobDetail(); // Restart the loop
+            } else {
+                // If already running, it will pick up the change
+                forcePollRestart = true; // Ensure it keeps going if it was about to stop
+            }
+
+        } catch (e) {
+            window.showToast('Failed to retry: ' + e.message, 'error');
         }
-        // Poll will update UI
-        alert('Retry started');
-    } catch (e) {
-        alert('Failed to retry: ' + e.message);
-    }
+    });
 };
 
 // --- Log Modal Logic ---
