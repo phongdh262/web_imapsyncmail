@@ -128,6 +128,7 @@ class JobResponse(BaseModel):
     failed: int = 0
     source: str
     target: str
+    data_transferred: str = "0 B" # Formatted string
     created_at: str
 
     class Config:
@@ -390,6 +391,17 @@ def format_job_response(job: Job):
     progress = 0
     if job.total_mailboxes > 0:
         progress = int(((job.completed + job.failed) / job.total_mailboxes) * 100)
+
+    # Format Bytes
+    bytes_val = job.data_transferred or 0
+    if bytes_val > 1024**3:
+        data_str = f"{bytes_val / (1024**3):.2f} GB"
+    elif bytes_val > 1024**2:
+        data_str = f"{bytes_val / (1024**2):.2f} MB"
+    elif bytes_val > 1024:
+         data_str = f"{bytes_val / 1024:.2f} KB"
+    else:
+         data_str = f"{bytes_val} B"
         
     return JobResponse(
         id=job.id,
@@ -401,6 +413,7 @@ def format_job_response(job: Job):
         failed=job.failed,
         source=job.source_host,
         target=job.target_host,
+        data_transferred=data_str,
         created_at=job.created_at.isoformat()
     )
 

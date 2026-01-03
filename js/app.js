@@ -494,6 +494,7 @@ const initJobDetail = async () => {
             document.getElementById('stat-total').textContent = job.total;
             document.getElementById('stat-completed').textContent = job.completed;
             document.getElementById('stat-failed').textContent = job.failed;
+            document.getElementById('stat-data').textContent = job.data_transferred;
             document.getElementById('main-progress-bar').style.width = `${job.progress}%`;
             document.getElementById('progress-percent').textContent = `${job.progress}%`;
 

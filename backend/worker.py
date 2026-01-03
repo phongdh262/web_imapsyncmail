@@ -133,15 +133,23 @@ def run_imapsync(mailbox_id: int):
                 log_file.flush()
                 
                 # Parse Data Transfer
-                # Example: "Total bytes transferred : 123456"
+                # Parse Data Transfer
+                # Pattern 1: Final summary "Total bytes transferred : 123456"
                 if "Total bytes transferred" in line:
-                    match = re.search(r'Total bytes transferred\s*:\s*(\d+)', line)
+                    match = re.search(r'Total bytes transferred.*?:\s*(\d+)', line, re.IGNORECASE)
                     if match:
-                        try:
-                            bytes_count = int(match.group(1))
-                            total_bytes = bytes_count
-                        except:
-                            pass
+                         try:
+                             total_bytes = int(match.group(1))
+                         except: pass
+                
+                # Pattern 2: "Detected 12 messages ... Total size: 123456 bytes" (Estimation)
+                # Use this if we haven't found the final yet, but accurate final is better.
+                elif "Total size" in line and "bytes" in line and total_bytes == 0:
+                     match = re.search(r'Total size.*?:\s*(\d+)', line, re.IGNORECASE)
+                     if match:
+                         try:
+                             total_bytes = int(match.group(1))
+                         except: pass
 
             process.wait()
             
@@ -183,10 +191,16 @@ def run_imapsync(mailbox_id: int):
             del active_processes[mailbox_id]
         
         # Recalculate Job Stats to avoid race conditions and check completion
+            # Recalculate Job Stats to avoid race conditions and check completion
         if job:
+            from sqlalchemy import func
             completed_count = db.query(Mailbox).filter(Mailbox.job_id == job.id, Mailbox.status == 'success').count()
             failed_count = db.query(Mailbox).filter(Mailbox.job_id == job.id, Mailbox.status == 'failed').count()
             
+            # Recalculate Data Transferred
+            total_job_bytes = db.query(func.sum(Mailbox.data_transferred)).filter(Mailbox.job_id == job.id).scalar() or 0
+            job.data_transferred = total_job_bytes
+
             job.completed = completed_count
             job.failed = failed_count
             

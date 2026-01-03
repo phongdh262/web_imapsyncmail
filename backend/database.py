@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Boolean, Text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Boolean, Text, BigInteger
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 from datetime import datetime
 from cryptography.fernet import Fernet
@@ -83,7 +83,7 @@ class Job(Base):
     total_mailboxes = Column(Integer, default=0)
     completed = Column(Integer, default=0)
     failed = Column(Integer, default=0)
-    data_transferred = Column(Integer, default=0) # Bytes
+    data_transferred = Column(BigInteger, default=0) # Bytes
     
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -102,7 +102,7 @@ class Mailbox(Base):
     
     status = Column(String(50), default="pending") # pending, running, success, failed
     message = Column(Text, nullable=True)
-    data_transferred = Column(Integer, default=0) # Bytes
+    data_transferred = Column(BigInteger, default=0) # Bytes
     
     job = relationship("Job", back_populates="mailboxes")
 
