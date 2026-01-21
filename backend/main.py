@@ -471,9 +471,6 @@ async def read_root():
 async def read_index():
     return serve_html('index.html')
 
-@app.get("/login.html")
-async def read_login():
-    return serve_html('login.html')
 
 @app.get("/create-job.html")
 async def read_create_job():
