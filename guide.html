@@ -5,188 +5,257 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hướng Dẫn Sử Dụng - IMAP Sync Tool</title>
-    <link rel="stylesheet" href="css/style.css?v=1.1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .guide-section {
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
         }
-
-        .guide-section h2 {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-        }
-
-        .step {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .step-number {
-            background: var(--primary);
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-            margin-top: 5px;
-            /* Visual alignment */
-        }
-
-        .step-content {
-            flex: 1;
-        }
-
-        .step-content h3 {
-            font-size: 1.1rem;
-            color: var(--text-main);
-            margin-bottom: 0.5rem;
-        }
-
-        .step-content p {
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .alert-info {
-            background: rgba(59, 130, 246, 0.1);
-            border-left: 4px solid var(--primary);
-            padding: 1rem;
-            margin-top: 1rem;
-            border-radius: 4px;
-        }
-    </style>
+    </script>
 </head>
 
-<body>
-    <div class="container fade-in">
-        <header>
-            <div class="logo">
-                <a href="index.html"
-                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-sync-alt"></i> IMAP Sync Pro
-                </a>
-            </div>
-            <a href="index.html" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Quay Lại Dashboard
+<body class="font-sans bg-gradient-to-br from-slate-50 via-white to-blue-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-slide-up">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 pb-6 border-b border-gray-200">
+            <a href="index.html" class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-blue-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                            stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M22 6L12 13L2 6" stroke="white" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="text-2xl font-bold text-gradient">IMAP Sync Pro</span>
+            </a>
+            <a href="index.html"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Quay Lại Dashboard
             </a>
         </header>
 
         <main>
-            <h1 class="mb-4">Hướng Dẫn Sử Dụng</h1>
-            <p class="subtitle mb-4">Hướng dẫn chi tiết cách sử dụng công cụ di chuyển email IMAP, từ đồng bộ đơn lẻ đến
-                di chuyển hàng loạt.</p>
-
-            <div class="guide-section">
-                <h2><i class="fas fa-rocket"></i> Bắt Đầu Nhanh</h2>
-                <p>Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP khác một cách an toàn và
-                    bảo mật. Dữ liệu của bạn được mã hóa và không bao giờ được lưu trữ lâu dài trên hệ thống này.</p>
-                <div class="alert-info">
-                    <strong>Quan trọng:</strong> Hãy đảm bảo cả máy chủ nguồn và đích đều hỗ trợ IMAP và bạn có thông
-                    tin đăng nhập chính xác trước khi bắt đầu.
-                </div>
+            <!-- Title -->
+            <div class="mb-10">
+                <h1 class="text-3xl font-bold text-gray-900 mb-3">Hướng Dẫn Sử Dụng</h1>
+                <p class="text-gray-500 text-lg">Hướng dẫn chi tiết cách sử dụng công cụ di chuyển email IMAP, từ đồng
+                    bộ đơn lẻ đến di chuyển hàng loạt.</p>
             </div>
 
-            <div class="guide-section">
-                <h2><i class="fas fa-users"></i> Di Chuyển Hàng Loạt (Sử dụng CSV)</h2>
-
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h3>Chuẩn bị File CSV</h3>
-                        <p>Tạo một file CSV (Comma Separated Values) chứa danh sách các tài khoản email cần di chuyển.
-                            Định dạng bắt buộc bao gồm 4 cột:</p>
-                        <code
-                            style="background: rgba(0,0,0,0.3); padding: 0.5rem; display: block; margin: 0.5rem 0; border-radius: 4px;">
-                            source_user, source_pass, target_user, target_pass
-                        </code>
-                        <p>Ví dụ:</p>
-                        <code
-                            style="background: rgba(0,0,0,0.3); padding: 0.5rem; display: block; margin: 0.5rem 0; border-radius: 4px;">
-                            nguyen_a@cty_cu.com, matkhau123, nguyen.a@cty_moi.com, MatKhauMoi!@#<br>
-                            tran_b@cty_cu.com, pass456, tran.b@cty_moi.com, SecurePass789
-                        </code>
+            <!-- Quick Start -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-blue-600 to-violet-600 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
                     </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Bắt Đầu Nhanh</h2>
                 </div>
-
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h3>Cấu Hình Máy Chủ</h3>
-                        <p>Truy cập trang "Create New Job". Nhập địa chỉ máy chủ IMAP (Host) cho cả nguồn và đích. </p>
-                        <p>Ví dụ: Gmail dùng <code>imap.gmail.com</code>, Office 365 dùng
-                            <code>outlook.office365.com</code>.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h3>Tải Lên và Bắt Đầu</h3>
-                        <p>Trong tab "Bulk Migration (CSV)", tải lên file CSV bạn vừa chuẩn bị. Hệ thống sẽ kiểm tra
-                            định dạng file. Nếu hợp lệ, nhấn "Upload CSV & Start".</p>
+                <p class="text-gray-600 mb-4">Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP
+                    khác một cách an toàn và bảo mật. Dữ liệu của bạn được mã hóa và không bao giờ được lưu trữ lâu dài
+                    trên hệ thống này.</p>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                    <div class="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-blue-800 text-sm"><strong>Quan trọng:</strong> Hãy đảm bảo cả máy chủ nguồn và
+                            đích đều hỗ trợ IMAP và bạn có thông tin đăng nhập chính xác trước khi bắt đầu.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="guide-section">
-                <h2><i class="fas fa-user"></i> Đồng Bộ Đơn Lẻ</h2>
-                <p>Thích hợp khi bạn chỉ cần di chuyển một tài khoản email duy nhất để kiểm tra hoặc sử dụng cá nhân.
-                </p>
-
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h3>Chọn Chế Độ</h3>
-                        <p>Tại trang "Create New Job", chuyển sang tab "Single Sync".</p>
+            <!-- Bulk Migration -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
                     </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Di Chuyển Hàng Loạt (Sử dụng CSV)</h2>
                 </div>
 
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h3>Nhập Thông Tin Tài Khoản</h3>
-                        <p>Nhập trực tiếp Email và Mật khẩu cho tài khoản nguồn và tài khoản đích vào các ô tương ứng.
-                        </p>
+                <div class="space-y-6">
+                    <!-- Step 1 -->
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            1</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-2">Chuẩn bị File CSV</h3>
+                            <p class="text-gray-600 mb-3">Tạo một file CSV chứa danh sách các tài khoản email cần di
+                                chuyển. Định dạng bắt buộc bao gồm 4 cột:</p>
+                            <code
+                                class="block bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-sm mb-3">source_user, source_pass, target_user, target_pass</code>
+                            <p class="text-gray-600 mb-2">Ví dụ:</p>
+                            <code
+                                class="block bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-sm leading-relaxed">nguyen_a@cty_cu.com, matkhau123, nguyen.a@cty_moi.com, MatKhauMoi!@#<br>tran_b@cty_cu.com, pass456, tran.b@cty_moi.com, SecurePass789</code>
+                        </div>
                     </div>
-                </div>
 
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h3>Bắt Đầu</h3>
-                        <p>Nhấn nút "Start Migration". Hệ thống sẽ tạo một tác vụ mới và bạn sẽ được chuyển hướng đến
-                            trang chi tiết để theo dõi tiến độ.</p>
+                    <!-- Step 2 -->
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            2</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-2">Cấu Hình Máy Chủ</h3>
+                            <p class="text-gray-600">Truy cập trang "Tạo Job mới". Nhập địa chỉ máy chủ IMAP (Host) cho
+                                cả nguồn và đích.</p>
+                            <p class="text-gray-600 mt-2">Ví dụ: Gmail dùng <code
+                                    class="bg-gray-100 px-2 py-1 rounded font-mono text-sm">imap.gmail.com</code>,
+                                Office 365 dùng <code
+                                    class="bg-gray-100 px-2 py-1 rounded font-mono text-sm">outlook.office365.com</code>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            3</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-2">Tải Lên và Bắt Đầu</h3>
+                            <p class="text-gray-600">Trong tab "Bulk Migration (CSV)", tải lên file CSV bạn vừa chuẩn
+                                bị. Hệ thống sẽ kiểm tra định dạng file. Nếu hợp lệ, nhấn "Bắt đầu Migration".</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="guide-section">
-                <h2><i class="fas fa-chart-line"></i> Theo Dõi và Xử Lý Lỗi</h2>
-                <p>Tại trang "Job Details", bạn có thể theo dõi tiến độ của từng hộp thư.</p>
-                <ul style="list-style: disc; margin-left: 1.5rem; color: var(--text-muted); margin-top: 1rem;">
-                    <li style="margin-bottom: 0.5rem;"><strong>Trạng Thái (Status):</strong> Xem trạng thái (Running,
-                        Success, Failed) của từng dòng.</li>
-                    <li style="margin-bottom: 0.5rem;"><strong>Xem Log (Log):</strong> Nếu có lỗi xảy ra, nhấn nút "Log"
-                        để xem chi tiết lỗi từ <code>imapsync</code>.</li>
-                    <li style="margin-bottom: 0.5rem;"><strong>Thử Lại (Retry):</strong> Đối với các mục thất bại, bạn
-                        có thể nhấn "Retry" để chạy lại quy trình đồng bộ cho hộp thư đó.</li>
+            <!-- Single Sync -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Đồng Bộ Đơn Lẻ</h2>
+                </div>
+                <p class="text-gray-600 mb-6">Thích hợp khi bạn chỉ cần di chuyển một tài khoản email duy nhất để kiểm
+                    tra hoặc sử dụng cá nhân.</p>
+
+                <div class="space-y-4">
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            1</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Chọn Chế Độ</h3>
+                            <p class="text-gray-600">Tại trang "Tạo Job mới", chuyển sang tab "Single Sync".</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            2</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Nhập Thông Tin Tài Khoản</h3>
+                            <p class="text-gray-600">Nhập trực tiếp Email và Mật khẩu cho tài khoản nguồn và tài khoản
+                                đích vào các ô tương ứng.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            3</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Bắt Đầu</h3>
+                            <p class="text-gray-600">Nhấn nút "Bắt đầu Migration". Hệ thống sẽ tạo một tác vụ mới và bạn
+                                sẽ được chuyển hướng đến trang chi tiết để theo dõi tiến độ.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitoring -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Theo Dõi và Xử Lý Lỗi</h2>
+                </div>
+                <p class="text-gray-600 mb-4">Tại trang "Job Details", bạn có thể theo dõi tiến độ của từng hộp thư.</p>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <div
+                            class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <strong class="text-gray-900">Trạng Thái (Status):</strong>
+                            <span class="text-gray-600"> Xem trạng thái (Running, Success, Failed) của từng dòng.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div
+                            class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <strong class="text-gray-900">Xem Log:</strong>
+                            <span class="text-gray-600"> Nếu có lỗi xảy ra, nhấn nút "Log" để xem chi tiết lỗi từ <code
+                                    class="bg-gray-100 px-2 py-0.5 rounded font-mono text-sm">imapsync</code>.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div
+                            class="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                        <div>
+                            <strong class="text-gray-900">Thử Lại (Retry):</strong>
+                            <span class="text-gray-600"> Đối với các mục thất bại, bạn có thể nhấn "Retry" để chạy lại
+                                quy trình đồng bộ cho hộp thư đó.</span>
+                        </div>
+                    </li>
                 </ul>
             </div>
-
         </main>
     </div>
 </body>

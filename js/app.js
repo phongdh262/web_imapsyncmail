@@ -85,35 +85,50 @@ const initDashboard = async () => {
         const res = await request(`${API_BASE}/jobs`);
         const jobs = await res.json();
 
+        const getStatusClasses = (status) => {
+            const statusMap = {
+                'running': 'bg-blue-100 text-blue-700 border border-blue-200',
+                'completed': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+                'success': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+                'failed': 'bg-red-100 text-red-700 border border-red-200',
+                'pending': 'bg-amber-100 text-amber-700 border border-amber-200'
+            };
+            return statusMap[status] || 'bg-gray-100 text-gray-700 border border-gray-200';
+        };
+
         jobListEl.innerHTML = jobs.map(job => `
-            <tr>
-                <td>
-                    <div style="font-weight: 500;">${job.name}</div>
-                    <div class="subtitle" style="font-size: 0.8rem;">${new Date(job.created_at).toLocaleString()}</div>
+            <tr class="hover:bg-blue-50/50 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="font-medium text-gray-900">${job.name}</div>
+                    <div class="text-sm text-gray-500">${new Date(job.created_at).toLocaleString()}</div>
                 </td>
-                <td><span class="status status-${job.status}">${job.status}</span></td>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="min-width: 30px;">${job.progress}%</span>
-                        <div class="progress-container" style="width: 80px; height: 6px; margin: 0;">
-                            <div class="progress-bar" style="width: ${job.progress}%"></div>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusClasses(job.status)}">
+                        ${job.status}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-700 min-w-[35px]">${job.progress}%</span>
+                        <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full progress-gradient rounded-full transition-all duration-300" style="width: ${job.progress}%"></div>
                         </div>
                     </div>
                 </td>
-                <td>
-                    <div style="font-size: 0.85rem;">${job.source}</div>
-                    <div style="font-size: 0.8rem; opacity: 0.7;">to ${job.target}</div>
+                <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900">${job.source}</div>
+                    <div class="text-sm text-gray-500">→ ${job.target}</div>
                 </td>
-                <td class="text-right">
-                    <a href="job-detail.html?id=${job.id}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                        View
+                <td class="px-6 py-4 text-right">
+                    <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                        Xem
                     </a>
                 </td>
             </tr>
         `).join('');
 
         if (jobs.length === 0) {
-            jobListEl.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">No jobs found. Create one!</td></tr>';
+            jobListEl.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500">Chưa có job nào. Tạo mới ngay!</td></tr>';
         }
 
         // Fetch System Stats
@@ -139,7 +154,7 @@ const initDashboard = async () => {
 
     } catch (e) {
         console.error(e);
-        jobListEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 2rem;">Failed to load jobs: ${e.message}</td></tr>`;
+        jobListEl.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">Lỗi tải jobs: ${e.message}</td></tr>`;
     }
 };
 
@@ -437,13 +452,23 @@ window.showToast = (message, type = 'info') => {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    const typeStyles = {
+        'success': 'border-l-emerald-500 bg-emerald-50',
+        'error': 'border-l-red-500 bg-red-50',
+        'info': 'border-l-blue-500 bg-blue-50',
+        'warning': 'border-l-amber-500 bg-amber-50'
+    };
+
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
+    toast.className = `min-w-[300px] p-4 rounded-xl shadow-lg border border-gray-200 border-l-4 ${typeStyles[type] || typeStyles.info} animate-slide-in-right cursor-pointer flex items-center gap-3`;
+    toast.innerHTML = `
+        <span class="text-gray-800 text-sm font-medium">${message}</span>
+    `;
 
     // Click to dismiss
     toast.onclick = () => {
-        toast.style.animation = 'fadeOutRight 0.3s ease-out forwards';
+        toast.classList.remove('animate-slide-in-right');
+        toast.classList.add('animate-fade-out-right');
         setTimeout(() => toast.remove(), 300);
     };
 
@@ -452,7 +477,8 @@ window.showToast = (message, type = 'info') => {
     // Auto dismiss
     setTimeout(() => {
         if (toast.isConnected) {
-            toast.style.animation = 'fadeOutRight 0.3s ease-out forwards';
+            toast.classList.remove('animate-slide-in-right');
+            toast.classList.add('animate-fade-out-right');
             setTimeout(() => toast.remove(), 300);
         }
     }, 5000);
@@ -467,11 +493,13 @@ window.showConfirm = (message, callback) => {
     }
 
     msgEl.textContent = message;
-    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
     // Cleanup old listeners
     window.closeConfirm = (result) => {
-        modal.style.display = 'none';
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
         if (result) callback();
     };
 };
@@ -500,10 +528,23 @@ const initJobDetail = async () => {
             if (!res.ok) throw new Error('Job not found');
             const job = await res.json();
 
+            // Status badge classes helper
+            const getStatusBadge = (status) => {
+                const statusMap = {
+                    'running': 'bg-blue-100 text-blue-700',
+                    'completed': 'bg-emerald-100 text-emerald-700',
+                    'success': 'bg-emerald-100 text-emerald-700',
+                    'failed': 'bg-red-100 text-red-700',
+                    'pending': 'bg-amber-100 text-amber-700'
+                };
+                return statusMap[status] || 'bg-gray-100 text-gray-700';
+            };
+
             // Setup Header
             document.getElementById('job-name').textContent = job.name;
-            document.getElementById('job-status').textContent = job.status;
-            document.getElementById('job-status').className = `status status-${job.status}`;
+            const statusEl = document.getElementById('job-status');
+            statusEl.textContent = job.status;
+            statusEl.className = `inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadge(job.status)}`;
             document.getElementById('source-host').textContent = job.source;
             document.getElementById('target-host').textContent = job.target;
 
@@ -519,22 +560,26 @@ const initJobDetail = async () => {
             const tableBody = document.getElementById('mailbox-list');
             if (job.mailboxes && job.mailboxes.length > 0) {
                 tableBody.innerHTML = job.mailboxes.map(mb => `
-                    <tr>
-                        <td>${mb.user}</td>
-                        <td>${mb.target_user}</td>
-                        <td><span class="status status-${mb.status === 'success' ? 'completed' : mb.status}">${mb.status}</span></td>
-                        <td>${mb.msg || '-'}</td>
-                        <td class="text-right">
-                             <div class="action-group" style="display: flex; justify-content: flex-end; align-items: center;">
-                                <button class="btn btn-secondary" onclick="viewLogs(${mb.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-right: 10px;">Log</button>
-                                ${mb.status === 'running' ? `<button class="btn btn-danger" onclick="stopSync(${mb.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; cursor: pointer; margin-right: 10px;">Stop</button>` : ''}
-                                ${mb.status === 'failed' ? `<button class="btn btn-primary" onclick="retrySync(${mb.id})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Retry</button>` : ''}
-                             </div>
+                    <tr class="hover:bg-blue-50/50 transition-colors">
+                        <td class="px-6 py-4 font-mono text-sm text-gray-900">${mb.user}</td>
+                        <td class="px-6 py-4 font-mono text-sm text-gray-900">${mb.target_user}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadge(mb.status === 'success' ? 'completed' : mb.status)}">
+                                ${mb.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">${mb.msg || '-'}</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end items-center gap-2">
+                                <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">Log</button>
+                                ${mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors">Stop</button>` : ''}
+                                ${mb.status === 'failed' ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Retry</button>` : ''}
+                            </div>
                         </td>
                     </tr>
                 `).join('');
             } else {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No mailboxes found. Did you upload a CSV?</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500">Chưa có mailbox. Đã upload CSV chưa?</td></tr>';
             }
 
             // Continue polling if running OR if we forced a restart (e.g. from Retry)
@@ -606,8 +651,9 @@ window.viewLogs = async (mailboxId) => {
     const logContent = document.getElementById('log-content');
 
     if (modal) {
-        modal.style.display = 'flex';
-        logContent.textContent = 'Loading logs...';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        logContent.textContent = 'Đang tải logs...';
 
         const fetchLogs = async () => {
             try {
@@ -640,7 +686,10 @@ window.viewLogs = async (mailboxId) => {
 
 window.closeModal = () => {
     const modal = document.getElementById('log-modal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
     if (logPollInterval) {
         clearInterval(logPollInterval);
         logPollInterval = null;
