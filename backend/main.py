@@ -142,7 +142,7 @@ class MailboxCreate(BaseModel):
 
 # API Routes
 @app.post("/api/jobs", response_model=JobResponse)
-async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     job_id = str(uuid.uuid4())
     
     # Process Options
@@ -172,7 +172,7 @@ max_workers = int(os.getenv("MAX_WORKERS", 2))
 executor = ThreadPoolExecutor(max_workers=max_workers) 
 
 @app.post("/api/jobs/{job_id}/mailboxes")
-async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Session = Depends(get_db)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -198,7 +198,7 @@ async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Sessi
     return {"message": "Mailbox added and started", "mailbox_id": mb.id}
 
 @app.post("/api/upload/{job_id}")
-async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -237,7 +237,7 @@ async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: Uploa
     return {"message": f"Started {count} mailboxes"}
 
 @app.delete("/api/jobs")
-def delete_all_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_all_jobs(db: Session = Depends(get_db)):
     try:
         # Delete Log Files
         import shutil
@@ -263,12 +263,12 @@ def delete_all_jobs(db: Session = Depends(get_db), current_user: User = Depends(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/jobs", response_model=List[JobResponse])
-def list_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def list_jobs(db: Session = Depends(get_db)):
     jobs = db.query(Job).order_by(Job.created_at.desc()).all()
     return [format_job_response(j) for j in jobs]
 
 @app.get("/api/jobs/{job_id}")
-def get_job(job_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_job(job_id: str, db: Session = Depends(get_db)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -323,7 +323,7 @@ def get_job(job_id: str, db: Session = Depends(get_db), current_user: User = Dep
     }
 
 @app.get("/api/mailboxes/{mailbox_id}/logs")
-def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db)):
     mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
     if not mb:
         raise HTTPException(status_code=404, detail="Mailbox not found")
@@ -337,7 +337,7 @@ def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), current_use
     return {"logs": f"Waiting for logs / Starting process...\nStatus: {mb.status}\nMessage: {mb.message}"}
 
 @app.post("/api/mailboxes/{mailbox_id}/stop")
-def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):
     from worker import kill_sync
     # Kill the process
     success = kill_sync(mailbox_id)
@@ -356,7 +356,7 @@ def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_us
         return {"message": "Process not found or already stopped"}
 
 @app.post("/api/mailboxes/{mailbox_id}/retry")
-def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):
     mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
     if not mb:
         raise HTTPException(status_code=404, detail="Mailbox not found")
@@ -387,7 +387,7 @@ def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_u
     return {"message": "Mailbox retry started", "mailbox_id": mb.id}
 
 @app.get("/api/stats")
-def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_dashboard_stats(db: Session = Depends(get_db)):
     from sqlalchemy import func
     total_jobs = db.query(Job).count()
     active_jobs = db.query(Job).filter(Job.status == "running").count()

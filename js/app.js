@@ -6,71 +6,11 @@
 
 const API_BASE = '/api';
 
-// --- Auth Logic ---
-const getToken = () => localStorage.getItem('access_token');
-const setToken = (token) => localStorage.setItem('access_token', token);
-const removeToken = () => localStorage.removeItem('access_token');
-
+// --- Simple Request Helper (No Auth) ---
 const request = async (url, options = {}) => {
-    const token = getToken();
-    const headers = options.headers || {};
-
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const config = {
-        ...options,
-        headers: headers
-    };
-
-    const res = await fetch(url, config);
-
-    if (res.status === 401) {
-        removeToken();
-        if (!window.location.href.includes('login.html')) {
-            window.location.href = 'login.html';
-        }
-        throw new Error("Unauthorized");
-    }
-
+    const res = await fetch(url, options);
     return res;
 };
-
-const login = async (username, password) => {
-    try {
-        const params = new URLSearchParams();
-        params.append('username', username);
-        params.append('password', password);
-
-        const res = await fetch(`${API_BASE}/login`, {
-            method: 'POST',
-            body: params,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-
-        if (res.ok) {
-            const data = await res.json();
-            setToken(data.access_token);
-            window.location.href = 'index.html';
-            return true;
-        }
-        return false;
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
-};
-
-const logout = () => {
-    removeToken();
-    window.location.href = 'login.html';
-};
-
-// Check Auth on Load (except login page)
-if (!window.location.href.includes('login.html') && !getToken()) {
-    window.location.href = 'login.html';
-}
 
 // --- Page Logic ---
 
