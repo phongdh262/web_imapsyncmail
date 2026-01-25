@@ -4,4 +4,7 @@ __pycache__/
 .DS_Store
 backend/imapsync.db
 backend/logs/
+logs/
+LOG_imapsync/
+secret.key
 .env

@@ -31,7 +31,12 @@ except Exception as e:
             import datetime
             f.write(f"[{datetime.datetime.now()}] {error_msg}\n")
     except:
+    except:
         pass
+
+# Ensure logs directory exists
+if not os.path.exists("logs"):
+    os.makedirs("logs")
 
 app = FastAPI()
 

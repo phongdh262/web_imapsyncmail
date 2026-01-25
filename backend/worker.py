@@ -40,7 +40,11 @@ def run_imapsync(mailbox_id: int):
 
     job = db.query(Job).filter(Job.id == mailbox.job_id).first()
     
-    log_file_path = f"logs/{mailbox.id}.log"
+    log_dir = "logs"
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+        
+    log_file_path = f"{log_dir}/{mailbox.id}.log"
     
     try:
         mailbox.status = 'running'

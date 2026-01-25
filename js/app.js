@@ -289,10 +289,15 @@ const initCreateJob = () => {
                     const uploadData = new FormData();
                     uploadData.append('file', fileInput.files[0]);
 
-                    await request(`${API_BASE}/upload/${job.id}`, {
+                    const uploadRes = await request(`${API_BASE}/upload/${job.id}`, {
                         method: 'POST',
                         body: uploadData
                     });
+
+                    if (!uploadRes.ok) {
+                        const err = await uploadRes.json().catch(() => ({}));
+                        throw new Error(err.detail || 'CSV Upload failed');
+                    }
                 }
             } else if (activeTab === 'single') {
                 const singlePayload = {
@@ -323,7 +328,7 @@ const initCreateJob = () => {
     });
 
     // File input trigger
-    const dropZone = document.querySelector('div[style*="dashed"]');
+    const dropZone = document.getElementById('drop-zone');
     const fileInput = dropZone.querySelector('input[type="file"]');
     const previewContainer = document.getElementById('csv-preview');
 
