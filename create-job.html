@@ -288,47 +288,7 @@
         </main>
     </div>
 
-    <script src="js/app.js?v=3.0"></script>
-    <script>
-        // Tab switching logic - enhanced for new design
-        document.addEventListener('DOMContentLoaded', () => {
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    tabBtns.forEach(b => b.classList.remove('active', 'bg-white', 'shadow-md', 'text-blue-600'));
-                    tabBtns.forEach(b => b.classList.add('text-gray-600'));
-                    btn.classList.add('active', 'bg-white', 'shadow-md', 'text-blue-600');
-                    btn.classList.remove('text-gray-600');
-
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                    document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
-                });
-            });
-            // Initialize first tab
-            tabBtns[0].classList.add('bg-white', 'shadow-md', 'text-blue-600');
-
-            // Dropzone interaction
-            const dropZone = document.getElementById('drop-zone');
-            const fileInput = dropZone.querySelector('input[type="file"]');
-
-            dropZone.addEventListener('click', () => fileInput.click());
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('border-blue-400', 'bg-blue-50');
-            });
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('border-blue-400', 'bg-blue-50');
-            });
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('border-blue-400', 'bg-blue-50');
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    fileInput.dispatchEvent(new Event('change'));
-                }
-            });
-        });
-    </script>
+    <script src="js/app.js?v=3.1"></script>
 </body>
 
 </html>
