@@ -31,7 +31,6 @@ except Exception as e:
             import datetime
             f.write(f"[{datetime.datetime.now()}] {error_msg}\n")
     except:
-    except:
         pass
 
 # Ensure logs directory exists
