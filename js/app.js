@@ -201,16 +201,11 @@ const initCreateJob = () => {
 
     // --- Auto Port Logic ---
     const setupAutoPort = (context) => {
-        // Need to add IDs or select specifically. Since I didn't add IDs in HTML edit, I rely on order or selectors.
-        // Assuming Structure: Source Server -> Grid-2 -> Form Group (Security) -> Select
-        // Let's use more robust selection if possible, otherwise rely on DOM structure.
-        // Best to select all Security selects and find their related Port input.
-
-        const cards = document.querySelectorAll('.card');
-        const sourceCard = cards[0]; // Source Server
-        const targetCard = cards[1]; // Target Server
+        const sourceCard = document.getElementById('source-server-card');
+        const targetCard = document.getElementById('target-server-card');
 
         const bindPortLogic = (card) => {
+            if (!card) return;
             const portInput = card.querySelector('input[name*="port"]');
             const securitySelect = card.querySelector('select[name*="security"]');
 
