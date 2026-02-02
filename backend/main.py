@@ -91,8 +91,10 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     user = db.query(User).filter(User.username == form_data.username).first()
     
     # Auto-create admin user if not exists (For simple setup)
+    # Password should be set via environment variable
     if not user and form_data.username == "phongdh":
-        user = User(username="phongdh", hashed_password=get_password_hash(r"%1yedJck}KC]>%:K{e)."))
+        admin_password = os.getenv("ADMIN_PASSWORD", "changeme123")
+        user = User(username="phongdh", hashed_password=get_password_hash(admin_password))
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -110,7 +112,6 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Pydantic Schemas
 # Pydantic Schemas
 class JobCreate(BaseModel):
     name: str = "Migration Job"
@@ -389,6 +390,37 @@ def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):
     executor.submit(run_imapsync, mb.id)
     
     return {"message": "Mailbox retry started", "mailbox_id": mb.id}
+
+@app.post("/api/jobs/{job_id}/cancel")
+def cancel_job(job_id: str, db: Session = Depends(get_db)):
+    """Cancel all running mailboxes in a job"""
+    from worker import kill_sync
+    
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Get all running mailboxes
+    running_mailboxes = db.query(Mailbox).filter(
+        Mailbox.job_id == job_id, 
+        Mailbox.status == 'running'
+    ).all()
+    
+    cancelled_count = 0
+    for mb in running_mailboxes:
+        success = kill_sync(mb.id)
+        if success:
+            mb.status = 'failed'
+            mb.message = 'Cancelled by user'
+            cancelled_count += 1
+    
+    # Update job status
+    if cancelled_count > 0:
+        job.status = 'failed'
+    
+    db.commit()
+    
+    return {"message": f"Cancelled {cancelled_count} mailboxes", "cancelled": cancelled_count}
 
 @app.get("/api/stats")
 def get_dashboard_stats(db: Session = Depends(get_db)):

@@ -58,7 +58,7 @@
                 <p class="text-gray-500">Configure source and target servers for bulk email migration.</p>
             </div>
 
-            <form id="create-job-form">
+            <form id="create-job-form" novalidate>
                 <!-- Server Configuration Grid -->
                 <div class="grid md:grid-cols-2 gap-6 mb-8">
                     <!-- Source Server -->
@@ -75,9 +75,11 @@
                         </div>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">IMAP Host</label>
-                                <input type="text" name="source_host"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">IMAP Host <span
+                                        class="text-red-500">*</span></label>
+                                <input type="text" name="source_host" required placeholder="imap.gmail.com"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
+                                <p class="mt-1 text-xs text-red-500 hidden error-message">Vui lòng nhập IMAP host</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -112,9 +114,11 @@
                         </div>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">IMAP Host</label>
-                                <input type="text" name="target_host"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">IMAP Host <span
+                                        class="text-red-500">*</span></label>
+                                <input type="text" name="target_host" required placeholder="mail.yourdomain.com"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
+                                <p class="mt-1 text-xs text-red-500 hidden error-message">Vui lòng nhập IMAP host</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -167,28 +171,64 @@
                     </div>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Concurrent Threads (Bulk
-                                Only)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Concurrent Threads (Bulk Only)
+                                <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 inline"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="tooltip-content">Số lượng email sync đồng thời. Giá trị cao hơn = nhanh
+                                        hơn nhưng tốn tài nguyên.</span>
+                                </span>
+                            </label>
                             <input type="number" id="opt-concurrency" value="10" min="1" max="50"
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-3">Additional Options</label>
                             <div class="flex flex-wrap gap-4">
-                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <label class="inline-flex items-center gap-2 cursor-pointer group">
                                     <input type="checkbox" id="opt-sync-dates" checked
                                         class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     <span class="text-sm text-gray-700">Sync Internal Dates</span>
+                                    <span class="tooltip-trigger relative">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="tooltip-content">Giữ nguyên ngày gốc của email thay vì ngày
+                                            import.</span>
+                                    </span>
                                 </label>
-                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <label class="inline-flex items-center gap-2 cursor-pointer group">
                                     <input type="checkbox" id="opt-skip-trash" checked
                                         class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     <span class="text-sm text-gray-700">Skip Trash</span>
+                                    <span class="tooltip-trigger relative">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="tooltip-content">Không sync thư mục Trash/Bin/Deleted.</span>
+                                    </span>
                                 </label>
-                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <label class="inline-flex items-center gap-2 cursor-pointer group">
                                     <input type="checkbox" id="opt-dry-run"
                                         class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     <span class="text-sm text-gray-700">Dry Run</span>
+                                    <span class="tooltip-trigger relative">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="tooltip-content">Chạy thử không thực sự copy email - dùng để
+                                            test.</span>
+                                    </span>
                                 </label>
                             </div>
                         </div>
@@ -208,22 +248,24 @@
                             </div>
                             <h2 class="text-lg font-semibold text-gray-900">Upload CSV File</h2>
                         </div>
-                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 transition-colors cursor-pointer dropzone"
                             id="drop-zone">
-                            <div class="flex flex-col items-center">
-                                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+                            <div class="flex flex-col items-center" id="dropzone-content">
+                                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4"
+                                    id="dropzone-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
                                 </div>
-                                <p class="text-gray-700 font-medium mb-1"><span class="text-blue-600">Click to
+                                <p class="text-gray-700 font-medium mb-1" id="dropzone-text"><span
+                                        class="text-blue-600">Click to
                                         upload</span> or drag and drop CSV file</p>
                                 <p class="text-gray-400 text-sm font-mono">Format: source_user, source_pass,
                                     target_user, target_pass</p>
                             </div>
-                            <input type="file" accept=".csv" class="hidden">
+                            <input type="file" accept=".csv" class="hidden" id="csv-file-input">
                         </div>
                         <div id="csv-preview" class="mt-4"></div>
                     </div>
@@ -244,24 +286,32 @@
                         </div>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Source Email</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Source Email <span
+                                        class="text-red-500">*</span></label>
                                 <input type="email" id="single-source-user" name="single_source_user"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    placeholder="user@gmail.com"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Source Password</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Source Password <span
+                                        class="text-red-500">*</span></label>
                                 <input type="password" id="single-source-pass" name="single_source_pass"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    placeholder="App password or IMAP password"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Target Email</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Target Email <span
+                                        class="text-red-500">*</span></label>
                                 <input type="email" id="single-target-user" name="single_target_user"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    placeholder="user@yourdomain.com"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Target Password</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Target Password <span
+                                        class="text-red-500">*</span></label>
                                 <input type="password" id="single-target-pass" name="single_target_pass"
-                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    placeholder="Target mailbox password"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
                             </div>
                         </div>
                     </div>
@@ -274,21 +324,21 @@
                         class="px-6 py-3 bg-gray-600 text-white font-medium rounded-xl hover:bg-gray-700 transition-all shadow-sm">
                         Cancel
                     </button>
-                    <button type="submit"
-                        class="px-8 py-3 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-violet-700 transition-all flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    <button type="submit" id="submit-btn"
+                        class="px-8 py-3 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-violet-700 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 btn-icon" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        Start Migration
+                        <span class="btn-text">Start Migration</span>
                     </button>
                 </div>
             </form>
         </main>
     </div>
 
-    <script src="js/app.js?v=3.1"></script>
+    <script src="js/app.js?v=4.0"></script>
 </body>
 
 </html>

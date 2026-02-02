@@ -51,6 +51,16 @@
     }
 }
 
+@keyframes progressShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
 /* Utility classes */
 .animate-slide-up {
     animation: slideUp 0.3s ease-out forwards;
@@ -82,6 +92,27 @@
     background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
     background-size: 200% 100%;
     animation: gradient-shift 2s ease infinite;
+}
+
+/* Animated progress bar */
+.progress-bar-animated {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-animated::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent);
+    background-size: 200% 100%;
+    animation: progressShimmer 1.5s infinite;
 }
 
 @keyframes gradient-shift {
@@ -153,9 +184,7 @@
 /* Focus ring for accessibility */
 .focus-ring:focus {
     outline: none;
-    ring: 2px;
-    ring-offset: 2px;
-    ring-color: #2563eb;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #2563eb;
 }
 
 /* Table row hover */
@@ -164,7 +193,160 @@
 }
 
 /* Dropzone styles */
+.dropzone {
+    transition: all 0.2s ease;
+}
+
 .dropzone-active {
     border-color: #2563eb !important;
     background-color: rgba(37, 99, 235, 0.05) !important;
+}
+
+.dropzone:hover {
+    border-color: #93c5fd;
+    background-color: rgba(59, 130, 246, 0.02);
+}
+
+/* Tab button styles */
+.tab-btn {
+    color: #6b7280;
+    background: transparent;
+}
+
+.tab-btn:hover {
+    color: #374151;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.tab-btn.active {
+    color: #1f2937;
+    background: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Tab content transitions */
+.tab-content {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* Tooltip styles */
+.tooltip-trigger {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    max-width: 250px;
+    white-space: normal;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1f2937;
+}
+
+.tooltip-trigger:hover .tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Input validation styles */
+.input-validation:invalid:not(:placeholder-shown) {
+    border-color: #ef4444;
+}
+
+.input-validation:valid:not(:placeholder-shown) {
+    border-color: #10b981;
+}
+
+/* Loading spinner */
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spinner 0.75s linear infinite;
+}
+
+/* Smooth icon transitions */
+.refresh-icon {
+    transition: transform 0.5s ease;
+}
+
+/* Button loading state */
+button:disabled {
+    cursor: not-allowed;
+}
+
+/* Scale animation for dropzone icon */
+#dropzone-icon {
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+#dropzone-icon.scale-110 {
+    transform: scale(1.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+    .tooltip-content {
+        max-width: 200px;
+        font-size: 11px;
+    }
+
+    /* Stack action buttons on mobile */
+    .flex.gap-3 {
+        flex-wrap: wrap;
+    }
+}
+
+/* Pulse animation for running status */
+@keyframes statusPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+/* Search input icon positioning */
+.relative input[type="text"] {
+    transition: all 0.2s ease;
+}
+
+.relative input[type="text"]:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }

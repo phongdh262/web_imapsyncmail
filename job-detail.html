@@ -40,6 +40,15 @@
                 <span class="text-2xl font-bold text-gradient">IMAP Sync Pro</span>
             </a>
             <div class="flex items-center gap-3">
+                <button id="cancel-all-btn" onclick="cancelAllMailboxes()"
+                    class="hidden items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all shadow-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Cancel All
+                </button>
                 <a href="index.html"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -78,7 +87,8 @@
                     <span id="progress-percent" class="text-4xl font-bold">0%</span>
                 </div>
                 <div class="bg-white/20 rounded-full h-3 overflow-hidden mb-6">
-                    <div id="main-progress-bar" class="h-full bg-white rounded-full transition-all duration-500"
+                    <div id="main-progress-bar"
+                        class="h-full bg-white rounded-full transition-all duration-500 progress-bar-animated"
                         style="width: 0%"></div>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -96,7 +106,7 @@
                     </div>
                     <div class="bg-white/10 rounded-xl p-4">
                         <div id="stat-data" class="text-2xl font-bold text-cyan-300">0 B</div>
-                        <div class="text-sm opacity-75">Data</div>
+                        <div class="text-sm opacity-75">Data Transferred</div>
                     </div>
                 </div>
             </div>
@@ -106,8 +116,16 @@
                 <div
                     class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 border-b border-gray-100">
                     <h2 class="text-xl font-semibold text-gray-900">Mailbox List</h2>
-                    <input type="text"
-                        class="w-full sm:w-64 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm">
+                    <div class="relative w-full sm:w-64">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" id="mailbox-search" placeholder="Search mailbox..."
+                            class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm">
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -135,6 +153,18 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Empty State for Mailboxes -->
+                <div id="mailbox-empty-state" class="hidden py-12 px-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">Chưa có mailbox</h3>
+                    <p class="text-gray-500 text-sm">Đã upload CSV chưa?</p>
+                </div>
             </div>
         </main>
     </div>
@@ -154,14 +184,21 @@
                         </svg>
                         Mailbox Logs
                     </h2>
-                    <button onclick="closeModal()"
-                        class="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-400">
+                            <input type="checkbox" id="log-autoscroll" checked
+                                class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-500">
+                            Auto-scroll
+                        </label>
+                        <button onclick="closeModal()"
+                            class="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <pre id="log-content"
                     class="flex-1 p-6 overflow-auto font-mono text-sm text-emerald-400 bg-slate-950 log-scrollbar leading-relaxed">Loading logs...</pre>
@@ -192,7 +229,7 @@
         <!-- Toasts injected here -->
     </div>
 
-    <script src="js/app.js?v=3.0"></script>
+    <script src="js/app.js?v=4.0"></script>
 </body>
 
 </html>

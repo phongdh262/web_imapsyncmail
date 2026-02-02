@@ -132,11 +132,11 @@
                         </svg>
                         Delete History
                     </button>
-                    <button
+                    <button id="refresh-btn"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all text-sm font-medium shadow-sm hover:shadow-md"
                         onclick="refreshDashboard()">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 refresh-icon" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
@@ -145,7 +145,7 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full" id="jobs-table">
                     <thead class="bg-gray-50">
                         <tr>
                             <th
@@ -169,6 +169,28 @@
                         <!-- Jobs will be populated here -->
                     </tbody>
                 </table>
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden py-16 px-6 text-center">
+                    <div
+                        class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-violet-100 rounded-2xl flex items-center justify-center animate-pulse-glow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Chưa có job nào</h3>
+                    <p class="text-gray-500 mb-6 max-w-sm mx-auto">Bắt đầu migration email bằng cách tạo job mới với
+                        file CSV hoặc đồng bộ đơn lẻ.</p>
+                    <a href="create-job.html"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-xl hover:from-blue-700 hover:to-violet-700 transition-all shadow-lg hover:shadow-xl font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Tạo Job Mới
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -196,7 +218,7 @@
         <!-- Toasts injected here -->
     </div>
 
-    <script src="js/app.js?v=3.0"></script>
+    <script src="js/app.js?v=4.0"></script>
 </body>
 
 </html>
