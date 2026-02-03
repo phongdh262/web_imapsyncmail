@@ -885,15 +885,369 @@ window.downloadAllLogs = async () => {
     }
 };
 
-// --- Initialization ---
+// ============================================
+// Dark Mode Toggle
+// ============================================
+const initTheme = () => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (prefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
+    updateThemeIcon();
+};
+
+const toggleTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon();
+};
+
+const updateThemeIcon = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const sunIcons = document.querySelectorAll('.sun-icon');
+    const moonIcons = document.querySelectorAll('.moon-icon');
+
+    sunIcons.forEach(icon => {
+        icon.style.display = isDark ? 'none' : 'block';
+    });
+    moonIcons.forEach(icon => {
+        icon.style.display = isDark ? 'block' : 'none';
+    });
+};
+
+window.toggleTheme = toggleTheme;
+
+// ============================================
+// Command Palette (Ctrl+K)
+// ============================================
+const commandPaletteCommands = [
+    { id: 'new-job', title: 'Tạo Job Mới', subtitle: 'Tạo migration job mới', icon: '➕', action: () => window.location.href = 'create-job.html', shortcut: ['⌘', 'N'] },
+    { id: 'dashboard', title: 'Dashboard', subtitle: 'Xem tổng quan jobs', icon: '📊', action: () => window.location.href = 'index.html' },
+    { id: 'guide', title: 'Hướng Dẫn Sử Dụng', subtitle: 'Xem hướng dẫn chi tiết', icon: '📖', action: () => window.location.href = 'guide.html' },
+    { id: 'refresh', title: 'Làm Mới Trang', subtitle: 'Refresh dữ liệu hiện tại', icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
+    { id: 'toggle-theme', title: 'Chuyển Đổi Giao Diện', subtitle: 'Light/Dark mode', icon: '🌓', action: () => toggleTheme() },
+];
+
+let commandPaletteOpen = false;
+let selectedCommandIndex = 0;
+let filteredCommands = [...commandPaletteCommands];
+
+const openCommandPalette = () => {
+    if (commandPaletteOpen) return;
+    commandPaletteOpen = true;
+    selectedCommandIndex = 0;
+    filteredCommands = [...commandPaletteCommands];
+
+    const palette = document.createElement('div');
+    palette.id = 'command-palette';
+    palette.className = 'command-palette';
+    palette.innerHTML = `
+        <div class="command-palette-backdrop" onclick="closeCommandPalette()"></div>
+        <div class="command-palette-content">
+            <input 
+                type="text" 
+                class="command-palette-input" 
+                placeholder="Tìm kiếm lệnh..." 
+                id="command-search"
+                autocomplete="off"
+            />
+            <div class="command-palette-results" id="command-results">
+                ${renderCommandItems()}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(palette);
+    document.body.style.overflow = 'hidden';
+
+    const searchInput = document.getElementById('command-search');
+    searchInput.focus();
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        filteredCommands = commandPaletteCommands.filter(cmd =>
+            cmd.title.toLowerCase().includes(query) ||
+            cmd.subtitle.toLowerCase().includes(query)
+        );
+        selectedCommandIndex = 0;
+        document.getElementById('command-results').innerHTML = renderCommandItems();
+    });
+};
+
+const renderCommandItems = () => {
+    if (filteredCommands.length === 0) {
+        return '<div class="px-4 py-8 text-center text-gray-500">Không tìm thấy lệnh phù hợp</div>';
+    }
+
+    return filteredCommands.map((cmd, index) => `
+        <div class="command-item ${index === selectedCommandIndex ? 'selected' : ''}" 
+             onclick="executeCommand('${cmd.id}')"
+             data-index="${index}">
+            <div class="command-item-icon">${cmd.icon}</div>
+            <div class="command-item-text">
+                <div class="command-item-title">${cmd.title}</div>
+                <div class="command-item-subtitle">${cmd.subtitle}</div>
+            </div>
+            ${cmd.shortcut ? `
+                <div class="command-shortcut">
+                    ${cmd.shortcut.map(k => `<kbd>${k}</kbd>`).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+};
+
+const closeCommandPalette = () => {
+    const palette = document.getElementById('command-palette');
+    if (palette) {
+        palette.remove();
+        document.body.style.overflow = '';
+    }
+    commandPaletteOpen = false;
+};
+
+const executeCommand = (cmdId) => {
+    const cmd = commandPaletteCommands.find(c => c.id === cmdId);
+    if (cmd) {
+        closeCommandPalette();
+        cmd.action();
+    }
+};
+
+window.openCommandPalette = openCommandPalette;
+window.closeCommandPalette = closeCommandPalette;
+window.executeCommand = executeCommand;
+
+// ============================================
+// Keyboard Shortcuts
+// ============================================
+const isTyping = () => {
+    const activeEl = document.activeElement;
+    return activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+};
+
+const initKeyboardShortcuts = () => {
+    document.addEventListener('keydown', (e) => {
+        // Command Palette: Ctrl/Cmd + K
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            if (commandPaletteOpen) {
+                closeCommandPalette();
+            } else {
+                openCommandPalette();
+            }
+            return;
+        }
+
+        // Handle command palette navigation
+        if (commandPaletteOpen) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeCommandPalette();
+                return;
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedCommandIndex = Math.min(selectedCommandIndex + 1, filteredCommands.length - 1);
+                document.getElementById('command-results').innerHTML = renderCommandItems();
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedCommandIndex = Math.max(selectedCommandIndex - 1, 0);
+                document.getElementById('command-results').innerHTML = renderCommandItems();
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filteredCommands[selectedCommandIndex]) {
+                    executeCommand(filteredCommands[selectedCommandIndex].id);
+                }
+                return;
+            }
+            return;
+        }
+
+        // Don't trigger shortcuts when typing in inputs
+        if (isTyping()) return;
+
+        // New Job: Ctrl/Cmd + N
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            window.location.href = 'create-job.html';
+            return;
+        }
+
+        // Refresh: R
+        if (e.key === 'r' || e.key === 'R') {
+            e.preventDefault();
+            window.location.reload();
+            return;
+        }
+
+        // Guide: G
+        if (e.key === 'g' || e.key === 'G') {
+            e.preventDefault();
+            window.location.href = 'guide.html';
+            return;
+        }
+
+        // Toggle Theme: T
+        if (e.key === 't' || e.key === 'T') {
+            e.preventDefault();
+            toggleTheme();
+            return;
+        }
+    });
+};
+
+// ============================================
+// Estimated Time Calculation
+// ============================================
+const calculateEstimatedTime = (mailboxes) => {
+    if (!mailboxes || mailboxes.length === 0) return null;
+
+    const completedMailboxes = mailboxes.filter(mb => mb.status === 'success' || mb.status === 'failed');
+    const runningMailboxes = mailboxes.filter(mb => mb.status === 'running');
+    const pendingMailboxes = mailboxes.filter(mb => mb.status === 'pending');
+
+    if (completedMailboxes.length === 0 || (runningMailboxes.length === 0 && pendingMailboxes.length === 0)) {
+        return null;
+    }
+
+    // Estimate average time per mailbox (assuming ~2-5 minutes per mailbox on average)
+    const remainingCount = runningMailboxes.length + pendingMailboxes.length;
+    const estimatedMinutes = remainingCount * 3; // 3 minutes average per mailbox
+
+    if (estimatedMinutes < 1) return 'Gần xong';
+    if (estimatedMinutes < 60) return `~${estimatedMinutes} phút`;
+    const hours = Math.floor(estimatedMinutes / 60);
+    const mins = estimatedMinutes % 60;
+    return `~${hours}h ${mins}m`;
+};
+
+window.calculateEstimatedTime = calculateEstimatedTime;
+
+// ============================================
+// Enhanced Empty State
+// ============================================
+const renderEmptyState = (containerId, options = {}) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const {
+        icon = 'inbox',
+        title = 'Chưa có dữ liệu',
+        description = 'Bắt đầu bằng cách tạo mục mới',
+        actionText = 'Tạo Mới',
+        actionHref = '#'
+    } = options;
+
+    const icons = {
+        inbox: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>`,
+        mail: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>`
+    };
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                ${icons[icon] || icons.inbox}
+            </div>
+            <h3 class="empty-state-title">${title}</h3>
+            <p class="empty-state-description">${description}</p>
+            <a href="${actionHref}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                ${actionText}
+            </a>
+        </div>
+    `;
+};
+
+window.renderEmptyState = renderEmptyState;
+
+// ============================================
+// Enhanced Toast with Actions
+// ============================================
+const showToastWithAction = (message, type = 'info', action = null, duration = 5000) => {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    const colors = {
+        success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+        error: 'bg-red-50 border-red-200 text-red-800',
+        warning: 'bg-amber-50 border-amber-200 text-amber-800',
+        info: 'bg-blue-50 border-blue-200 text-blue-800'
+    };
+
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+
+    toast.className = `toast relative px-4 py-3 rounded-xl border shadow-lg ${colors[type]} overflow-hidden`;
+    toast.innerHTML = `
+        <div class="flex items-center gap-3">
+            <span class="text-lg">${icons[type]}</span>
+            <span class="flex-1 font-medium">${message}</span>
+            ${action ? `<button onclick="${action.callback}" class="px-3 py-1 text-sm font-medium bg-white/50 rounded-lg hover:bg-white/80 transition-colors">${action.text}</button>` : ''}
+            <button onclick="this.parentElement.parentElement.remove()" class="text-lg opacity-50 hover:opacity-100">×</button>
+        </div>
+        <div class="toast-progress" style="animation-duration: ${duration}ms"></div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+};
+
+window.showToastWithAction = showToastWithAction;
+
+// ============================================
+// Initialization
+// ============================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize theme first
+    initTheme();
+
+    // Initialize keyboard shortcuts
+    initKeyboardShortcuts();
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            updateThemeIcon();
+        }
+    });
+
+    // Initialize page-specific logic
     const path = window.location.pathname;
 
     if (path.includes('create-job.html')) {
         initCreateJob();
     } else if (path.includes('job-detail.html')) {
         initJobDetail();
-    } else {
+    } else if (!path.includes('guide.html')) {
         initDashboard();
     }
 });
