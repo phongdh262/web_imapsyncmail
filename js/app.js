@@ -899,6 +899,7 @@ const initTheme = () => {
     }
 
     updateThemeIcon();
+    updateBodyTheme();
 };
 
 const toggleTheme = () => {
@@ -908,6 +909,7 @@ const toggleTheme = () => {
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcon();
+    updateBodyTheme();
 };
 
 const updateThemeIcon = () => {
@@ -921,6 +923,27 @@ const updateThemeIcon = () => {
     moonIcons.forEach(icon => {
         icon.style.display = isDark ? 'block' : 'none';
     });
+};
+
+// Update body classes for theme compatibility
+const updateBodyTheme = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const body = document.body;
+
+    // Light mode gradient classes
+    const lightClasses = ['bg-gradient-to-br', 'from-slate-50', 'via-white', 'to-blue-50'];
+
+    if (isDark) {
+        // Remove light gradient classes in dark mode
+        lightClasses.forEach(cls => body.classList.remove(cls));
+        body.style.backgroundColor = '#0f172a';
+        body.style.backgroundImage = 'none';
+    } else {
+        // Restore light gradient classes
+        lightClasses.forEach(cls => body.classList.add(cls));
+        body.style.backgroundColor = '';
+        body.style.backgroundImage = '';
+    }
 };
 
 window.toggleTheme = toggleTheme;

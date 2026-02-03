@@ -98,6 +98,25 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Dark mode body background - override Tailwind gradient classes */
+[data-theme="dark"] body {
+    background-image: none !important;
+    background-color: var(--bg-primary) !important;
+}
+
+/* Override gradient background utilities in dark mode */
+[data-theme="dark"] .bg-gradient-to-br {
+    background-image: none !important;
+}
+
+[data-theme="dark"] .from-slate-50,
+[data-theme="dark"] .via-white,
+[data-theme="dark"] .to-blue-50 {
+    --tw-gradient-from: transparent !important;
+    --tw-gradient-via: transparent !important;
+    --tw-gradient-to: transparent !important;
+}
+
 /* Override Tailwind background classes for dark mode compatibility */
 .bg-white {
     background-color: var(--bg-card) !important;
