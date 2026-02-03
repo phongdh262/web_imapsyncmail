@@ -112,6 +112,10 @@ body {
     color: var(--text-primary) !important;
 }
 
+.text-gray-700 {
+    color: var(--text-secondary) !important;
+}
+
 .text-gray-600,
 .text-gray-500 {
     color: var(--text-secondary) !important;
@@ -122,8 +126,97 @@ body {
 }
 
 .border-gray-100,
-.border-gray-200 {
+.border-gray-200,
+.border-gray-300 {
     border-color: var(--border-primary) !important;
+}
+
+/* Blue color overrides for dark mode */
+[data-theme="dark"] .bg-blue-50 {
+    background-color: rgba(37, 99, 235, 0.15) !important;
+}
+
+[data-theme="dark"] .bg-blue-100 {
+    background-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+[data-theme="dark"] .text-blue-700,
+[data-theme="dark"] .text-blue-600 {
+    color: #93c5fd !important;
+}
+
+[data-theme="dark"] .border-blue-200 {
+    border-color: rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Orange color overrides for dark mode */
+[data-theme="dark"] .bg-orange-100 {
+    background-color: rgba(234, 88, 12, 0.2) !important;
+}
+
+[data-theme="dark"] .text-orange-600 {
+    color: #fdba74 !important;
+}
+
+/* Emerald/Green color overrides for dark mode */
+[data-theme="dark"] .bg-emerald-100 {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+[data-theme="dark"] .text-emerald-600,
+[data-theme="dark"] .text-emerald-700 {
+    color: #6ee7b7 !important;
+}
+
+/* Violet/Purple color overrides for dark mode */
+[data-theme="dark"] .bg-violet-100 {
+    background-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+[data-theme="dark"] .text-violet-600 {
+    color: #c4b5fd !important;
+}
+
+/* Cyan color overrides for dark mode */
+[data-theme="dark"] .bg-cyan-100 {
+    background-color: rgba(6, 182, 212, 0.2) !important;
+}
+
+[data-theme="dark"] .text-cyan-600 {
+    color: #67e8f9 !important;
+}
+
+/* Red color overrides for dark mode */
+[data-theme="dark"] .bg-red-100 {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+[data-theme="dark"] .text-red-600,
+[data-theme="dark"] .text-red-700 {
+    color: #fca5a5 !important;
+}
+
+/* Amber color overrides for dark mode */
+[data-theme="dark"] .bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+[data-theme="dark"] .text-amber-700 {
+    color: #fcd34d !important;
+}
+
+/* Hover states in dark mode */
+[data-theme="dark"] .hover\:bg-blue-100:hover {
+    background-color: rgba(37, 99, 235, 0.25) !important;
+}
+
+[data-theme="dark"] .hover\:bg-gray-100:hover,
+[data-theme="dark"] .hover\:bg-gray-200:hover {
+    background-color: var(--bg-hover) !important;
+}
+
+[data-theme="dark"] .hover\:border-blue-300:hover {
+    border-color: rgba(37, 99, 235, 0.4) !important;
 }
 
 /* ============================================
