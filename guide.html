@@ -4,9 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hướng Dẫn Sử Dụng - IMAP Sync Tool</title>
+    <title>Hướng Dẫn Sử Dụng - IMAP Sync Pro</title>
+    <meta name="description"
+        content="Hướng dẫn chi tiết cách sử dụng IMAP Sync Pro để di chuyển email giữa các máy chủ IMAP một cách an toàn và hiệu quả.">
+    <meta property="og:title" content="Hướng Dẫn Sử Dụng - IMAP Sync Pro">
+    <meta property="og:description"
+        content="Công cụ di chuyển email IMAP chuyên nghiệp. Hỗ trợ Gmail, Office 365, và các máy chủ IMAP khác.">
+    <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=4.0">
+    <link rel="stylesheet" href="css/style.css?v=5.0">
     <script>
         tailwind.config = {
             theme: {
@@ -57,8 +63,33 @@
                     bộ đơn lẻ đến di chuyển hàng loạt.</p>
             </div>
 
-            <!-- Quick Start -->
+            <!-- Table of Contents -->
             <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">📑 Mục Lục</h2>
+                <nav class="space-y-2">
+                    <a href="#quick-start" class="block text-blue-600 hover:text-blue-800 hover:underline">1. Bắt Đầu
+                        Nhanh</a>
+                    <a href="#bulk-migration" class="block text-blue-600 hover:text-blue-800 hover:underline">2. Di
+                        Chuyển Hàng Loạt (CSV)</a>
+                    <a href="#single-sync" class="block text-blue-600 hover:text-blue-800 hover:underline">3. Đồng Bộ
+                        Đơn Lẻ</a>
+                    <a href="#monitoring" class="block text-blue-600 hover:text-blue-800 hover:underline">4. Theo Dõi và
+                        Xử Lý Lỗi</a>
+                    <a href="#gmail-setup" class="block text-blue-600 hover:text-blue-800 hover:underline">5. Cài Đặt
+                        IMAP cho Gmail</a>
+                    <a href="#office365-setup" class="block text-blue-600 hover:text-blue-800 hover:underline">6. Cài
+                        Đặt IMAP cho Office 365</a>
+                    <a href="#security" class="block text-blue-600 hover:text-blue-800 hover:underline">7. Lưu Ý Bảo
+                        Mật</a>
+                    <a href="#faq" class="block text-blue-600 hover:text-blue-800 hover:underline">8. Câu Hỏi Thường Gặp
+                        (FAQ)</a>
+                    <a href="#troubleshooting" class="block text-blue-600 hover:text-blue-800 hover:underline">9. Xử Lý
+                        Sự Cố</a>
+                </nav>
+            </div>
+
+            <!-- Quick Start -->
+            <div id="quick-start" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
                 <div class="flex items-center gap-3 mb-4">
                     <div
                         class="w-10 h-10 bg-gradient-to-br from-blue-600 to-violet-600 rounded-xl flex items-center justify-center">
@@ -68,7 +99,7 @@
                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-900">Bắt Đầu Nhanh</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">1. Bắt Đầu Nhanh</h2>
                 </div>
                 <p class="text-gray-600 mb-4">Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP
                     khác một cách an toàn và bảo mật. Dữ liệu của bạn được mã hóa và không bao giờ được lưu trữ lâu dài
@@ -87,7 +118,7 @@
             </div>
 
             <!-- Bulk Migration -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+            <div id="bulk-migration" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-600" fill="none"
@@ -96,7 +127,7 @@
                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-900">Di Chuyển Hàng Loạt (Sử dụng CSV)</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">2. Di Chuyển Hàng Loạt (CSV)</h2>
                 </div>
 
                 <div class="space-y-6">
@@ -106,7 +137,7 @@
                             class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                             1</div>
                         <div class="flex-1">
-                            <h3 class="font-semibold text-gray-900 mb-2">Chuẩn bị File CSV</h3>
+                            <h3 class="font-semibold text-gray-900 mb-2">Chuẩn Bị File CSV</h3>
                             <p class="text-gray-600 mb-3">Tạo một file CSV chứa danh sách các tài khoản email cần di
                                 chuyển. Định dạng bắt buộc bao gồm 4 cột:</p>
                             <code
@@ -149,7 +180,7 @@
             </div>
 
             <!-- Single Sync -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+            <div id="single-sync" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-600" fill="none"
@@ -158,7 +189,7 @@
                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-900">Đồng Bộ Đơn Lẻ</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">3. Đồng Bộ Đơn Lẻ</h2>
                 </div>
                 <p class="text-gray-600 mb-6">Thích hợp khi bạn chỉ cần di chuyển một tài khoản email duy nhất để kiểm
                     tra hoặc sử dụng cá nhân.</p>
@@ -197,7 +228,7 @@
             </div>
 
             <!-- Monitoring -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div id="monitoring" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none"
@@ -206,7 +237,7 @@
                                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-900">Theo Dõi và Xử Lý Lỗi</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">4. Theo Dõi và Xử Lý Lỗi</h2>
                 </div>
                 <p class="text-gray-600 mb-4">Tại trang "Job Details", bạn có thể theo dõi tiến độ của từng hộp thư.</p>
                 <ul class="space-y-3">
@@ -256,7 +287,297 @@
                     </li>
                 </ul>
             </div>
+
+            <!-- Gmail Setup -->
+            <div id="gmail-setup" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">5. Cài Đặt IMAP cho Gmail</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl mb-4">
+                        <p class="text-amber-800 text-sm"><strong>⚠️ Lưu ý:</strong> Gmail yêu cầu sử dụng <strong>App
+                                Password</strong> thay vì mật khẩu thường nếu bạn đã bật 2FA.</p>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-sm flex-shrink-0">
+                            1</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Bật IMAP trong Gmail</h3>
+                            <p class="text-gray-600">Vào <strong>Settings → See all settings → Forwarding and
+                                    POP/IMAP</strong> → Bật "Enable IMAP"</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-sm flex-shrink-0">
+                            2</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Tạo App Password</h3>
+                            <p class="text-gray-600">Vào <a href="https://myaccount.google.com/apppasswords"
+                                    target="_blank"
+                                    class="text-blue-600 hover:underline">myaccount.google.com/apppasswords</a> → Chọn
+                                "Mail" và "Other" → Copy mật khẩu 16 ký tự được tạo.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-sm flex-shrink-0">
+                            3</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Thông Tin Kết Nối Gmail</h3>
+                            <div class="bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-sm mt-2">
+                                <p>Host: <span class="text-white">imap.gmail.com</span></p>
+                                <p>Port: <span class="text-white">993</span></p>
+                                <p>Security: <span class="text-white">SSL/TLS</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Office 365 Setup -->
+            <div id="office365-setup" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">6. Cài Đặt IMAP cho Office 365 / Outlook</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm flex-shrink-0">
+                            1</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Kiểm Tra IMAP Đã Bật</h3>
+                            <p class="text-gray-600">IMAP thường được bật mặc định trong Office 365. Nếu không, admin
+                                cần bật trong Exchange Admin Center.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div
+                            class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm flex-shrink-0">
+                            2</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">Thông Tin Kết Nối Office 365</h3>
+                            <div class="bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-sm mt-2">
+                                <p>Host: <span class="text-white">outlook.office365.com</span></p>
+                                <p>Port: <span class="text-white">993</span></p>
+                                <p>Security: <span class="text-white">SSL/TLS</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                        <p class="text-blue-800 text-sm"><strong>💡 Mẹo:</strong> Nếu tổ chức sử dụng Modern
+                            Authentication, bạn có thể cần tạo App Password hoặc liên hệ IT Admin.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div id="security" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">7. Lưu Ý Bảo Mật</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div
+                            class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <strong class="text-gray-900">Mã Hóa Mật Khẩu:</strong>
+                            <span class="text-gray-600"> Tất cả mật khẩu được mã hóa bằng thuật toán Fernet
+                                (AES-128-CBC) trước khi lưu vào database.</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div
+                            class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <strong class="text-gray-900">File Tạm Thời:</strong>
+                            <span class="text-gray-600"> Mật khẩu được ghi vào file tạm thời (temp file) và tự động xóa
+                                ngay sau khi imapsync kết thúc.</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div
+                            class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <strong class="text-gray-900">Không Lưu Trữ Lâu Dài:</strong>
+                            <span class="text-gray-600"> Bạn có thể xóa toàn bộ lịch sử job bất cứ lúc nào từ
+                                Dashboard.</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-xl mt-4">
+                        <p class="text-green-800 text-sm"><strong>🔐 Khuyến nghị:</strong> Sau khi hoàn tất migration,
+                            hãy thay đổi App Password hoặc thu hồi quyền truy cập nếu không còn cần thiết.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div id="faq" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">8. Câu Hỏi Thường Gặp (FAQ)</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="border-b border-gray-100 pb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Tốc độ migration phụ thuộc vào yếu tố gì?</h3>
+                        <p class="text-gray-600 text-sm">Tốc độ phụ thuộc vào: dung lượng mailbox, số lượng email, tốc
+                            độ mạng, và giới hạn của server nguồn/đích. Email lớn hoặc nhiều attachment sẽ mất thời gian
+                            hơn.</p>
+                    </div>
+
+                    <div class="border-b border-gray-100 pb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Có cần giữ máy tính mở không?</h3>
+                        <p class="text-gray-600 text-sm">Không. Sau khi bắt đầu job, quá trình sync chạy trên server.
+                            Bạn có thể đóng trình duyệt và quay lại kiểm tra sau.</p>
+                    </div>
+
+                    <div class="border-b border-gray-100 pb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Email có bị trùng lặp không nếu chạy lại?</h3>
+                        <p class="text-gray-600 text-sm">Không. Imapsync sử dụng Message-ID để xác định email đã tồn tại
+                            và chỉ đồng bộ những email mới.</p>
+                    </div>
+
+                    <div class="border-b border-gray-100 pb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Thư mục có được giữ nguyên không?</h3>
+                        <p class="text-gray-600 text-sm">Có. Hệ thống sử dụng tính năng <code
+                                class="bg-gray-100 px-1 rounded text-xs">--automap</code> để tự động ánh xạ các thư mục
+                            chuẩn (Inbox, Sent, Drafts, etc.).</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Có thể chỉ sync một số thư mục nhất định không?
+                        </h3>
+                        <p class="text-gray-600 text-sm">Hiện tại phiên bản này sync toàn bộ mailbox (trừ Trash nếu bật
+                            Skip Trash). Các tùy chọn nâng cao sẽ có trong phiên bản tương lai.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div id="troubleshooting" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">9. Xử Lý Sự Cố</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-red-50 rounded-xl p-4">
+                        <h3 class="font-semibold text-red-800 mb-2">🔴 Lỗi: "Authentication failed"</h3>
+                        <ul class="text-red-700 text-sm space-y-1 list-disc list-inside">
+                            <li>Kiểm tra lại email và mật khẩu</li>
+                            <li>Với Gmail: Đảm bảo dùng App Password, không phải mật khẩu thường</li>
+                            <li>Kiểm tra IMAP đã được bật trong cài đặt email</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 rounded-xl p-4">
+                        <h3 class="font-semibold text-amber-800 mb-2">🟡 Lỗi: "Connection timed out"</h3>
+                        <ul class="text-amber-700 text-sm space-y-1 list-disc list-inside">
+                            <li>Kiểm tra địa chỉ host IMAP đã chính xác</li>
+                            <li>Xác nhận port (993 cho SSL, 143 cho không SSL)</li>
+                            <li>Kiểm tra firewall không chặn kết nối</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-xl p-4">
+                        <h3 class="font-semibold text-blue-800 mb-2">🔵 Lỗi: "Certificate verify failed"</h3>
+                        <ul class="text-blue-700 text-sm space-y-1 list-disc list-inside">
+                            <li>Server đích có thể dùng self-signed certificate</li>
+                            <li>Thử đổi Security option sang STARTTLS hoặc None</li>
+                            <li>Liên hệ quản trị viên mail server để kiểm tra SSL</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h3 class="font-semibold text-gray-800 mb-2">⚪ Sync chậm hoặc bị ngắt giữa chừng</h3>
+                        <ul class="text-gray-700 text-sm space-y-1 list-disc list-inside">
+                            <li>Mailbox quá lớn, thử chia nhỏ hoặc giảm concurrent threads</li>
+                            <li>Server nguồn có thể giới hạn số kết nối</li>
+                            <li>Kiểm tra logs để xem chi tiết lỗi</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 pt-8 border-t border-gray-200 text-center">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p class="text-gray-500 text-sm">© 2026 IMAP Sync Pro. Phát triển bởi PhongDH.</p>
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Dashboard</a>
+                    <span class="text-gray-300">|</span>
+                    <a href="create-job.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Tạo Job
+                        Mới</a>
+                    <span class="text-gray-300">|</span>
+                    <span class="text-gray-400 text-sm">v5.0</span>
+                </div>
+            </div>
+        </footer>
     </div>
 </body>
 

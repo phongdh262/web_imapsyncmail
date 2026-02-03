@@ -797,6 +797,94 @@ window.closeModal = () => {
     }
 };
 
+// --- Download All Logs ---
+window.downloadAllLogs = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get('id');
+
+    if (!jobId) {
+        window.showToast('Không tìm thấy Job ID', 'error');
+        return;
+    }
+
+    const downloadBtn = document.getElementById('download-logs-btn');
+    const originalText = downloadBtn?.innerHTML;
+
+    // Show loading state
+    if (downloadBtn) {
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = `
+            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Đang tải...
+        `;
+    }
+
+    try {
+        // Get job details with mailboxes
+        const jobRes = await request(`${API_BASE}/jobs/${jobId}`);
+        if (!jobRes.ok) throw new Error('Không thể tải thông tin job');
+        const job = await jobRes.json();
+
+        // Fetch all logs
+        let allLogs = `========================================\n`;
+        allLogs += `IMAP SYNC PRO - LOGS EXPORT\n`;
+        allLogs += `Job: ${job.name}\n`;
+        allLogs += `Source: ${job.source} → Target: ${job.target}\n`;
+        allLogs += `Exported at: ${new Date().toLocaleString('vi-VN')}\n`;
+        allLogs += `========================================\n\n`;
+
+        if (job.mailboxes && job.mailboxes.length > 0) {
+            for (const mb of job.mailboxes) {
+                allLogs += `\n========================================\n`;
+                allLogs += `MAILBOX: ${mb.user} → ${mb.target_user}\n`;
+                allLogs += `Status: ${mb.status}\n`;
+                allLogs += `Message: ${mb.msg || 'N/A'}\n`;
+                allLogs += `========================================\n\n`;
+
+                try {
+                    const logRes = await request(`${API_BASE}/mailboxes/${mb.id}/logs`);
+                    if (logRes.ok) {
+                        const logData = await logRes.json();
+                        allLogs += logData.logs || 'No logs available';
+                    } else {
+                        allLogs += 'Failed to fetch logs for this mailbox';
+                    }
+                } catch (e) {
+                    allLogs += `Error fetching logs: ${e.message}`;
+                }
+                allLogs += '\n\n';
+            }
+        } else {
+            allLogs += 'No mailboxes found in this job.\n';
+        }
+
+        // Create and download file
+        const blob = new Blob([allLogs], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `imap_sync_logs_${job.name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        window.showToast('Đã tải logs thành công!', 'success');
+
+    } catch (e) {
+        window.showToast('Lỗi: ' + e.message, 'error');
+    } finally {
+        // Restore button
+        if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.innerHTML = originalText;
+        }
+    }
+};
+
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
