@@ -238,6 +238,30 @@ body {
     border-color: rgba(37, 99, 235, 0.4) !important;
 }
 
+/* Dark mode override for buttons using bg-gray-100 (Command Palette, Cancel buttons, etc.) */
+[data-theme="dark"] .bg-gray-100 {
+    background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .hover\:bg-gray-200:hover {
+    background-color: var(--bg-hover) !important;
+}
+
+/* Also apply for auto dark mode based on system preference */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .bg-gray-100 {
+        background-color: var(--bg-tertiary) !important;
+    }
+
+    :root:not([data-theme="light"]) .hover\:bg-gray-200:hover {
+        background-color: var(--bg-hover) !important;
+    }
+
+    :root:not([data-theme="light"]) .text-gray-700 {
+        color: var(--text-secondary) !important;
+    }
+}
+
 /* ============================================
    Custom Animations
    ============================================ */
