@@ -663,6 +663,21 @@ textarea::placeholder {
     transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
+/* Tabs container dark mode override */
+.tabs.bg-gray-100 {
+    background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .tabs {
+    background-color: var(--bg-tertiary) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .tabs {
+        background-color: var(--bg-tertiary) !important;
+    }
+}
+
 /* ============================================
    Tooltip Styles
    ============================================ */
