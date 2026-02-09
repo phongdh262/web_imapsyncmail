@@ -976,7 +976,14 @@ window.downloadAllLogs = async () => {
                 allLogs += `========================================\n\n`;
 
                 try {
-                    const logRes = await request(`${API_BASE}/mailboxes/${mb.id}/logs`);
+                    // Include password if exists
+                    let logUrl = `${API_BASE}/mailboxes/${mb.id}/logs`;
+                    const savedPassword = sessionStorage.getItem(`job_password_${job.id}`);
+                    if (savedPassword) {
+                        logUrl += `?password=${encodeURIComponent(savedPassword)}`;
+                    }
+
+                    const logRes = await request(logUrl);
                     if (logRes.ok) {
                         const logData = await logRes.json();
                         allLogs += logData.logs || 'No logs available';
