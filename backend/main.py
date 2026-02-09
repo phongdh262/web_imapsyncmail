@@ -290,21 +290,14 @@ def get_job(job_id: str, db: Session = Depends(get_db), password: Optional[str] 
     
     # Password verification
     if job.password_hash:
-        # Debug log
-        print(f"DEBUG: Verifying job {job_id} with provided password: '{password}'", flush=True)
-        
         if not password:
-            print("DEBUG: Password required but not provided", flush=True)
             raise HTTPException(
                 status_code=401, 
                 detail="Password required",
                 headers={"X-Password-Required": "true"}
             )
         
-        is_valid = verify_password(password, job.password_hash)
-        print(f"DEBUG: verification result: {is_valid}", flush=True)
-        
-        if not is_valid:
+        if not verify_password(password, job.password_hash):
             raise HTTPException(status_code=401, detail="Incorrect password")
     
     # Self-heal / Real-time Stats Calculation

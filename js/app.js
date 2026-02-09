@@ -618,10 +618,7 @@ window.submitJobPassword = async (jobId) => {
         if (res.ok) {
             // Save password and reload
             sessionStorage.setItem(`job_password_${jobId}`, password);
-            document.getElementById('password-modal').remove();
-            // Restart polling
-            forcePollRestart = true;
-            initJobDetail();
+            window.location.reload();
         } else {
             showPasswordModal(jobId, true);
         }
