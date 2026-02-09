@@ -122,6 +122,7 @@ class JobCreate(BaseModel):
     source_security: str = "SSL/TLS"
     target_security: str = "SSL/TLS"
     options: dict = {} # JSON Options
+    password: str = None # Optional password protection
 
 class JobResponse(BaseModel):
     id: str
@@ -154,6 +155,11 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, db:
     import json
     options_json = json.dumps(job_data.options)
     
+    # Hash password if provided
+    password_hash = None
+    if job_data.password:
+        password_hash = get_password_hash(job_data.password)
+    
     db_job = Job(
         id=job_id,
         name=job_data.name,
@@ -164,6 +170,7 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, db:
         source_security=job_data.source_security,
         target_security=job_data.target_security,
         options=options_json,
+        password_hash=password_hash,
         status="running" # Auto start for demo
     )
     db.add(db_job)
@@ -272,11 +279,25 @@ def list_jobs(db: Session = Depends(get_db)):
     jobs = db.query(Job).order_by(Job.created_at.desc()).all()
     return [format_job_response(j) for j in jobs]
 
+from fastapi import Header
+from typing import Optional
+
 @app.get("/api/jobs/{job_id}")
-def get_job(job_id: str, db: Session = Depends(get_db)):
+def get_job(job_id: str, db: Session = Depends(get_db), x_job_password: Optional[str] = Header(None)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Password verification
+    if job.password_hash:
+        if not x_job_password:
+            raise HTTPException(
+                status_code=401, 
+                detail="Password required",
+                headers={"X-Password-Required": "true"}
+            )
+        if not verify_password(x_job_password, job.password_hash):
+            raise HTTPException(status_code=401, detail="Incorrect password")
     
     # Self-heal / Real-time Stats Calculation
     # Trust the mailboxes table more than the job counters
@@ -343,10 +364,16 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
     }
 
 @app.get("/api/mailboxes/{mailbox_id}/logs")
-def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db)):
+def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), x_job_password: Optional[str] = Header(None)):
     mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
     if not mb:
         raise HTTPException(status_code=404, detail="Mailbox not found")
+    
+    # Password verification for parent job
+    job = db.query(Job).filter(Job.id == mb.job_id).first()
+    if job and job.password_hash:
+        if not x_job_password or not verify_password(x_job_password, job.password_hash):
+            raise HTTPException(status_code=401, detail="Password required")
     
     log_path = f"logs/{mailbox_id}.log"
     
@@ -355,6 +382,26 @@ def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db)):
             return {"logs": f.read()}
     
     return {"logs": f"Waiting for logs / Starting process...\nStatus: {mb.status}\nMessage: {mb.message}"}
+
+class PasswordVerify(BaseModel):
+    password: str
+
+@app.post("/api/jobs/{job_id}/verify")
+def verify_job_password(job_id: str, data: PasswordVerify, db: Session = Depends(get_db)):
+    """Verify password for a job"""
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Job has no password
+    if not job.password_hash:
+        return {"valid": True, "password_required": False}
+    
+    # Verify password
+    if verify_password(data.password, job.password_hash):
+        return {"valid": True, "password_required": True}
+    else:
+        raise HTTPException(status_code=401, detail="Incorrect password")
 
 @app.post("/api/mailboxes/{mailbox_id}/stop")
 def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):

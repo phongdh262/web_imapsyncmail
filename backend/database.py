@@ -63,6 +63,7 @@ class Job(Base):
     id = Column(String(36), primary_key=True, index=True)
     name = Column(String(255))
     status = Column(String(50), default="pending") # pending, running, completed, failed
+    password_hash = Column(String(255), nullable=True) # Optional password protection
     
     # Source Config
     source_host = Column(String(255))

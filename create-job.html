@@ -190,6 +190,23 @@
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Job Password (Optional)
+                                <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 inline"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="tooltip-content">Đặt mật khẩu để bảo vệ job. Ai muốn xem chi tiết job
+                                        hoặc tải logs cần nhập mật khẩu.</span>
+                                </span>
+                            </label>
+                            <input type="password" id="job-password" name="job_password"
+                                placeholder="Để trống nếu không cần bảo mật"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Concurrent Threads (Bulk Only)
                                 <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 inline"

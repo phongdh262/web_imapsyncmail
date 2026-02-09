@@ -290,7 +290,8 @@ const initCreateJob = () => {
             target_port: parseInt(formData.get('target_port') || 993),
             source_security: formData.get('source_security'),
             target_security: formData.get('target_security'),
-            options: options
+            options: options,
+            password: document.getElementById('job-password')?.value || null
         };
 
         try {
@@ -303,6 +304,11 @@ const initCreateJob = () => {
 
             if (!res.ok) throw new Error('Failed to create job');
             const job = await res.json();
+
+            // Save password to sessionStorage for later use
+            if (jobPayload.password) {
+                sessionStorage.setItem(`job_password_${job.id}`, jobPayload.password);
+            }
 
             // 2. Handle Mailboxes based on Active Tab
             if (activeTab === 'bulk') {
@@ -540,7 +546,78 @@ window.showConfirm = (message, callback) => {
     };
 };
 
-// 3. Job Detail Logic
+// Password Modal for protected jobs
+window.showPasswordModal = (jobId, isWrongPassword = false) => {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('password-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'password-modal';
+    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Job Protected</h3>
+                    <p class="text-sm text-gray-500">Nhập mật khẩu để xem job này</p>
+                </div>
+            </div>
+            ${isWrongPassword ? '<p class="text-red-500 text-sm mb-3">Mật khẩu không đúng. Vui lòng thử lại.</p>' : ''}
+            <input type="password" id="job-password-input" placeholder="Nhập mật khẩu..."
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                onkeypress="if(event.key==='Enter') submitJobPassword('${jobId}')">
+            <div class="flex gap-3">
+                <button onclick="window.location.href='index.html'" 
+                    class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
+                    Quay lại
+                </button>
+                <button onclick="submitJobPassword('${jobId}')"
+                    class="flex-1 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors">
+                    Xác nhận
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('job-password-input').focus();
+};
+
+window.submitJobPassword = async (jobId) => {
+    const passwordInput = document.getElementById('job-password-input');
+    const password = passwordInput.value;
+
+    if (!password) {
+        window.showToast('Vui lòng nhập mật khẩu', 'warning');
+        return;
+    }
+
+    try {
+        const res = await request(`${API_BASE}/jobs/${jobId}/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+
+        if (res.ok) {
+            // Save password and reload
+            sessionStorage.setItem(`job_password_${jobId}`, password);
+            document.getElementById('password-modal').remove();
+            // Restart polling
+            forcePollRestart = true;
+            initJobDetail();
+        } else {
+            showPasswordModal(jobId, true);
+        }
+    } catch (e) {
+        window.showToast('Lỗi: ' + e.message, 'error');
+    }
+};
 let isJobPolling = false;
 let forcePollRestart = false;
 let currentMailboxes = [];
@@ -569,7 +646,27 @@ const initJobDetail = async () => {
 
     const updateUI = async () => {
         try {
-            const res = await request(`${API_BASE}/jobs/${jobId}`);
+            // Get saved password from sessionStorage
+            const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
+
+            const headers = {};
+            if (savedPassword) {
+                headers['X-Job-Password'] = savedPassword;
+            }
+
+            const res = await request(`${API_BASE}/jobs/${jobId}`, { headers });
+
+            // Handle password required
+            if (res.status === 401) {
+                const data = await res.json();
+                if (data.detail === 'Password required' || data.detail === 'Incorrect password') {
+                    isJobPolling = false;
+                    showPasswordModal(jobId, data.detail === 'Incorrect password');
+                    return;
+                }
+                throw new Error('Unauthorized');
+            }
+
             if (!res.ok) throw new Error('Job not found');
             const job = await res.json();
 
@@ -770,7 +867,17 @@ window.viewLogs = async (mailboxId) => {
 
         const fetchLogs = async () => {
             try {
-                const res = await request(`${API_BASE}/mailboxes/${mailboxId}/logs`);
+                // Get password from URL params for this job
+                const params = new URLSearchParams(window.location.search);
+                const jobId = params.get('id');
+                const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
+
+                const headers = {};
+                if (savedPassword) {
+                    headers['X-Job-Password'] = savedPassword;
+                }
+
+                const res = await request(`${API_BASE}/mailboxes/${mailboxId}/logs`, { headers });
                 if (!res.ok) throw new Error('Failed to fetch logs');
                 const data = await res.json();
 
