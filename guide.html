@@ -118,8 +118,9 @@
                     <h2 class="text-xl font-semibold text-gray-900">1. Bắt Đầu Nhanh</h2>
                 </div>
                 <p class="text-gray-600 mb-4">Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP
-                    khác một cách an toàn và bảo mật. Dữ liệu của bạn được mã hóa và không bao giờ được lưu trữ lâu dài
-                    trên hệ thống này.</p>
+                    khác một cách an toàn và bảo mật. Giao diện người dùng hiện đã được chuyển sang <strong>Tiếng
+                        Anh</strong> để tăng tính chuyên nghiệp, tuy nhiên tài liệu hướng dẫn này vẫn được giữ bằng
+                    <strong>Tiếng Việt</strong> để bạn dễ dàng theo dõi.</p>
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
                     <div class="flex items-start gap-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0"
@@ -127,8 +128,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p class="text-blue-800 text-sm"><strong>Quan trọng:</strong> Hãy đảm bảo cả máy chủ nguồn và
-                            đích đều hỗ trợ IMAP và bạn có thông tin đăng nhập chính xác trước khi bắt đầu.</p>
+                        <div class="text-blue-800 text-sm">
+                            <p class="font-bold mb-1">Lưu ý quan trọng:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Đảm bảo cả máy chủ nguồn và đích đều hỗ trợ IMAP.</li>
+                                <li><strong>Job Password (bắt buộc):</strong> Mọi Job khi tạo đều yêu cầu mật khẩu để
+                                    bảo mật dữ liệu riêng tư.</li>
+                                <li><strong>An toàn:</strong> Bạn không thể xóa lịch sử của các Job đang trong trạng
+                                    thái <strong>Running</strong>.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -226,8 +235,8 @@
                             2</div>
                         <div class="flex-1">
                             <h3 class="font-semibold text-gray-900 mb-1">Nhập Thông Tin Tài Khoản</h3>
-                            <p class="text-gray-600">Nhập trực tiếp Email và Mật khẩu cho tài khoản nguồn và tài khoản
-                                đích vào các ô tương ứng.</p>
+                            <p class="text-gray-600">Nhập Email, Mật khẩu và đặc biệt là <strong>Job Password</strong>
+                                để bảo vệ phiên làm việc này.</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
@@ -465,9 +474,10 @@
                             </svg>
                         </div>
                         <div>
-                            <strong class="text-gray-900">Không Lưu Trữ Lâu Dài:</strong>
-                            <span class="text-gray-600"> Bạn có thể xóa toàn bộ lịch sử job bất cứ lúc nào từ
-                                Dashboard.</span>
+                            <strong class="text-gray-900">Quản Lý Lịch Sử:</strong>
+                            <span class="text-gray-600"> Bạn có thể xóa từng Job riêng lẻ hoặc chọn "Clear All" để dọn
+                                dẹp toàn bộ. Hệ thống sẽ chặn việc xóa nếu Job đang hoạt động để tránh mất dữ
+                                liệu.</span>
                         </div>
                     </div>
 
@@ -497,6 +507,27 @@
                         <p class="text-gray-600 text-sm">Tốc độ phụ thuộc vào: dung lượng mailbox, số lượng email, tốc
                             độ mạng, và giới hạn của server nguồn/đích. Email lớn hoặc nhiều attachment sẽ mất thời gian
                             hơn.</p>
+                    </div>
+
+                    <div class="border-b border-gray-100 pb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Tại sao tôi không thể xóa Job?</h3>
+                        <p class="text-gray-600 text-sm">Hệ thống bảo vệ dữ liệu bằng cách không cho phép xóa Job khi nó
+                            đang ở trạng thái <strong>Running</strong>. Hãy Stop Job hoặc đợi nó hoàn thành trước khi
+                            xóa.</p>
+                    </div>
+
+                    <div class="border-b border-gray-100 pb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Tôi quên Job Password thì sao?</h3>
+                        <p class="text-gray-600 text-sm">Vì lý do bảo mật, chúng tôi không lưu mật khẩu dưới dạng văn
+                            bản thuần. Nếu quên, bạn sẽ không thể xem chi tiết Job đó. Hãy lưu giữ mật khẩu cẩn thận.
+                        </p>
+                    </div>
+
+                    <div class="border-b border-gray-100 pb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">❓ Tại sao giao diện là Tiếng Anh?</h3>
+                        <p class="text-gray-600 text-sm">Giao diện Tiếng Anh giúp công cụ trông chuyên nghiệp và dễ dàng
+                            bảo trì theo các tiêu chuẩn kỹ thuật quốc tế. Hướng dẫn này sẽ giúp bạn hiểu rõ mọi thao
+                            tác.</p>
                     </div>
 
                     <div class="border-b border-gray-100 pb-4">
@@ -590,7 +621,7 @@
                     <a href="create-job.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Tạo Job
                         Mới</a>
                     <span class="text-gray-300">|</span>
-                    <span class="text-gray-400 text-sm">v5.0</span>
+                    <span class="text-gray-400 text-sm">v6.0</span>
                 </div>
             </div>
         </footer>
