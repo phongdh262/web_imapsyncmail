@@ -131,12 +131,30 @@ def run_imapsync(mailbox_id: int):
             # Stream logs
             import re
             total_bytes = 0
+            current_folder = 0
+            total_folders = 0
+            last_progress = 0
             
             for line in process.stdout:
                 log_file.write(line)
                 log_file.flush()
                 
-                # Parse Data Transfer
+                # Parse Folder Progress (e.g., "++++ Syncing folder [5/42]")
+                folder_match = re.search(r'\[(\d+)/(\d+)\]', line)
+                if folder_match:
+                    try:
+                        current_folder = int(folder_match.group(1))
+                        total_folders = int(folder_match.group(2))
+                        if total_folders > 0:
+                            progress = int((current_folder / total_folders) * 100)
+                            # Only update DB if progress changed by 5% or more
+                            if progress - last_progress >= 5 or progress == 100:
+                                mailbox.progress = progress
+                                mailbox.message = f"Syncing folder {current_folder}/{total_folders}"
+                                db.commit()
+                                last_progress = progress
+                    except: pass
+                
                 # Parse Data Transfer
                 # Pattern 1: Final summary "Total bytes transferred : 123456"
                 if "Total bytes transferred" in line:
@@ -172,6 +190,7 @@ def run_imapsync(mailbox_id: int):
 
             if process.returncode == 0:
                 mailbox.status = 'success'
+                mailbox.progress = 100
                 mailbox.message = "Sync Completed Successfully"
                 job.completed += 1
             elif process.returncode == -15 or process.returncode == -9: # Terminated

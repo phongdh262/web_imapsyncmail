@@ -102,6 +102,7 @@ class Mailbox(Base):
     
     status = Column(String(50), default="pending") # pending, running, success, failed
     message = Column(Text, nullable=True)
+    progress = Column(Integer, default=0) # 0-100 percent progress
     data_transferred = Column(BigInteger, default=0) # Bytes
     
     job = relationship("Job", back_populates="mailboxes")

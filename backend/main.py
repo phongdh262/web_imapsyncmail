@@ -299,10 +299,12 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
     # Get mailboxes for details
     mailboxes = db.query(Mailbox).filter(Mailbox.job_id == job_id).all()
     
-    # Calculate progress for response
+    # Calculate progress for response - use average progress of all mailboxes
     progress = 0
     if job.total_mailboxes > 0:
-        progress = int(((job.completed + job.failed) / job.total_mailboxes) * 100)
+        # Calculate average progress from all mailboxes
+        total_progress = sum(mb.progress for mb in mailboxes)
+        progress = int(total_progress / job.total_mailboxes)
 
     # We need to construct the response manually to override what might be in the DB temporarily
     return {
@@ -322,6 +324,7 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
                 "user": mb.source_user,
                 "target_user": mb.target_user,
                 "status": mb.status,
+                "progress": mb.progress,
                 "msg": mb.message
             } for mb in mailboxes
         ]

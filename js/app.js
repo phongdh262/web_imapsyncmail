@@ -658,7 +658,19 @@ function renderMailboxes(mailboxes, getStatusBadge) {
                         ${mb.status}
                     </span>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="${mb.msg || ''}">${mb.msg || '-'}</td>
+                <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                    ${mb.status === 'running' ? `
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full progress-gradient rounded-full transition-all duration-500" style="width: ${mb.progress || 0}%"></div>
+                            </div>
+                            <span class="text-xs font-medium text-blue-600 min-w-[35px]">${mb.progress || 0}%</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1 truncate" title="${mb.msg || ''}">${mb.msg || 'Starting...'}</div>
+                    ` : `
+                        <span class="truncate" title="${mb.msg || ''}">${mb.msg || '-'}</span>
+                    `}
+                </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex justify-end items-center gap-2">
                         <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">Log</button>
