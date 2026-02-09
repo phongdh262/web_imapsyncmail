@@ -160,8 +160,8 @@ def run_imapsync(mailbox_id: int):
                         last_db_pulse = now
                     except: pass
 
-                # 1. Parse Folder Progress (e.g., "++++ Syncing folder [5/42]")
-                folder_match = re.search(r'\[(\d+)/(\d+)\]', line)
+                # 1. Parse Folder Progress (e.g., "Folder     1/9 [INBOX]")
+                folder_match = re.search(r'Folder\s+(\d+)/(\d+)', line)
                 if folder_match:
                     try:
                         current_folder = int(folder_match.group(1))
@@ -176,12 +176,18 @@ def run_imapsync(mailbox_id: int):
                                 last_db_pulse = now
                     except: pass
                 
-                # 2. Parse Message Progress (e.g., "- msg 5/150 ...")
-                msg_match = re.search(r'- msg (\d+)/(\d+)', line)
-                if msg_match and total_folders > 0:
+                # 2. Parse Message Total for current folder (e.g., "folder [INBOX] has 911 messages in total")
+                msg_total_match = re.search(r'has\s+(\d+)\s+messages\s+in\s+total', line)
+                if msg_total_match:
+                    try:
+                        total_msgs = int(msg_total_match.group(1))
+                    except: pass
+
+                # 3. Parse Message Progress (e.g., "msg INBOX/700 {356143} copied")
+                msg_match = re.search(r'msg\s+.*?/(\d+)', line)
+                if msg_match and total_folders > 0 and total_msgs > 0:
                     try:
                         current_msg = int(msg_match.group(1))
-                        total_msgs = int(msg_match.group(2))
                         
                         base_p = ((current_folder - 1) / total_folders)
                         msg_p = (current_msg / total_msgs) / total_folders
@@ -195,13 +201,13 @@ def run_imapsync(mailbox_id: int):
                             last_db_pulse = now
                     except: pass
 
-                # 3. Catch general status lines
+                # 4. Catch general status lines
                 elif any(kw in line for kw in ["Connecting to", "Calculating", "Authentication", "Detected"]):
                     mailbox.message = line_stripped[:100] + "..." if len(line_stripped) > 100 else line_stripped
                     db.commit()
                     last_db_pulse = now
                 
-                # 4. Parse Data Transfer
+                # 5. Parse Data Transfer
                 if "Total bytes transferred" in line:
                     match = re.search(r'Total bytes transferred.*?:\s*(\d+)', line, re.IGNORECASE)
                     if match:
