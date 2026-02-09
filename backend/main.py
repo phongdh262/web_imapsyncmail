@@ -293,15 +293,30 @@ def get_job(job_id: str, db: Session = Depends(get_db), password: Optional[str] 
     
     # Password verification
     if job.password_hash:
+        print(f"--- DEBUG VERIFY JOB {job_id} ---", flush=True)
+        print(f"Query Param Password: '{password}'", flush=True)
+        print(f"Cookie Password: '{job_password}'", flush=True)
+        print(f"Effective Password: '{effective_password}'", flush=True)
+        
         if not effective_password:
+            print("ERROR: No password provided (needed for this job)", flush=True)
             raise HTTPException(
                 status_code=401, 
                 detail="Password required",
                 headers={"X-Password-Required": "true"}
             )
         
-        if not verify_password(effective_password, job.password_hash):
-            raise HTTPException(status_code=401, detail="Incorrect password")
+        try:
+            is_valid = verify_password(effective_password, job.password_hash)
+            print(f"Verification Result: {is_valid}", flush=True)
+            if not is_valid:
+                print("ERROR: Password incorrect", flush=True)
+                raise HTTPException(status_code=401, detail="Incorrect password")
+        except Exception as e:
+            print(f"ERROR: Exception during verify_password: {str(e)}", flush=True)
+            raise HTTPException(status_code=500, detail="Internal error during verification")
+        
+        print("--- DEBUG VERIFY SUCCESS ---", flush=True)
     
     # Self-heal / Real-time Stats Calculation
     # Trust the mailboxes table more than the job counters
