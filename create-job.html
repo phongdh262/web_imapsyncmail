@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo Job Migration Mới - IMAP Sync Pro</title>
-    <meta name="description" content="Tạo job di chuyển email mới. Hỗ trợ bulk migration qua CSV hoặc đồng bộ đơn lẻ.">
-    <meta property="og:title" content="Tạo Job Migration - IMAP Sync Pro">
-    <meta property="og:description" content="Cấu hình và bắt đầu di chuyển email giữa các máy chủ IMAP.">
+    <title>Create New Migration Job - IMAP Sync Pro</title>
+    <meta name="description"
+        content="Create a new email migration job. Supports bulk migration via CSV or single sync.">
+    <meta property="og:title" content="Create Migration Job - IMAP Sync Pro">
+    <meta property="og:description" content="Configure and start email migration between IMAP servers.">
     <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css?v=6.0">
@@ -97,7 +98,7 @@
                                         class="text-red-500">*</span></label>
                                 <input type="text" name="source_host" required placeholder="imap.gmail.com"
                                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
-                                <p class="mt-1 text-xs text-red-500 hidden error-message">Vui lòng nhập IMAP host</p>
+                                <p class="mt-1 text-xs text-red-500 hidden error-message">Please enter IMAP host</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -136,7 +137,7 @@
                                         class="text-red-500">*</span></label>
                                 <input type="text" name="target_host" required placeholder="mail.yourdomain.com"
                                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
-                                <p class="mt-1 text-xs text-red-500 hidden error-message">Vui lòng nhập IMAP host</p>
+                                <p class="mt-1 text-xs text-red-500 hidden error-message">Please enter IMAP host</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -190,20 +191,21 @@
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Job Password (Optional)
+                                Job Password <span class="text-red-500">*</span>
                                 <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 inline"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span class="tooltip-content">Đặt mật khẩu để bảo vệ job. Ai muốn xem chi tiết job
-                                        hoặc tải logs cần nhập mật khẩu.</span>
+                                    <span class="tooltip-content">Set a password to protect this job. Anyone wanting to
+                                        view details or download logs will need this password.</span>
                                 </span>
                             </label>
-                            <input type="password" id="job-password" name="job_password"
-                                placeholder="Để trống nếu không cần bảo mật"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <input type="password" id="job-password" name="job_password" required
+                                placeholder="Enter a secure password for this job"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation">
+                            <p class="mt-1 text-xs text-red-500 hidden error-message">Job password is required</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -214,8 +216,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span class="tooltip-content">Số lượng email sync đồng thời. Giá trị cao hơn = nhanh
-                                        hơn nhưng tốn tài nguyên.</span>
+                                    <span class="tooltip-content">Number of simultaneous email syncs. Higher value =
+                                        faster but uses more resources.</span>
                                 </span>
                             </label>
                             <input type="number" id="opt-concurrency" value="10" min="1" max="50"
@@ -234,8 +236,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span class="tooltip-content">Giữ nguyên ngày gốc của email thay vì ngày
-                                            import.</span>
+                                        <span class="tooltip-content">Keep the original date of the emails instead of
+                                            the import date.</span>
                                     </span>
                                 </label>
                                 <label class="inline-flex items-center gap-2 cursor-pointer group">
@@ -248,7 +250,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span class="tooltip-content">Không sync thư mục Trash/Bin/Deleted.</span>
+                                        <span class="tooltip-content">Do not sync Trash/Bin/Deleted folders.</span>
                                     </span>
                                 </label>
                                 <label class="inline-flex items-center gap-2 cursor-pointer group">
@@ -261,8 +263,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span class="tooltip-content">Chạy thử không thực sự copy email - dùng để
-                                            test.</span>
+                                        <span class="tooltip-content">Run a simulation without actually copying emails -
+                                            used for testing.</span>
                                     </span>
                                 </label>
                             </div>
@@ -375,9 +377,9 @@
         <!-- Footer -->
         <footer class="mt-12 pt-8 border-t border-gray-200">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p class="text-gray-500 text-sm">© 2026 IMAP Sync Pro. Phát triển bởi PhongDH.</p>
+                <p class="text-gray-500 text-sm">© 2026 IMAP Sync Pro. Developed by PhongDH.</p>
                 <div class="flex items-center gap-4">
-                    <a href="guide.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Hướng Dẫn</a>
+                    <a href="guide.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Guide</a>
                     <span class="text-gray-300">|</span>
                     <a href="index.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Dashboard</a>
                     <span class="text-gray-300">|</span>

@@ -122,7 +122,7 @@ class JobCreate(BaseModel):
     source_security: str = "SSL/TLS"
     target_security: str = "SSL/TLS"
     options: dict = {} # JSON Options
-    password: str = None # Optional password protection
+    password: str # Mandatory password protection
 
 class JobResponse(BaseModel):
     id: str
@@ -258,6 +258,14 @@ async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: Uploa
 
 @app.delete("/api/jobs")
 def delete_all_jobs(db: Session = Depends(get_db)):
+    # Check if any jobs are currently running
+    active_jobs = db.query(Job).filter(Job.status == "running").count()
+    if active_jobs > 0:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot delete history while {active_jobs} jobs are still running. Please stop them first."
+        )
+    
     try:
         # Delete Log Files
         import shutil
@@ -278,6 +286,36 @@ def delete_all_jobs(db: Session = Depends(get_db)):
         db.query(Job).delete()
         db.commit()
         return {"message": "All jobs and history deleted"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/jobs/{job_id}")
+def delete_single_job(job_id: str, db: Session = Depends(get_db)):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    if job.status == "running":
+        raise HTTPException(status_code=400, detail="Cannot delete a job that is currently running. Please stop it first.")
+    
+    try:
+        # 1. Delete associated log files
+        mailboxes = db.query(Mailbox).filter(Mailbox.job_id == job_id).all()
+        for mb in mailboxes:
+            log_path = f"logs/{mb.id}.log"
+            if os.path.exists(log_path):
+                try:
+                    os.remove(log_path)
+                except Exception as e:
+                    print(f"Error removing log {log_path}: {e}")
+        
+        # 2. Delete DB records
+        db.query(Mailbox).filter(Mailbox.job_id == job_id).delete()
+        db.delete(job)
+        db.commit()
+        
+        return {"message": f"Job {job_id} and its mailboxes/logs deleted"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

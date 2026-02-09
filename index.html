@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMAP Sync Dashboard - Công Cụ Di Chuyển Email Chuyên Nghiệp</title>
+    <title>IMAP Sync Dashboard - Professional Email Migration Tool</title>
     <meta name="description"
-        content="IMAP Sync Pro - Công cụ di chuyển email hàng loạt giữa các máy chủ IMAP. Hỗ trợ Gmail, Office 365, và các máy chủ IMAP khác.">
+        content="IMAP Sync Pro - Bulk email migration tool between IMAP servers. Supports Gmail, Office 365, and other IMAP servers.">
     <meta property="og:title" content="IMAP Sync Pro - Email Migration Tool">
     <meta property="og:description"
-        content="Di chuyển email an toàn và hiệu quả giữa các máy chủ IMAP với giao diện trực quan.">
+        content="Migrate emails securely and efficiently between IMAP servers with an intuitive interface.">
     <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css?v=6.0">
@@ -47,8 +47,7 @@
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Dark Mode Toggle -->
-                <button onclick="toggleTheme()" class="theme-toggle" title="Chuyển đổi giao diện (T)"
-                    aria-label="Toggle theme">
+                <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Theme (T)" aria-label="Toggle theme">
                     <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -63,7 +62,7 @@
                 <!-- Command Palette Hint -->
                 <button onclick="openCommandPalette()"
                     class="hidden sm:inline-flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all text-sm"
-                    title="Mở Command Palette">
+                    title="Open Command Palette">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -156,13 +155,13 @@
                 <div class="flex items-center gap-3">
                     <button
                         class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all text-sm font-medium shadow-sm hover:shadow-md"
-                        onclick="deleteAllJobs()">
+                        onclick="deleteAllJobs()" title="Delete all jobs and logs that are NOT currently running">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Delete History
+                        Clear All
                     </button>
                     <button id="refresh-btn"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all text-sm font-medium shadow-sm hover:shadow-md"
@@ -211,16 +210,16 @@
                                 d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Chưa có job nào</h3>
-                    <p class="text-gray-500 mb-6 max-w-sm mx-auto">Bắt đầu migration email bằng cách tạo job mới với
-                        file CSV hoặc đồng bộ đơn lẻ.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
+                    <p class="text-gray-500 mb-6 max-w-sm mx-auto">Start email migration by creating a new job with a
+                        CSV file or single sync.</p>
                     <a href="create-job.html"
                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-xl hover:from-blue-700 hover:to-violet-700 transition-all shadow-lg hover:shadow-xl font-medium">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Tạo Job Mới
+                        Create New Job
                     </a>
                 </div>
             </div>
@@ -253,11 +252,12 @@
     <!-- Footer -->
     <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8 border-t border-gray-200">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p class="text-gray-500 text-sm">© 2026 IMAP Sync Pro. Phát triển bởi PhongDH.</p>
+            <p class="text-gray-500 text-sm">© 2026 IMAP Sync Pro. Developed by PhongDH.</p>
             <div class="flex items-center gap-4">
-                <a href="guide.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Hướng Dẫn</a>
+                <a href="guide.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Guide</a>
                 <span class="text-gray-300">|</span>
-                <a href="create-job.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Tạo Job Mới</a>
+                <a href="create-job.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Create New
+                    Job</a>
                 <span class="text-gray-300">|</span>
                 <span class="text-gray-400 text-sm">v5.0</span>
             </div>

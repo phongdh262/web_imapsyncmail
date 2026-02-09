@@ -45,7 +45,7 @@ const initDashboard = async () => {
 
     if (!jobListEl) return;
 
-    jobListEl.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500"><div class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Đang tải...</div></td></tr>';
+    jobListEl.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500"><div class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading...</div></td></tr>';
 
     try {
         const res = await request(`${API_BASE}/jobs`);
@@ -95,9 +95,18 @@ const initDashboard = async () => {
                         <div class="text-sm text-gray-500">→ ${job.target}</div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                            Xem
-                        </a>
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                                View
+                            </a>
+                            <button onclick="deleteSingleJob('${job.id}', '${job.name.replace(/'/g, "\\'")}')" 
+                                class="inline-flex items-center justify-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                title="Delete this job">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -115,7 +124,7 @@ const initDashboard = async () => {
 
     } catch (e) {
         console.error(e);
-        jobListEl.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">Lỗi tải jobs: ${e.message}</td></tr>`;
+        jobListEl.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">Error loading jobs: ${e.message}</td></tr>`;
     }
 };
 
@@ -142,18 +151,38 @@ window.refreshDashboard = async () => {
 };
 
 window.deleteAllJobs = async () => {
-    window.showConfirm("Bạn có chắc muốn xóa TẤT CẢ jobs và logs? Hành động này không thể hoàn tác.", async () => {
+    window.showConfirm("Are you sure you want to delete ALL jobs and logs? This action cannot be undone.", async () => {
         try {
             const res = await request(`${API_BASE}/jobs`, { method: 'DELETE' });
-            if (!res.ok) throw new Error("Failed to delete jobs");
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.detail || "Failed to delete jobs");
+            }
 
-            window.showToast("Đã xóa toàn bộ lịch sử", "success");
+            window.showToast("All history cleared", "success");
 
             // Refresh dashboard
             await initDashboard();
 
         } catch (e) {
-            window.showToast("Lỗi: " + e.message, "error");
+            window.showToast("Error: " + e.message, "error");
+        }
+    });
+};
+
+window.deleteSingleJob = async (jobId, jobName) => {
+    window.showConfirm(`Are you sure you want to delete "${jobName}"? This will permanently remove its logs.`, async () => {
+        try {
+            const res = await request(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.detail || "Failed to delete job");
+            }
+
+            window.showToast("Job and logs deleted", "success");
+            await initDashboard();
+        } catch (e) {
+            window.showToast("Error: " + e.message, "error");
         }
     });
 };
@@ -281,13 +310,13 @@ const initCreateJob = () => {
         isValid = validateField(targetHost) && isValid;
 
         if (!isValid) {
-            window.showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
+            window.showToast('Please fill in all required fields', 'error');
             return;
         }
 
         // Show loading state
         submitBtn.disabled = true;
-        btnText.textContent = 'Đang tạo...';
+        btnText.textContent = 'Creating...';
         btnIcon.classList.add('animate-spin-slow');
 
         const formData = new FormData(form);
@@ -302,7 +331,7 @@ const initCreateJob = () => {
 
         // Better job name with time
         const now = new Date();
-        const jobName = `Migration ${now.toLocaleDateString('vi-VN')} ${now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+        const jobName = `Migration ${now.toLocaleDateString('en-US')} ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
 
         // Get password - only send if not empty
         const passwordInput = document.getElementById('job-password');
@@ -354,7 +383,7 @@ const initCreateJob = () => {
                         throw new Error(err.detail || 'CSV Upload failed');
                     }
                 } else {
-                    window.showToast('Vui lòng chọn file CSV', 'warning');
+                    window.showToast('Please select a CSV file', 'warning');
                     submitBtn.disabled = false;
                     btnText.textContent = 'Start Migration';
                     btnIcon.classList.remove('animate-spin-slow');
@@ -369,11 +398,11 @@ const initCreateJob = () => {
                 };
 
                 if (!singlePayload.source_user || !singlePayload.target_user) {
-                    throw new Error("Vui lòng nhập đầy đủ email source và target");
+                    throw new Error("Please enter both source and target email");
                 }
 
                 if (!singlePayload.source_pass || !singlePayload.target_pass) {
-                    throw new Error("Vui lòng nhập đầy đủ password");
+                    throw new Error("Please enter both passwords");
                 }
 
                 await request(`${API_BASE}/jobs/${job.id}/mailboxes`, {
@@ -386,7 +415,7 @@ const initCreateJob = () => {
             window.location.href = `job-detail.html?id=${job.id}`;
 
         } catch (error) {
-            window.showToast('Lỗi: ' + error.message, 'error');
+            window.showToast('Error: ' + error.message, 'error');
             submitBtn.disabled = false;
             btnText.textContent = 'Start Migration';
             btnIcon.classList.remove('animate-spin-slow');
@@ -432,7 +461,7 @@ const initCreateJob = () => {
                     fileInput.files = files;
                     handleFileSelect(file);
                 } else {
-                    window.showToast('Vui lòng chọn file CSV', 'error');
+                    window.showToast('Please select a CSV file', 'error');
                 }
             }
         });
@@ -496,7 +525,7 @@ const initCreateJob = () => {
                 });
 
                 if (lines.length > 5) {
-                    html += `<tr><td colspan="3" class="text-center py-2 text-gray-400 text-sm">...và ${lines.length - 5} mailbox khác</td></tr>`;
+                    html += `<tr><td colspan="3" class="text-center py-2 text-gray-400 text-sm">...and ${lines.length - 5} other mailboxes</td></tr>`;
                 }
 
                 html += `</tbody></table></div></div>`;
@@ -592,11 +621,11 @@ window.showPasswordModal = (jobId, isWrongPassword = false) => {
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">Job Protected</h3>
-                    <p class="text-sm text-gray-500">Nhập mật khẩu để xem job này</p>
+                    <p class="text-sm text-gray-500">Enter password to view this job</p>
                 </div>
             </div>
-            ${isWrongPassword ? '<p class="text-red-500 text-sm mb-3">Mật khẩu không đúng. Vui lòng thử lại.</p>' : ''}
-            <input type="password" id="job-password-input" placeholder="Nhập mật khẩu..."
+            ${isWrongPassword ? '<p class="text-red-500 text-sm mb-3">Incorrect password. Please try again.</p>' : ''}
+            <input type="password" id="job-password-input" placeholder="Enter password..."
                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
                 onkeypress="if(event.key==='Enter') submitJobPassword('${jobId}')">
             <div class="flex gap-3">

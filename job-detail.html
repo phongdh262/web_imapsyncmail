@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi Tiết Job - IMAP Sync Pro</title>
-    <meta name="description" content="Theo dõi tiến độ migration email chi tiết với logs real-time.">
-    <meta property="og:title" content="Chi Tiết Job Migration - IMAP Sync Pro">
-    <meta property="og:description" content="Xem trạng thái và logs của từng mailbox trong quá trình di chuyển.">
+    <title>Job Details - IMAP Sync Pro</title>
+    <meta name="description" content="Track email migration progress in detail with real-time logs.">
+    <meta property="og:title" content="Job Migration Details - IMAP Sync Pro">
+    <meta property="og:description" content="View status and logs for each mailbox during migration.">
     <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css?v=6.0">
@@ -45,8 +45,7 @@
             </a>
             <div class="flex items-center gap-3">
                 <!-- Dark Mode Toggle -->
-                <button onclick="toggleTheme()" class="theme-toggle" title="Chuyển đổi giao diện (T)"
-                    aria-label="Toggle theme">
+                <button onclick="toggleTheme()" class="theme-toggle" title="Toggle Theme (T)" aria-label="Toggle theme">
                     <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -65,7 +64,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Tải Logs
+                    Download Logs
                 </button>
                 <button id="cancel-all-btn" onclick="cancelAllMailboxes()"
                     class="hidden items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all shadow-sm font-medium">
@@ -74,7 +73,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Dừng Tất Cả
+                    Stop All
                 </button>
                 <a href="index.html"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm font-medium">
@@ -83,7 +82,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Quay Lại
+                    Back
                 </a>
             </div>
         </header>
@@ -189,8 +188,8 @@
                                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">Chưa có mailbox</h3>
-                    <p class="text-gray-500 text-sm">Đã upload CSV chưa?</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">No mailboxes found</h3>
+                    <p class="text-gray-500 text-sm">Have you uploaded a CSV yet?</p>
                 </div>
             </div>
         </main>
@@ -259,9 +258,9 @@
     <!-- Footer -->
     <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8 border-t border-gray-200">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p class="text-gray-500 text-sm">© 2026 IMAP Sync Pro. Phát triển bởi PhongDH.</p>
+            <p class="text-gray-500 text-sm">© 2026 IMAP Sync Pro. Developed by PhongDH.</p>
             <div class="flex items-center gap-4">
-                <a href="guide.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Hướng Dẫn</a>
+                <a href="guide.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Guide</a>
                 <span class="text-gray-300">|</span>
                 <a href="index.html" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Dashboard</a>
                 <span class="text-gray-300">|</span>
