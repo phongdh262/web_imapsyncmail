@@ -133,44 +133,84 @@ def run_imapsync(mailbox_id: int):
             total_bytes = 0
             current_folder = 0
             total_folders = 0
-            last_progress = 0
+            current_msg = 0
+            total_msgs = 0
+            last_progress = -1
+            last_db_pulse = time.time()
             
-            for line in process.stdout:
+            # Using readline() is often more "real-time" than the iterator in some environments
+            while True:
+                line = process.stdout.readline()
+                if not line and process.poll() is not None:
+                    break
+                
+                if not line:
+                    continue
+
+                line_stripped = line.strip()
                 log_file.write(line)
                 log_file.flush()
                 
-                # Parse Folder Progress (e.g., "++++ Syncing folder [5/42]")
+                now = time.time()
+                # Pulse DB every 10 seconds even if no progress match, just to show activity
+                if now - last_db_pulse > 10:
+                    try:
+                        db.refresh(mailbox)
+                        db.commit()
+                        last_db_pulse = now
+                    except: pass
+
+                # 1. Parse Folder Progress (e.g., "++++ Syncing folder [5/42]")
                 folder_match = re.search(r'\[(\d+)/(\d+)\]', line)
                 if folder_match:
                     try:
                         current_folder = int(folder_match.group(1))
                         total_folders = int(folder_match.group(2))
                         if total_folders > 0:
-                            progress = int((current_folder / total_folders) * 100)
-                            # Only update DB if progress changed by 5% or more
-                            if progress - last_progress >= 5 or progress == 100:
+                            progress = int(((current_folder - 1) / total_folders) * 100)
+                            if progress != last_progress:
                                 mailbox.progress = progress
                                 mailbox.message = f"Syncing folder {current_folder}/{total_folders}"
                                 db.commit()
                                 last_progress = progress
+                                last_db_pulse = now
                     except: pass
                 
-                # Parse Data Transfer
-                # Pattern 1: Final summary "Total bytes transferred : 123456"
+                # 2. Parse Message Progress (e.g., "- msg 5/150 ...")
+                msg_match = re.search(r'- msg (\d+)/(\d+)', line)
+                if msg_match and total_folders > 0:
+                    try:
+                        current_msg = int(msg_match.group(1))
+                        total_msgs = int(msg_match.group(2))
+                        
+                        base_p = ((current_folder - 1) / total_folders)
+                        msg_p = (current_msg / total_msgs) / total_folders
+                        progress = int((base_p + msg_p) * 100)
+                        
+                        if progress != last_progress:
+                            mailbox.progress = progress
+                            mailbox.message = f"Folder {current_folder}/{total_folders}: msg {current_msg}/{total_msgs}"
+                            db.commit()
+                            last_progress = progress
+                            last_db_pulse = now
+                    except: pass
+
+                # 3. Catch general status lines
+                elif any(kw in line for kw in ["Connecting to", "Calculating", "Authentication", "Detected"]):
+                    mailbox.message = line_stripped[:100] + "..." if len(line_stripped) > 100 else line_stripped
+                    db.commit()
+                    last_db_pulse = now
+                
+                # 4. Parse Data Transfer
                 if "Total bytes transferred" in line:
                     match = re.search(r'Total bytes transferred.*?:\s*(\d+)', line, re.IGNORECASE)
                     if match:
-                         try:
-                             total_bytes = int(match.group(1))
+                         try: total_bytes = int(match.group(1))
                          except: pass
-                
-                # Pattern 2: "Detected 12 messages ... Total size: 123456 bytes" (Estimation)
-                # Use this if we haven't found the final yet, but accurate final is better.
                 elif "Total size" in line and "bytes" in line and total_bytes == 0:
                      match = re.search(r'Total size.*?:\s*(\d+)', line, re.IGNORECASE)
                      if match:
-                         try:
-                             total_bytes = int(match.group(1))
+                         try: total_bytes = int(match.group(1))
                          except: pass
 
             process.wait()

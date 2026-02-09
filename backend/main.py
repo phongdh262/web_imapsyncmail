@@ -188,7 +188,7 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, res
 from concurrent.futures import ThreadPoolExecutor
 
 # Global Executor
-max_workers = int(os.getenv("MAX_WORKERS", 2))
+max_workers = int(os.getenv("MAX_WORKERS", 10))
 executor = ThreadPoolExecutor(max_workers=max_workers) 
 
 @app.post("/api/jobs/{job_id}/mailboxes")
