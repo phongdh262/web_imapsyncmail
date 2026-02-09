@@ -171,17 +171,11 @@
                                 class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
                             Bảo Mật
                         </a>
-                        <a href="#faq"
+                        <a href="#faq_troubleshoot"
                             class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                             <span
                                 class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                            FAQ
-                        </a>
-                        <a href="#troubleshooting"
-                            class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
-                            <span
-                                class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                            Xử Lý Sự Cố
+                            FAQ & Xử Lý Sự Cố
                         </a>
                     </nav>
                 </div>
@@ -543,56 +537,167 @@
 
                 <!-- 8 & 9. FAQ & Troubleshooting -->
                 <section id="faq_troubleshoot" class="mb-12">
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">FAQ & Xử Lý Sự Cố</h2>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
+                        <span
+                            class="bg-blue-100 text-blue-600 w-8 h-8 rounded-lg flex items-center justify-center text-lg">?</span>
+                        FAQ & Xử Lý Sự Cố
+                    </h2>
+
                     <div class="space-y-4">
+                        <!-- 1. Authentication Failed -->
                         <details
-                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20">
+                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
                             <summary
-                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white">
-                                <span>🔴 Lỗi "Authentication failed"</span>
+                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                                <span class="flex items-center gap-3">
+                                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                    Lỗi "Authentication failed" (Thất bại xác thực)
+                                </span>
                                 <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
-                            <div class="px-4 pb-4 text-slate-600 dark:text-slate-400 text-sm">
-                                Kiểm tra lại email/mật khẩu. Với Gmail, hãy chắc chắn bạn đang dùng <strong>App
-                                    Password</strong> 16 ký tự, không phải mật khẩu đăng nhập Google.
+                            <div
+                                class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li><strong>Sai mật khẩu:</strong> Kiểm tra lại chính xác email và mật khẩu.</li>
+                                    <li><strong>Chưa bật 2FA/App Password:</strong> Với Gmail, Yahoo, Outlook, bạn KHÔNG
+                                        THỂ dùng mật khẩu đăng nhập bình thường. Bắt buộc phải bật xác thực 2 bước (2FA)
+                                        và tạo <strong>App Password</strong> (Mật khẩu ứng dụng) 16 ký tự.</li>
+                                    <li><strong>IMAP bị tắt:</strong> Đảm bảo IMAP đã được "Enable" trong cài đặt của
+                                        Webmail.</li>
+                                </ul>
                             </div>
                         </details>
 
+                        <!-- 2. Connection Timed Out -->
                         <details
-                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
                             <summary
-                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white">
-                                <span>🟡 Lỗi "Connection timed out"</span>
+                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                                <span class="flex items-center gap-3">
+                                    <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                                    Lỗi "Connection timed out" / "Network is unreachable"
+                                </span>
                                 <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
-                            <div class="px-4 pb-4 text-slate-600 dark:text-slate-400 text-sm">
-                                Kiểm tra Hostname và Port. Port chuẩn cho SSL là 993. Đảm bảo Firewall không chặn kết
-                                nối ra ngoài (Outbound).
+                            <div
+                                class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li><strong>Sai Host/Port:</strong> Kiểm tra lại địa chỉ máy chủ IMAP. Port chuẩn
+                                        cho SSL là <strong>993</strong>, không SSL là 143.</li>
+                                    <li><strong>Firewall chặn:</strong> Máy chủ của bạn có thể đang chặn kết nối ra
+                                        ngoài (Outbound) đến port 993. Hãy kiểm tra Firewall hoặc Security Group (nếu
+                                        dùng AWS/GCP).</li>
+                                    <li><strong>DNS lỗi:</strong> Server không phân giải được tên miền máy chủ mail. Thử
+                                        dùng IP thay vì Hostname.</li>
+                                </ul>
                             </div>
                         </details>
 
+                        <!-- 3. Folder Creation Failed -->
                         <details
-                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
                             <summary
-                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white">
-                                <span>🔵 Sync bị chậm?</span>
+                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                                <span class="flex items-center gap-3">
+                                    <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                                    Lỗi tạo thư mục (Folder Creation Failed)
+                                </span>
                                 <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
-                            <div class="px-4 pb-4 text-slate-600 dark:text-slate-400 text-sm">
-                                Tốc độ phụ thuộc vào mạng và giới hạn của Provider (Gmail giới hạn bandwidth mỗi ngày).
-                                Hãy giảm số lượng `Concurrent Threads` nếu gặp lỗi quá tải.
+                            <div
+                                class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                                <p class="mb-2">Thường xảy ra khi tên thư mục chứa ký tự đặc biệt hoặc xung đột tên hệ
+                                    thống.</p>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Tránh dùng các ký tự như <code>\ / * ? " < > |</code> trong tên thư mục.</li>
+                                    <li>Một số server (như Exchange) dành riêng các tên folder như "Notes", "Journal".
+                                        Nếu nguồn có folder này, hãy đổi tên trước khi sync.</li>
+                                </ul>
+                            </div>
+                        </details>
+
+                        <!-- 4. Quota Exceeded -->
+                        <details
+                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                                <span class="flex items-center gap-3">
+                                    <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                                    Lỗi "Quota exceeded" (Hết dung lượng)
+                                </span>
+                                <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div
+                                class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                                Hộp thư đích đã đầy. Bạn cần mua thêm dung lượng hoặc xóa bớt email cũ trên đích. Tool
+                                sẽ tự động bỏ qua (skip) các email không thể lưu do hết chỗ.
+                            </div>
+                        </details>
+
+                        <!-- 5. Message Too Large -->
+                        <details
+                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                                <span class="flex items-center gap-3">
+                                    <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                                    Lỗi "Message too large"
+                                </span>
+                                <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div
+                                class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                                Server đích giới hạn kích thước email nhận vào (ví dụ: Gmail max 25MB, Outlook max
+                                20MB). Các email có file đính kèm lớn hơn mức này sẽ bị từ chối. Bạn cần xử lý thủ công
+                                các email này.
+                            </div>
+                        </details>
+
+                        <!-- 6. Slow Sync Speed -->
+                        <details
+                            class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                                <span class="flex items-center gap-3">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                    Tại sao tốc độ Sync chậm?
+                                </span>
+                                <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </summary>
+                            <div
+                                class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li><strong>Giới hạn của Provider:</strong> Gmail và Outlook giới hạn băng thông mỗi
+                                        ngày. Nếu vượt quá, tốc độ sẽ bị bóp nghẹt (throttling) hoặc tạm khóa.</li>
+                                    <li><strong>Số lượng file nhỏ:</strong> Di chuyển 1000 email 1KB chậm hơn nhiều so
+                                        với 1 email 1MB do overhead của giao thức IMAP.</li>
+                                    <li><strong>Giải pháp:</strong> Giảm số lượng <code>Concurrent Threads</code> xuống
+                                        (mặc định là 1-2) để tránh bị chặn.</li>
+                                </ul>
                             </div>
                         </details>
                     </div>
