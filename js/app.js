@@ -1428,8 +1428,8 @@ const calculateEstimatedTime = (mailboxes) => {
     const remainingCount = runningMailboxes.length + pendingMailboxes.length;
     const estimatedMinutes = remainingCount * 3; // 3 minutes average per mailbox
 
-    if (estimatedMinutes < 1) return 'Gần xong';
-    if (estimatedMinutes < 60) return `~${estimatedMinutes} phút`;
+    if (estimatedMinutes < 1) return 'Almost done';
+    if (estimatedMinutes < 60) return `~${estimatedMinutes} min`;
     const hours = Math.floor(estimatedMinutes / 60);
     const mins = estimatedMinutes % 60;
     return `~${hours}h ${mins}m`;
@@ -1446,9 +1446,9 @@ const renderEmptyState = (containerId, options = {}) => {
 
     const {
         icon = 'inbox',
-        title = 'Chưa có dữ liệu',
-        description = 'Bắt đầu bằng cách tạo mục mới',
-        actionText = 'Tạo Mới',
+        title = 'No data yet',
+        description = 'Start by creating a new item',
+        actionText = 'Create New',
         actionHref = '#'
     } = options;
 
