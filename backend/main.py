@@ -279,24 +279,24 @@ def list_jobs(db: Session = Depends(get_db)):
     jobs = db.query(Job).order_by(Job.created_at.desc()).all()
     return [format_job_response(j) for j in jobs]
 
-from fastapi import Header
+from fastapi import Header, Query
 from typing import Optional
 
 @app.get("/api/jobs/{job_id}")
-def get_job(job_id: str, db: Session = Depends(get_db), x_job_password: Optional[str] = Header(None)):
+def get_job(job_id: str, db: Session = Depends(get_db), password: Optional[str] = Query(None)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
     # Password verification
     if job.password_hash:
-        if not x_job_password:
+        if not password:
             raise HTTPException(
                 status_code=401, 
                 detail="Password required",
                 headers={"X-Password-Required": "true"}
             )
-        if not verify_password(x_job_password, job.password_hash):
+        if not verify_password(password, job.password_hash):
             raise HTTPException(status_code=401, detail="Incorrect password")
     
     # Self-heal / Real-time Stats Calculation
@@ -364,7 +364,7 @@ def get_job(job_id: str, db: Session = Depends(get_db), x_job_password: Optional
     }
 
 @app.get("/api/mailboxes/{mailbox_id}/logs")
-def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), x_job_password: Optional[str] = Header(None)):
+def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), password: Optional[str] = Query(None)):
     mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
     if not mb:
         raise HTTPException(status_code=404, detail="Mailbox not found")
@@ -372,7 +372,7 @@ def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), x_job_passw
     # Password verification for parent job
     job = db.query(Job).filter(Job.id == mb.job_id).first()
     if job and job.password_hash:
-        if not x_job_password or not verify_password(x_job_password, job.password_hash):
+        if not password or not verify_password(password, job.password_hash):
             raise HTTPException(status_code=401, detail="Password required")
     
     log_path = f"logs/{mailbox_id}.log"

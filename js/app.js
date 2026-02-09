@@ -9,7 +9,14 @@ const API_BASE = '/api';
 
 // --- Simple Request Helper (No Auth) ---
 const request = async (url, options = {}) => {
-    const res = await fetch(url, options);
+    // Ensure headers are properly passed to fetch
+    const fetchOptions = {
+        ...options,
+        headers: {
+            ...options.headers
+        }
+    };
+    const res = await fetch(url, fetchOptions);
     return res;
 };
 
@@ -651,14 +658,15 @@ const initJobDetail = async () => {
     const updateUI = async () => {
         try {
             // Get saved password from sessionStorage
+            // Get saved password from sessionStorage
             const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
 
-            const headers = {};
+            let url = `${API_BASE}/jobs/${jobId}`;
             if (savedPassword) {
-                headers['X-Job-Password'] = savedPassword;
+                url += `?password=${encodeURIComponent(savedPassword)}`;
             }
 
-            const res = await request(`${API_BASE}/jobs/${jobId}`, { headers });
+            const res = await request(url);
 
             // Handle password required
             if (res.status === 401) {
@@ -876,12 +884,12 @@ window.viewLogs = async (mailboxId) => {
                 const jobId = params.get('id');
                 const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
 
-                const headers = {};
+                let url = `${API_BASE}/mailboxes/${mailboxId}/logs`;
                 if (savedPassword) {
-                    headers['X-Job-Password'] = savedPassword;
+                    url += `?password=${encodeURIComponent(savedPassword)}`;
                 }
 
-                const res = await request(`${API_BASE}/mailboxes/${mailboxId}/logs`, { headers });
+                const res = await request(url);
                 if (!res.ok) throw new Error('Failed to fetch logs');
                 const data = await res.json();
 

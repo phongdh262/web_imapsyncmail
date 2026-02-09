@@ -213,7 +213,7 @@ class TestPasswordProtection:
         # Access with correct password
         response = client.get(
             f"/api/jobs/{job_id}",
-            headers={"X-Job-Password": "correctpass"}
+            params={"password": "correctpass"}
         )
         assert response.status_code == 200
         data = response.json()
@@ -234,7 +234,7 @@ class TestPasswordProtection:
         # Access with wrong password
         response = client.get(
             f"/api/jobs/{job_id}",
-            headers={"X-Job-Password": "wrongpassword"}
+            params={"password": "wrongpassword"}
         )
         assert response.status_code == 401
         data = response.json()
@@ -393,7 +393,7 @@ class TestMailboxOperations:
         # Get logs with password - should work
         response = client.get(
             f"/api/mailboxes/{mailbox_id}/logs",
-            headers={"X-Job-Password": "logpass"}
+            params={"password": "logpass"}
         )
         assert response.status_code == 200
 
