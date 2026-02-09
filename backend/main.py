@@ -550,7 +550,7 @@ def cancel_job(job_id: str, db: Session = Depends(get_db)):
     return {"message": f"Cancelled {cancelled_count} mailboxes", "cancelled": cancelled_count}
 
 @app.get("/api/stats")
-def get_dashboard_stats(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_dashboard_stats(db: Session = Depends(get_db)):
     from sqlalchemy import func
     total_jobs = db.query(Job).count()
     active_jobs = db.query(Job).filter(Job.status == "running").count()

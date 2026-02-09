@@ -168,17 +168,13 @@ def test_mailbox_management():
 
 
 def test_stats_api(test_user):
-    # Attempt without auth
-    res_no_auth = client.get("/api/stats")
-    assert res_no_auth.status_code == 401
-    
-    # Authenticate and test
-    login_res = client.post("/api/login", data={"username": "testadmin", "password": "password123"})
-    token = login_res.json()["access_token"]
-
-    response = client.get("/api/stats", headers={"Authorization": f"Bearer {token}"})
-    assert response.status_code == 200
-    assert "total_jobs" in response.json()
+    # Stats API is now public, no auth required
+    res = client.get("/api/stats")
+    assert res.status_code == 200
+    assert "total_jobs" in res.json()
+    assert "active_jobs" in res.json()
+    assert "completed_mailboxes" in res.json()
+    assert "data_transferred" in res.json()
 
 def test_delete_all_jobs():
     create_res = client.post("/api/jobs", json={"name": "ToDelete", "source_host": "h1", "target_host": "h2", "password": "p"})
@@ -317,25 +313,10 @@ def test_login_and_auth(test_user):
     token = response.json()["access_token"]
     assert token is not None
 
-    # 2. Test Auth Access to Stats
-    # Without token
-    res_no_auth = client.get("/api/stats")
-    assert res_no_auth.status_code == 401
-
-    # With token
-    res_auth = client.get("/api/stats", headers={"Authorization": f"Bearer {token}"})
-    assert res_auth.status_code == 200
-    assert "total_jobs" in res_auth.json()
-
-    # 3. Test Auth Access to Stats
-    # Without token
-    res_no_auth = client.get("/api/stats")
-    assert res_no_auth.status_code == 401
-
-    # With token
-    res_auth = client.get("/api/stats", headers={"Authorization": f"Bearer {token}"})
-    assert res_auth.status_code == 200
-    assert "total_jobs" in res_auth.json()
+    # 2. Test Stats API (now public, no auth needed)
+    res_stats = client.get("/api/stats")
+    assert res_stats.status_code == 200
+    assert "total_jobs" in res_stats.json()
 
 def test_csv_upload():
     # 1. Create a job

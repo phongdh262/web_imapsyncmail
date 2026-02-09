@@ -166,6 +166,7 @@ def run_imapsync(mailbox_id: int):
                     try:
                         current_folder = int(folder_match.group(1))
                         total_folders = int(folder_match.group(2))
+                        total_msgs = 0 # Reset for new folder to avoid stale data from previous folder
                         if total_folders > 0:
                             progress = int(((current_folder - 1) / total_folders) * 100)
                             if progress != last_progress:
@@ -189,9 +190,17 @@ def run_imapsync(mailbox_id: int):
                     try:
                         current_msg = int(msg_match.group(1))
                         
+                        # Fix: If current_msg > total_msgs (underestimation), update total dynamically
+                        if current_msg > total_msgs:
+                            total_msgs = current_msg
+
                         base_p = ((current_folder - 1) / total_folders)
                         msg_p = (current_msg / total_msgs) / total_folders
                         progress = int((base_p + msg_p) * 100)
+                        
+                        # Fix: Clamp to 100%
+                        if progress > 100:
+                            progress = 100
                         
                         if progress != last_progress:
                             mailbox.progress = progress
