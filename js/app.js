@@ -20,6 +20,12 @@ const request = async (url, options = {}) => {
     return res;
 };
 
+// --- Cookie Helper ---
+const setCookie = (name, value, hours = 24) => {
+    const expires = new Date(Date.now() + hours * 3600000).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; samesite=strict`;
+};
+
 // --- Page Logic ---
 
 // 1. Dashboard Logic
@@ -316,9 +322,10 @@ const initCreateJob = () => {
             if (!res.ok) throw new Error('Failed to create job');
             const job = await res.json();
 
-            // Save password to sessionStorage for later use
+            // Save password to sessionStorage and Cookie for later use
             if (jobPayload.password) {
                 sessionStorage.setItem(`job_password_${job.id}`, jobPayload.password);
+                setCookie('job_password', jobPayload.password);
             }
 
             // 2. Handle Mailboxes based on Active Tab
@@ -618,6 +625,7 @@ window.submitJobPassword = async (jobId) => {
         if (res.ok) {
             // Save password and reload
             sessionStorage.setItem(`job_password_${jobId}`, password);
+            setCookie('job_password', password);
             window.location.reload();
         } else {
             showPasswordModal(jobId, true);
