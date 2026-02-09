@@ -35,7 +35,60 @@ const setCookie = (name, value, hours = 24) => {
     document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; samesite=strict`;
 };
 
+// --- Animated Counter for Stats ---
+const animateCounter = (elementId, targetValue, duration = 800) => {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const target = parseInt(targetValue) || 0;
+    const startValue = parseInt(el.textContent) || 0;
+    const startTime = performance.now();
+
+    el.classList.add('counting');
+
+    const updateCounter = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Easing function for smooth animation
+        const easeOutQuad = t => t * (2 - t);
+        const currentValue = Math.floor(startValue + (target - startValue) * easeOutQuad(progress));
+
+        el.textContent = currentValue;
+
+        if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+        } else {
+            el.textContent = target;
+            el.classList.remove('counting');
+        }
+    };
+
+    requestAnimationFrame(updateCounter);
+};
+
+// --- Floating Action Button Injection ---
+const injectFAB = () => {
+    // Only inject on dashboard (index.html)
+    if (!document.getElementById('jobs-table-body')) return;
+
+    // Don't inject if already exists
+    if (document.querySelector('.fab')) return;
+
+    const fab = document.createElement('a');
+    fab.href = 'create-job.html';
+    fab.className = 'fab ripple';
+    fab.title = 'Create New Job';
+    fab.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+    `;
+    document.body.appendChild(fab);
+};
+
 // --- Page Logic ---
+
 
 // 1. Dashboard Logic
 const initDashboard = async () => {
@@ -45,7 +98,31 @@ const initDashboard = async () => {
 
     if (!jobListEl) return;
 
-    jobListEl.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-gray-500"><div class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading...</div></td></tr>';
+    // Show skeleton loading
+    jobListEl.innerHTML = `
+        <tr class="skeleton-row">
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-10 w-48"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-6 w-20 rounded-full"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-4 w-24"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-8 w-32"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-8 w-16"></div></td>
+        </tr>
+        <tr class="skeleton-row">
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-10 w-48"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-6 w-20 rounded-full"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-4 w-24"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-8 w-32"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-8 w-16"></div></td>
+        </tr>
+        <tr class="skeleton-row">
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-10 w-48"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-6 w-20 rounded-full"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-4 w-24"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-8 w-32"></div></td>
+            <td class="px-6 py-4"><div class="skeleton skeleton-card h-8 w-16"></div></td>
+        </tr>
+    `;
+
 
     try {
         const res = await request(`${API_BASE}/jobs`);
@@ -70,8 +147,9 @@ const initDashboard = async () => {
             jobsTable?.classList.remove('hidden');
             emptyState?.classList.add('hidden');
 
-            jobListEl.innerHTML = jobs.map(job => `
-                <tr class="hover:bg-blue-50/50 transition-colors">
+            jobListEl.innerHTML = jobs.map((job, index) => `
+                <tr class="hover:bg-blue-50/50 transition-colors stagger-item ${job.status === 'running' ? 'pulse-running' : ''}">
+
                     <td class="px-6 py-4">
                         <div class="font-medium text-gray-900">${job.name}</div>
                         <div class="text-sm text-gray-500">${new Date(job.created_at).toLocaleString()}</div>
@@ -86,10 +164,11 @@ const initDashboard = async () => {
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700 min-w-[35px]">${job.progress}%</span>
                             <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full progress-gradient rounded-full transition-all duration-500" style="width: ${job.progress}%"></div>
+                                <div class="h-full ${job.status === 'running' ? 'progress-shimmer progress-bar-glow' : 'progress-gradient'} rounded-full transition-all duration-500" style="width: ${job.progress}%"></div>
                             </div>
                         </div>
                     </td>
+
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900">${job.source}</div>
                         <div class="text-sm text-gray-500">→ ${job.target}</div>
@@ -112,15 +191,16 @@ const initDashboard = async () => {
             `).join('');
         }
 
-        // Fetch System Stats
+        // Fetch System Stats with animated counter
         const statsRes = await request(`${API_BASE}/stats`);
         if (statsRes.ok) {
             const stats = await statsRes.json();
-            document.getElementById('stat-total-jobs').textContent = stats.total_jobs;
-            document.getElementById('stat-active-jobs').textContent = stats.active_jobs;
-            document.getElementById('stat-completed-mailboxes').textContent = stats.completed_mailboxes;
+            animateCounter('stat-total-jobs', stats.total_jobs);
+            animateCounter('stat-active-jobs', stats.active_jobs);
+            animateCounter('stat-completed-mailboxes', stats.completed_mailboxes);
             document.getElementById('stat-data-transferred').textContent = stats.data_transferred;
         }
+
 
     } catch (e) {
         console.error(e);
@@ -1447,11 +1527,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize page-specific logic
     const path = window.location.pathname;
 
+    // Add page enter animation
+    document.body.classList.add('page-enter');
+
     if (path.includes('create-job.html')) {
         initCreateJob();
     } else if (path.includes('job-detail.html')) {
         initJobDetail();
     } else if (!path.includes('guide.html')) {
         initDashboard();
+        injectFAB(); // Add floating action button on dashboard
     }
 });

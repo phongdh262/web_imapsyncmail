@@ -93,9 +93,9 @@
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 card-hover">
+            <div class="glass-card rounded-2xl p-5 shadow-lg border border-gray-100 card-lift stats-card">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -104,11 +104,12 @@
                     </div>
                     <span class="text-sm text-gray-500">Total Jobs</span>
                 </div>
-                <span class="text-3xl font-bold text-gray-900" id="stat-total-jobs">0</span>
+                <span class="text-3xl font-bold text-gradient-accent stat-value" id="stat-total-jobs">0</span>
             </div>
-            <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 card-hover">
+
+            <div class="glass-card rounded-2xl p-5 shadow-lg border border-gray-100 card-lift stats-card">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -117,11 +118,12 @@
                     </div>
                     <span class="text-sm text-gray-500">Running</span>
                 </div>
-                <span class="text-3xl font-bold text-emerald-600" id="stat-active-jobs">0</span>
+                <span class="text-3xl font-bold text-emerald-600 stat-value" id="stat-active-jobs">0</span>
+
             </div>
-            <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 card-hover">
+            <div class="glass-card rounded-2xl p-5 shadow-lg border border-gray-100 card-lift stats-card">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -130,11 +132,12 @@
                     </div>
                     <span class="text-sm text-gray-500">Synced</span>
                 </div>
-                <span class="text-3xl font-bold text-violet-600" id="stat-completed-mailboxes">0</span>
+                <span class="text-3xl font-bold text-violet-600 stat-value" id="stat-completed-mailboxes">0</span>
             </div>
-            <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 card-hover">
+
+            <div class="glass-card rounded-2xl p-5 shadow-lg border border-gray-100 card-lift stats-card">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -143,8 +146,9 @@
                     </div>
                     <span class="text-sm text-gray-500">Data</span>
                 </div>
-                <span class="text-3xl font-bold text-cyan-600" id="stat-data-transferred">0 GB</span>
+                <span class="text-3xl font-bold text-cyan-600 stat-value" id="stat-data-transferred">0 GB</span>
             </div>
+
         </div>
 
         <!-- Jobs Table -->

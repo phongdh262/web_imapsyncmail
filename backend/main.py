@@ -12,7 +12,7 @@ import sys
 # Add current directory to sys.path to ensure modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from database import SessionLocal, engine, init_db, Job, Mailbox, User
+from database import SessionLocal, engine, Job, Mailbox, User, get_db, init_db
 from auth import Token, get_current_user, create_access_token, verify_password, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta
 from pydantic import BaseModel
@@ -77,13 +77,6 @@ def health_check():
         "imapsync": imapsync_path or "not found"
     }
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # --- Auth Routes ---
 @app.post("/api/login", response_model=Token)
@@ -557,7 +550,7 @@ def cancel_job(job_id: str, db: Session = Depends(get_db)):
     return {"message": f"Cancelled {cancelled_count} mailboxes", "cancelled": cancelled_count}
 
 @app.get("/api/stats")
-def get_dashboard_stats(db: Session = Depends(get_db)):
+def get_dashboard_stats(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     from sqlalchemy import func
     total_jobs = db.query(Job).count()
     active_jobs = db.query(Job).filter(Job.status == "running").count()

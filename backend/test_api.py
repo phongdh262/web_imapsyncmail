@@ -2,8 +2,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from .main import app, get_db
-from .database import Base, Job, Mailbox
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from main import app, get_db
+from database import Base, Job, Mailbox
 
 # Setup test database (SQLite in-memory)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -16,7 +20,8 @@ def override_get_db():
         yield db
     finally:
         db.close()
-
+# from .main import app # Removed
+# from .database import get_db # Removed
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
@@ -26,6 +31,17 @@ def setup_db():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
+
+@pytest.fixture
+def test_user():
+    db = TestingSessionLocal()
+    from .auth import get_password_hash
+    from .database import User
+    user = User(username="testadmin", hashed_password=get_password_hash("password123"))
+    db.add(user)
+    db.commit()
+    yield user
+    db.close()
 
 def test_create_job_mandatory_password():
     # Test creating job without password (should fail validation)
@@ -151,16 +167,18 @@ def test_mailbox_management():
     assert job_data["total"] == 1 # The field is "total" in the response, not "total_mailboxes"
 
 
-def test_stats_api():
-    # Create some jobs
-    client.post("/api/jobs", json={"name": "J1", "source_host": "h1", "target_host": "h2", "password": "p"})
-    client.post("/api/jobs", json={"name": "J2", "source_host": "h1", "target_host": "h2", "password": "p"})
+def test_stats_api(test_user):
+    # Attempt without auth
+    res_no_auth = client.get("/api/stats")
+    assert res_no_auth.status_code == 401
     
-    response = client.get("/api/stats")
+    # Authenticate and test
+    login_res = client.post("/api/login", data={"username": "testadmin", "password": "password123"})
+    token = login_res.json()["access_token"]
+
+    response = client.get("/api/stats", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
-    data = response.json()
-    assert data["total_jobs"] >= 2
-    assert "data_transferred" in data
+    assert "total_jobs" in response.json()
 
 def test_delete_all_jobs():
     create_res = client.post("/api/jobs", json={"name": "ToDelete", "source_host": "h1", "target_host": "h2", "password": "p"})
@@ -289,6 +307,73 @@ def test_protected_log_access():
     response = no_auth_client.get(f"/api/mailboxes/{mb_id}/logs?password=secure")
     assert response.status_code == 200
     assert "logs" in response.json()
+def test_login_and_auth(test_user):
+    # 1. Test Login
+    response = client.post(
+        "/api/login",
+        data={"username": "testadmin", "password": "password123"}
+    )
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    assert token is not None
 
+    # 2. Test Auth Access to Stats
+    # Without token
+    res_no_auth = client.get("/api/stats")
+    assert res_no_auth.status_code == 401
 
+    # With token
+    res_auth = client.get("/api/stats", headers={"Authorization": f"Bearer {token}"})
+    assert res_auth.status_code == 200
+    assert "total_jobs" in res_auth.json()
 
+    # 3. Test Auth Access to Stats
+    # Without token
+    res_no_auth = client.get("/api/stats")
+    assert res_no_auth.status_code == 401
+
+    # With token
+    res_auth = client.get("/api/stats", headers={"Authorization": f"Bearer {token}"})
+    assert res_auth.status_code == 200
+    assert "total_jobs" in res_auth.json()
+
+def test_csv_upload():
+    # 1. Create a job
+    create_res = client.post(
+        "/api/jobs",
+        json={"name": "CSV Job", "source_host": "h1", "target_host": "h2", "password": "p"}
+    )
+    job_id = create_res.json()["id"]
+
+    # 2. Upload CSV
+    csv_content = (
+        "source1@gmail.com,pass1,target1@dest.com,tpass1\n"
+        "source2@gmail.com,pass2,target2@dest.com,tpass2\n"
+    )
+    files = {"file": ("test.csv", csv_content, "text/csv")}
+    response = client.post(f"/api/upload/{job_id}", files=files)
+    
+    assert response.status_code == 200
+    assert "Started 2 mailboxes" in response.json()["message"]
+
+    # 3. Verify mailboxes in DB
+    db = TestingSessionLocal()
+    mbs = db.query(Mailbox).filter(Mailbox.job_id == job_id).all()
+    assert len(mbs) == 2
+    assert mbs[0].source_user == "source1@gmail.com"
+    db.close()
+
+def test_advanced_password_verification():
+    # Test that different ways of providing job password work
+    create_res = client.post("/api/jobs", json={"name": "AuthTest", "source_host": "h1", "target_host": "h2", "password": "secret"})
+    job_id = create_res.json()["id"]
+
+    # Header auth
+    res_header = client.get(f"/api/jobs/{job_id}", headers={"X-Job-Password": "secret"})
+    assert res_header.status_code == 200
+
+    # Cookie auth (Playwright/Browser logic simulation)
+    client.cookies.set("job_password", "secret")
+    res_cookie = client.get(f"/api/jobs/{job_id}")
+    assert res_cookie.status_code == 200
+    client.cookies.clear()

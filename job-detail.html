@@ -114,27 +114,29 @@
                 </div>
                 <div class="bg-white/20 rounded-full h-3 overflow-hidden mb-6">
                     <div id="main-progress-bar"
-                        class="h-full bg-white rounded-full transition-all duration-500 progress-bar-animated"
+                        class="h-full bg-white rounded-full transition-all duration-500 progress-bar-animated progress-shimmer"
                         style="width: 0%"></div>
                 </div>
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <div id="stat-total" class="text-2xl font-bold">0</div>
+                    <div class="bg-white/10 rounded-xl p-4 card-lift">
+                        <div id="stat-total" class="text-2xl font-bold stat-value">0</div>
                         <div class="text-sm opacity-75">Total Mailboxes</div>
                     </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <div id="stat-completed" class="text-2xl font-bold text-emerald-300">0</div>
+                    <div class="bg-white/10 rounded-xl p-4 card-lift">
+                        <div id="stat-completed" class="text-2xl font-bold text-emerald-300 stat-value">0</div>
                         <div class="text-sm opacity-75">Completed</div>
                     </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <div id="stat-failed" class="text-2xl font-bold text-red-300">0</div>
+                    <div class="bg-white/10 rounded-xl p-4 card-lift">
+                        <div id="stat-failed" class="text-2xl font-bold text-red-300 stat-value">0</div>
                         <div class="text-sm opacity-75">Failed</div>
                     </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <div id="stat-data" class="text-2xl font-bold text-cyan-300">0 B</div>
+                    <div class="bg-white/10 rounded-xl p-4 card-lift">
+                        <div id="stat-data" class="text-2xl font-bold text-cyan-300 stat-value">0 B</div>
                         <div class="text-sm opacity-75">Data Transferred</div>
                     </div>
                 </div>
+
             </div>
 
             <!-- Mailbox List -->
