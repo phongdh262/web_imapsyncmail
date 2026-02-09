@@ -9,12 +9,21 @@ const API_BASE = '/api';
 
 // --- Simple Request Helper (No Auth) ---
 const request = async (url, options = {}) => {
-    // Ensure headers are properly passed to fetch
+    // Try to find jobId to pick up password for header safety
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get('id');
+    const headers = { ...options.headers };
+
+    if (jobId) {
+        const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
+        if (savedPassword) {
+            headers['X-Job-Password'] = savedPassword;
+        }
+    }
+
     const fetchOptions = {
         ...options,
-        headers: {
-            ...options.headers
-        }
+        headers
     };
     const res = await fetch(url, fetchOptions);
     return res;

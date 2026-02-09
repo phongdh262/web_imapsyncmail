@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, UploadFile, File, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -148,7 +148,7 @@ class MailboxCreate(BaseModel):
 
 # API Routes
 @app.post("/api/jobs", response_model=JobResponse)
-async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, response: Response, db: Session = Depends(get_db)):
     job_id = str(uuid.uuid4())
     
     # Process Options
@@ -159,6 +159,14 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, db:
     password_hash = None
     if job_data.password:
         password_hash = get_password_hash(job_data.password)
+        # Set cookie from backend for reliability
+        response.set_cookie(
+            key="job_password", 
+            value=job_data.password, 
+            max_age=3600*24, 
+            httponly=False,
+            samesite="lax"
+        )
     
     db_job = Job(
         id=job_id,
@@ -283,40 +291,36 @@ from fastapi import Header, Query, Cookie
 from typing import Optional
 
 @app.get("/api/jobs/{job_id}")
-def get_job(job_id: str, db: Session = Depends(get_db), password: Optional[str] = Query(None), job_password: Optional[str] = Cookie(None)):
-    # Prefer query param, fallback to cookie if needed
-    effective_password = password or job_password
-    
+def get_job(job_id: str, request: Request, db: Session = Depends(get_db), password: Optional[str] = Query(None), job_password: Optional[str] = Cookie(None)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
     # Password verification
     if job.password_hash:
-        print(f"--- DEBUG VERIFY JOB {job_id} ---", flush=True)
-        print(f"Query Param Password: '{password}'", flush=True)
-        print(f"Cookie Password: '{job_password}'", flush=True)
-        print(f"Effective Password: '{effective_password}'", flush=True)
+        x_job_password = request.headers.get("X-Job-Password")
         
+        # Priority: 1. Query Param, 2. Header, 3. Cookie
+        effective_password = password or x_job_password or job_password
+        
+        print(f"--- [GET_JOB] DEBUG VERIFY {job_id} ---", flush=True)
+        print(f"Query Param: {password}", flush=True)
+        print(f"Header: {x_job_password}", flush=True)
+        print(f"Cookie: {job_password}", flush=True)
+        print(f"Effective: {effective_password}", flush=True)
+
         if not effective_password:
-            print("ERROR: No password provided (needed for this job)", flush=True)
             raise HTTPException(
                 status_code=401, 
                 detail="Password required",
                 headers={"X-Password-Required": "true"}
             )
         
-        try:
-            is_valid = verify_password(effective_password, job.password_hash)
-            print(f"Verification Result: {is_valid}", flush=True)
-            if not is_valid:
-                print("ERROR: Password incorrect", flush=True)
-                raise HTTPException(status_code=401, detail="Incorrect password")
-        except Exception as e:
-            print(f"ERROR: Exception during verify_password: {str(e)}", flush=True)
-            raise HTTPException(status_code=500, detail="Internal error during verification")
+        if not verify_password(effective_password, job.password_hash):
+            print(f"ERROR: Password mismatch for job {job_id}", flush=True)
+            raise HTTPException(status_code=401, detail="Incorrect password")
         
-        print("--- DEBUG VERIFY SUCCESS ---", flush=True)
+        print(f"SUCCESS: Verification passed for job {job_id}", flush=True)
     
     # Self-heal / Real-time Stats Calculation
     # Trust the mailboxes table more than the job counters
@@ -383,10 +387,7 @@ def get_job(job_id: str, db: Session = Depends(get_db), password: Optional[str] 
     }
 
 @app.get("/api/mailboxes/{mailbox_id}/logs")
-def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), password: Optional[str] = Query(None), job_password: Optional[str] = Cookie(None)):
-    # Prefer query param, fallback to cookie
-    effective_password = password or job_password
-    
+def get_mailbox_logs(mailbox_id: int, request: Request, db: Session = Depends(get_db), password: Optional[str] = Query(None), job_password: Optional[str] = Cookie(None)):
     mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
     if not mb:
         raise HTTPException(status_code=404, detail="Mailbox not found")
@@ -394,6 +395,9 @@ def get_mailbox_logs(mailbox_id: int, db: Session = Depends(get_db), password: O
     # Password verification for parent job
     job = db.query(Job).filter(Job.id == mb.job_id).first()
     if job and job.password_hash:
+        x_job_password = request.headers.get("X-Job-Password")
+        effective_password = password or x_job_password or job_password
+        
         if not effective_password or not verify_password(effective_password, job.password_hash):
             raise HTTPException(status_code=401, detail="Password required")
     
@@ -409,7 +413,7 @@ class PasswordVerify(BaseModel):
     password: str
 
 @app.post("/api/jobs/{job_id}/verify")
-def verify_job_password(job_id: str, data: PasswordVerify, db: Session = Depends(get_db)):
+def verify_job_password(job_id: str, data: PasswordVerify, response: Response, db: Session = Depends(get_db)):
     """Verify password for a job"""
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
@@ -421,6 +425,14 @@ def verify_job_password(job_id: str, data: PasswordVerify, db: Session = Depends
     
     # Verify password
     if verify_password(data.password, job.password_hash):
+        # Set cookie from backend for reliability
+        response.set_cookie(
+            key="job_password", 
+            value=data.password, 
+            max_age=3600*24, # 1 day
+            httponly=False,  # Allow JS access for redundancy if needed
+            samesite="lax"
+        )
         return {"valid": True, "password_required": True}
     else:
         raise HTTPException(status_code=401, detail="Incorrect password")
