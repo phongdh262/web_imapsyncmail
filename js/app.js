@@ -282,6 +282,10 @@ const initCreateJob = () => {
         const now = new Date();
         const jobName = `Migration ${now.toLocaleDateString('vi-VN')} ${now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
 
+        // Get password - only send if not empty
+        const passwordInput = document.getElementById('job-password');
+        const password = passwordInput?.value?.trim() || null;
+
         const jobPayload = {
             name: jobName,
             source_host: sourceHost.value,
@@ -291,7 +295,7 @@ const initCreateJob = () => {
             source_security: formData.get('source_security'),
             target_security: formData.get('target_security'),
             options: options,
-            password: document.getElementById('job-password')?.value || null
+            password: password
         };
 
         try {

@@ -1,2 +1,4 @@
 [2026-02-09 13:59:46.457403] Failed to initialize database: (pymysql.err.OperationalError) (2003, "Can't connect to MySQL server on 'localhost' ([Errno 61] Connection refused)")
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2026-02-09 14:38:08.285080] Failed to initialize database: (pymysql.err.OperationalError) (2003, "Can't connect to MySQL server on 'localhost' ([Errno 61] Connection refused)")
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
