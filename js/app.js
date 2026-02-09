@@ -711,12 +711,13 @@ window.showPasswordModal = (jobId, isWrongPassword = false) => {
             <div class="flex gap-3">
                 <button onclick="window.location.href='index.html'" 
                     class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
-                    Quay lại
+                    Back
                 </button>
                 <button onclick="submitJobPassword('${jobId}')"
                     class="flex-1 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors">
-                    Xác nhận
+                    Confirm
                 </button>
+
             </div>
         </div>
     `;
@@ -729,9 +730,10 @@ window.submitJobPassword = async (jobId) => {
     const password = passwordInput.value;
 
     if (!password) {
-        window.showToast('Vui lòng nhập mật khẩu', 'warning');
+        window.showToast('Please enter password', 'warning');
         return;
     }
+
 
     try {
         const res = await request(`${API_BASE}/jobs/${jobId}/verify`, {
@@ -749,8 +751,9 @@ window.submitJobPassword = async (jobId) => {
             showPasswordModal(jobId, true);
         }
     } catch (e) {
-        window.showToast('Lỗi: ' + e.message, 'error');
+        window.showToast('Error: ' + e.message, 'error');
     }
+
 };
 let isJobPolling = false;
 let forcePollRestart = false;
@@ -864,11 +867,13 @@ const initJobDetail = async () => {
                 isJobPolling = false;
             }
 
+            document.getElementById('job-name').textContent = job.name;
         } catch (e) {
             console.error(e);
             document.getElementById('job-name').textContent = "Error loading job";
             isJobPolling = false;
         }
+
     };
 
     updateUI();
@@ -938,40 +943,42 @@ window.cancelAllMailboxes = async () => {
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get('id');
 
-    window.showConfirm('Bạn có chắc muốn dừng TẤT CẢ mailbox đang chạy?', async () => {
+    window.showConfirm('Are you sure you want to stop ALL running mailboxes?', async () => {
         try {
             const res = await request(`${API_BASE}/jobs/${jobId}/cancel`, { method: 'POST' });
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.detail || 'Failed to cancel');
             }
-            window.showToast('Đã gửi lệnh dừng tất cả', 'info');
+            window.showToast('Stop command sent for all mailboxes', 'info');
         } catch (e) {
-            window.showToast('Lỗi: ' + e.message, 'error');
+            window.showToast('Error: ' + e.message, 'error');
         }
     });
+
 };
 
 window.stopSync = async (mailboxId) => {
-    window.showConfirm('Bạn có chắc muốn dừng sync này?', async () => {
+    window.showConfirm('Are you sure you want to stop this sync?', async () => {
         try {
             await request(`${API_BASE}/mailboxes/${mailboxId}/stop`, { method: 'POST' });
-            window.showToast('Đã gửi lệnh dừng', 'info');
+            window.showToast('Stop command sent', 'info');
         } catch (e) {
-            window.showToast('Lỗi: ' + e.message, 'error');
+            window.showToast('Error: ' + e.message, 'error');
         }
     });
 };
 
+
 window.retrySync = async (mailboxId) => {
-    window.showConfirm('Thử lại sync mailbox này?', async () => {
+    window.showConfirm('Retry this mailbox sync?', async () => {
         try {
             const res = await request(`${API_BASE}/mailboxes/${mailboxId}/retry`, { method: 'POST' });
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.detail || 'Failed to retry');
             }
-            window.showToast('Đang retry...', 'success');
+            window.showToast('Retrying...', 'success');
 
             // Force restart polling if it stopped
             if (!isJobPolling) {
@@ -982,10 +989,11 @@ window.retrySync = async (mailboxId) => {
             }
 
         } catch (e) {
-            window.showToast('Lỗi: ' + e.message, 'error');
+            window.showToast('Error: ' + e.message, 'error');
         }
     });
 };
+
 
 // --- Log Modal Logic ---
 let logPollInterval = null;
@@ -998,9 +1006,10 @@ window.viewLogs = async (mailboxId) => {
     if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        logContent.textContent = 'Đang tải logs...';
+        logContent.textContent = 'Loading logs...';
 
         const fetchLogs = async () => {
+
             try {
                 // Get password from URL params for this job
                 const params = new URLSearchParams(window.location.search);
@@ -1057,9 +1066,10 @@ window.downloadAllLogs = async () => {
     const jobId = params.get('id');
 
     if (!jobId) {
-        window.showToast('Không tìm thấy Job ID', 'error');
+        window.showToast('Job ID not found', 'error');
         return;
     }
+
 
     const downloadBtn = document.getElementById('download-logs-btn');
     const originalText = downloadBtn?.innerHTML;
@@ -1072,22 +1082,25 @@ window.downloadAllLogs = async () => {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Đang tải...
+            Loading...
         `;
     }
+
 
     try {
         // Get job details with mailboxes
         const jobRes = await request(`${API_BASE}/jobs/${jobId}`);
-        if (!jobRes.ok) throw new Error('Không thể tải thông tin job');
+        if (!jobRes.ok) throw new Error('Failed to fetch job details');
         const job = await jobRes.json();
+
 
         // Fetch all logs
         let allLogs = `========================================\n`;
         allLogs += `IMAP SYNC PRO - LOGS EXPORT\n`;
         allLogs += `Job: ${job.name}\n`;
         allLogs += `Source: ${job.source} → Target: ${job.target}\n`;
-        allLogs += `Exported at: ${new Date().toLocaleString('vi-VN')}\n`;
+        allLogs += `Exported at: ${new Date().toLocaleString('en-US')}\n`;
+
         allLogs += `========================================\n\n`;
 
         if (job.mailboxes && job.mailboxes.length > 0) {
@@ -1133,11 +1146,12 @@ window.downloadAllLogs = async () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
 
-        window.showToast('Đã tải logs thành công!', 'success');
+        window.showToast('Logs downloaded successfully!', 'success');
 
     } catch (e) {
-        window.showToast('Lỗi: ' + e.message, 'error');
+        window.showToast('Error: ' + e.message, 'error');
     } finally {
+
         // Restore button
         if (downloadBtn) {
             downloadBtn.disabled = false;
@@ -1213,12 +1227,13 @@ window.toggleTheme = toggleTheme;
 // Command Palette (Ctrl+K)
 // ============================================
 const commandPaletteCommands = [
-    { id: 'new-job', title: 'Tạo Job Mới', subtitle: 'Tạo migration job mới', icon: '➕', action: () => window.location.href = 'create-job.html', shortcut: ['⌘', 'N'] },
-    { id: 'dashboard', title: 'Dashboard', subtitle: 'Xem tổng quan jobs', icon: '📊', action: () => window.location.href = 'index.html' },
-    { id: 'guide', title: 'Hướng Dẫn Sử Dụng', subtitle: 'Xem hướng dẫn chi tiết', icon: '📖', action: () => window.location.href = 'guide.html' },
-    { id: 'refresh', title: 'Làm Mới Trang', subtitle: 'Refresh dữ liệu hiện tại', icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
-    { id: 'toggle-theme', title: 'Chuyển Đổi Giao Diện', subtitle: 'Light/Dark mode', icon: '🌓', action: () => toggleTheme() },
+    { id: 'new-job', title: 'Create New Job', subtitle: 'Create a new migration job', icon: '➕', action: () => window.location.href = 'create-job.html', shortcut: ['⌘', 'N'] },
+    { id: 'dashboard', title: 'Dashboard', subtitle: 'View jobs overview', icon: '📊', action: () => window.location.href = 'index.html' },
+    { id: 'guide', title: 'User Guide', subtitle: 'View detailed guide', icon: '📖', action: () => window.location.href = 'guide.html' },
+    { id: 'refresh', title: 'Refresh Page', subtitle: 'Refresh current data', icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
+    { id: 'toggle-theme', title: 'Toggle Theme', subtitle: 'Light/Dark mode', icon: '🌓', action: () => toggleTheme() },
 ];
+
 
 let commandPaletteOpen = false;
 let selectedCommandIndex = 0;
@@ -1239,10 +1254,11 @@ const openCommandPalette = () => {
             <input 
                 type="text" 
                 class="command-palette-input" 
-                placeholder="Tìm kiếm lệnh..." 
+                placeholder="Search commands..." 
                 id="command-search"
                 autocomplete="off"
             />
+
             <div class="command-palette-results" id="command-results">
                 ${renderCommandItems()}
             </div>
@@ -1268,10 +1284,11 @@ const openCommandPalette = () => {
 
 const renderCommandItems = () => {
     if (filteredCommands.length === 0) {
-        return '<div class="px-4 py-8 text-center text-gray-500">Không tìm thấy lệnh phù hợp</div>';
+        return '<div class="px-4 py-8 text-center text-gray-500">No matching commands found</div>';
     }
 
     return filteredCommands.map((cmd, index) => `
+
         <div class="command-item ${index === selectedCommandIndex ? 'selected' : ''}" 
              onclick="executeCommand('${cmd.id}')"
              data-index="${index}">
