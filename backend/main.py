@@ -306,6 +306,17 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
         total_progress = sum(mb.progress for mb in mailboxes)
         progress = int(total_progress / job.total_mailboxes)
 
+    # Format Data Transferred
+    bytes_val = job.data_transferred or 0
+    if bytes_val > 1024**3:
+        data_str = f"{bytes_val / (1024**3):.2f} GB"
+    elif bytes_val > 1024**2:
+        data_str = f"{bytes_val / (1024**2):.2f} MB"
+    elif bytes_val > 1024:
+        data_str = f"{bytes_val / 1024:.2f} KB"
+    else:
+        data_str = f"{bytes_val} B"
+
     # We need to construct the response manually to override what might be in the DB temporarily
     return {
         "id": job.id,
@@ -317,6 +328,7 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
         "failed": job.failed,
         "source": job.source_host,
         "target": job.target_host,
+        "data_transferred": data_str,
         "created_at": str(job.created_at),
         "mailboxes": [
             {
