@@ -528,8 +528,7 @@ const initCreateJob = () => {
             dropZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                dropZone.classList.add('dropzone-active', 'border-blue-500', 'bg-blue-50');
-                dropzoneIcon?.classList.add('scale-110');
+                dropZone.classList.add('dragover');
             });
         });
 
@@ -537,8 +536,7 @@ const initCreateJob = () => {
             dropZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                dropZone.classList.remove('dropzone-active', 'border-blue-500', 'bg-blue-50');
-                dropzoneIcon?.classList.remove('scale-110');
+                dropZone.classList.remove('dragover');
             });
         });
 
@@ -565,14 +563,17 @@ const initCreateJob = () => {
 
         function handleFileSelect(file) {
             // Update dropzone appearance
-            dropzoneText.innerHTML = `<span class="text-emerald-600 font-medium">${file.name}</span> (${(file.size / 1024).toFixed(1)} KB)`;
-            dropzoneIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-            `;
-            dropzoneIcon.classList.remove('bg-gray-100');
-            dropzoneIcon.classList.add('bg-emerald-100');
+            dropZone.classList.add('has-file');
+            if (dropzoneText) {
+                dropzoneText.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">${file.name}</span> <span class="text-slate-400 font-normal">(${(file.size / 1024).toFixed(1)} KB)</span>`;
+            }
+            if (dropzoneIcon) {
+                dropzoneIcon.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                `;
+            }
 
             // Preview Logic
             const reader = new FileReader();
@@ -582,45 +583,58 @@ const initCreateJob = () => {
                 const previewLines = lines.slice(0, 5);
 
                 let html = `
-                    <div class="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-medium text-gray-900">CSV Preview</h3>
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                    <div class="csv-preview-card">
+                        <div class="csv-preview-header">
+                            <h3 class="font-bold text-slate-800 dark:text-slate-200">CSV Preview</h3>
+                            <span class="csv-count-badge">
                                 ${lines.length} mailboxes
                             </span>
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
+                            <table class="csv-preview-table">
                                 <thead>
-                                    <tr class="border-b border-gray-200">
-                                        <th class="text-left py-2 px-3 font-medium text-gray-500">Source User</th>
-                                        <th class="text-left py-2 px-3 font-medium text-gray-500">Target User</th>
-                                        <th class="text-left py-2 px-3 font-medium text-gray-500">Password</th>
+                                    <tr>
+                                        <th>Source User</th>
+                                        <th>Target User</th>
+                                        <th>Password</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                 `;
 
                 previewLines.forEach(line => {
-                    const cols = line.split(',').map(c => c.trim());
-                    if (cols.length >= 4) {
+                    const parts = line.split(',').map(p => p.trim());
+                    if (parts.length >= 2) {
+                        const hasPass = parts.length >= 3 && parts[1] !== '' && parts[3] !== '';
                         html += `
-                            <tr class="border-b border-gray-100">
-                                <td class="py-2 px-3 font-mono text-gray-900">${cols[0]}</td>
-                                <td class="py-2 px-3 font-mono text-gray-900">${cols[2]}</td>
-                                <td class="py-2 px-3 text-emerald-600">✓ Present</td>
+                            <tr>
+                                <td class="font-mono text-xs">${parts[0] || '-'}</td>
+                                <td class="font-mono text-xs">${parts[2] || '-'}</td>
+                                <td>
+                                    <span class="password-badge ${hasPass ? 'password-present' : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'}">
+                                        ${hasPass ? '✓ Present' : '✗ Missing'}
+                                    </span>
+                                </td>
                             </tr>
                         `;
                     }
                 });
 
-                if (lines.length > 5) {
-                    html += `<tr><td colspan="3" class="text-center py-2 text-gray-400 text-sm">...and ${lines.length - 5} other mailboxes</td></tr>`;
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                        ${lines.length > 5 ? `
+                        <div class="px-6 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-800 text-center">
+                            <p class="text-xs text-slate-400 italic">Showing first 5 of ${lines.length} mailboxes</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                if (previewContainer) {
+                    previewContainer.innerHTML = html;
                 }
-
-                html += `</tbody></table></div></div>`;
-
-                if (previewContainer) previewContainer.innerHTML = html;
             };
             reader.readAsText(file);
         }
@@ -1610,7 +1624,9 @@ const serverPresets = {
     gmail: { host: 'imap.gmail.com', port: 993, security: 'SSL/TLS' },
     office365: { host: 'outlook.office365.com', port: 993, security: 'SSL/TLS' },
     yahoo: { host: 'imap.mail.yahoo.com', port: 993, security: 'SSL/TLS' },
-    outlook: { host: 'imap-mail.outlook.com', port: 993, security: 'SSL/TLS' }
+    outlook: { host: 'imap-mail.outlook.com', port: 993, security: 'SSL/TLS' },
+    h01: { host: 'h01.azdigimail.com', port: 993, security: 'SSL/TLS' },
+    h02: { host: 'h02.azdigimail.com', port: 993, security: 'SSL/TLS' }
 };
 
 window.applyPreset = (side, provider) => {

@@ -155,8 +155,16 @@
                                 <span class="text-sm">💜</span> Yahoo
                             </button>
                             <button type="button" class="preset-btn" onclick="applyPreset('source', 'outlook')"
-                                title="Outlook.com">
+                                title="Outlook">
                                 <span class="text-sm">📬</span> Outlook
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('source', 'h01')"
+                                title="H01 Azdigi">
+                                <span class="text-sm">🚀</span> H01
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('source', 'h02')"
+                                title="H02 Azdigi">
+                                <span class="text-sm">🚀</span> H02
                             </button>
                         </div>
                         <div class="space-y-4">
@@ -239,8 +247,16 @@
                                 <span class="text-sm">💜</span> Yahoo
                             </button>
                             <button type="button" class="preset-btn" onclick="applyPreset('target', 'outlook')"
-                                title="Outlook.com">
+                                title="Outlook">
                                 <span class="text-sm">📬</span> Outlook
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('target', 'h01')"
+                                title="H01 Azdigi">
+                                <span class="text-sm">🚀</span> H01
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('target', 'h02')"
+                                title="H02 Azdigi">
+                                <span class="text-sm">🚀</span> H02
                             </button>
                         </div>
                         <div class="space-y-4">
@@ -412,22 +428,27 @@
                             </div>
                             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Upload CSV File</h2>
                         </div>
-                        <div class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer dropzone bg-slate-50/50 dark:bg-slate-900/50"
-                            id="drop-zone">
+                        <div class="dropzone-area" id="drop-zone">
                             <div class="flex flex-col items-center" id="dropzone-content">
-                                <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4"
-                                    id="dropzone-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none"
+                                <div class="dropzone-icon-wrapper" id="dropzone-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
                                 </div>
-                                <p class="text-slate-700 dark:text-slate-300 font-medium mb-1" id="dropzone-text"><span
-                                        class="text-blue-600 dark:text-blue-400">Click to
-                                        upload</span> or drag and drop CSV file</p>
-                                <p class="text-slate-400 text-sm font-mono">Format: source_user, source_pass,
-                                    target_user, target_pass</p>
+                                <div class="space-y-1">
+                                    <p class="text-slate-700 dark:text-slate-200 font-semibold text-lg"
+                                        id="dropzone-text">
+                                        <span class="text-blue-600 dark:text-blue-400">Click to upload</span> or drag
+                                        and drop
+                                    </p>
+                                    <p class="text-slate-400 text-sm">Valid CSV file with migration details</p>
+                                    <p
+                                        class="pt-2 text-xs text-slate-400 font-mono bg-slate-100/50 dark:bg-slate-800/50 px-3 py-1 rounded-full inline-block">
+                                        Format: source_user, source_pass, target_user, target_pass
+                                    </p>
+                                </div>
                             </div>
                             <input type="file" accept=".csv" class="hidden" id="csv-file-input">
                         </div>
