@@ -142,41 +142,47 @@ class MailboxCreate(BaseModel):
 # API Routes
 @app.post("/api/jobs", response_model=JobResponse)
 async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, response: Response, db: Session = Depends(get_db)):
-    job_id = str(uuid.uuid4())
+    try:
+        job_id = str(uuid.uuid4())
     
-    # Process Options
-    import json
-    options_json = json.dumps(job_data.options)
-    
-    # Hash password if provided
-    password_hash = None
-    if job_data.password:
-        password_hash = get_password_hash(job_data.password)
-        # Set cookie from backend for reliability
-        response.set_cookie(
-            key="job_password", 
-            value=job_data.password, 
-            max_age=3600*24, 
-            httponly=False,
-            samesite="lax"
+        # Process Options
+        import json
+        options_json = json.dumps(job_data.options)
+        
+        # Hash password if provided
+        password_hash = None
+        if job_data.password:
+            password_hash = get_password_hash(job_data.password)
+            # Set cookie from backend for reliability
+            response.set_cookie(
+                key="job_password", 
+                value=job_data.password, 
+                max_age=3600*24, 
+                httponly=False,
+                samesite="lax"
+            )
+        
+        db_job = Job(
+            id=job_id,
+            name=job_data.name,
+            source_host=job_data.source_host,
+            target_host=job_data.target_host,
+            source_port=job_data.source_port,
+            target_port=job_data.target_port,
+            source_security=job_data.source_security,
+            target_security=job_data.target_security,
+            options=options_json,
+            password_hash=password_hash,
+            status="running" # Auto start for demo
         )
-    
-    db_job = Job(
-        id=job_id,
-        name=job_data.name,
-        source_host=job_data.source_host,
-        target_host=job_data.target_host,
-        source_port=job_data.source_port,
-        target_port=job_data.target_port,
-        source_security=job_data.source_security,
-        target_security=job_data.target_security,
-        options=options_json,
-        password_hash=password_hash,
-        status="running" # Auto start for demo
-    )
-    db.add(db_job)
-    db.commit()
-    return format_job_response(db_job)
+        db.add(db_job)
+        db.commit()
+        return format_job_response(db_job)
+    except Exception as e:
+        with open("error_log.txt", "a") as f:
+            import traceback
+            traceback.print_exc(file=f)
+        raise HTTPException(status_code=500, detail=str(e))
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -315,8 +321,14 @@ def delete_single_job(job_id: str, db: Session = Depends(get_db)):
 
 @app.get("/api/jobs", response_model=List[JobResponse])
 def list_jobs(db: Session = Depends(get_db)):
-    jobs = db.query(Job).order_by(Job.created_at.desc()).all()
-    return [format_job_response(j) for j in jobs]
+    try:
+        jobs = db.query(Job).order_by(Job.created_at.desc()).all()
+        return [format_job_response(j) for j in jobs]
+    except Exception as e:
+        with open("error_log.txt", "a") as f:
+            import traceback
+            traceback.print_exc(file=f)
+        raise HTTPException(status_code=500, detail=str(e))
 
 from fastapi import Header, Query, Cookie
 from typing import Optional
