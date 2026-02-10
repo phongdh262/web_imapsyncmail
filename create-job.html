@@ -11,7 +11,7 @@
     <meta property="og:description" content="Configure and start email migration between IMAP servers.">
     <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=8.0">
+    <link rel="stylesheet" href="css/style.css?v=9.0">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
@@ -52,52 +52,67 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-8 pb-6 border-b border-gray-200 dark:border-slate-700">
-            <a href="index.html" class="flex items-center gap-3 text-decoration-none group">
-                <div
-                    class="w-10 h-10 bg-gradient-to-br from-blue-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
-                            stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M22 6L12 13L2 6" stroke="white" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
+        <!-- Unified Navbar -->
+        <nav
+            class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-slate-700 shadow-sm transition-all duration-300 rounded-2xl mb-8 px-6 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="flex items-center gap-3 group">
+                    <a href="index.html" class="flex items-center gap-3 text-decoration-none">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-br from-blue-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                                    stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M22 6L12 13L2 6" stroke="white" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <h1
+                            class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-violet-700 dark:from-blue-400 dark:to-violet-400">
+                            IMAP Sync Pro</h1>
+                    </a>
                 </div>
-                <span
-                    class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-violet-700 dark:from-blue-400 dark:to-violet-400">IMAP
-                    Sync Pro</span>
-            </a>
-            <!-- Dark Mode Toggle -->
-            <button onclick="toggleTheme()"
-                class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-slate-600 dark:text-slate-300"
-                title="Toggle Theme (T)" aria-label="Toggle theme">
-                <svg class="sun-icon w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <svg class="moon-icon w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
-        </header>
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleTheme()"
+                        class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-slate-600 dark:text-slate-300"
+                        title="Toggle Theme (T)" aria-label="Toggle theme">
+                        <svg class="sun-icon w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <svg class="moon-icon w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+                    <a href="guide.html"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all shadow-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Guide
+                    </a>
+                    <a href="index.html"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shadow-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </nav>
 
         <main>
-            <!-- Back Button -->
-            <a href="index.html"
-                class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-6 transition-colors font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to Dashboard
-            </a>
-
             <!-- Title -->
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Create Migration Job</h1>
@@ -106,29 +121,53 @@
             </div>
 
             <form id="create-job-form" novalidate>
-                <!-- Server Configuration Grid -->
-                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <!-- Server Configuration Grid with Flow Indicator -->
+                <div class="server-config-grid mb-8">
                     <!-- Source Server -->
                     <div id="source-server-card"
                         class="glass-card rounded-2xl p-6 shadow-lg border border-white/20 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div
-                                class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                                </svg>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5 text-orange-600 dark:text-orange-400" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                                    </svg>
+                                </div>
+                                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Source Server</h2>
                             </div>
-                            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Source Server</h2>
+                        </div>
+                        <!-- Server Presets -->
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <button type="button" class="preset-btn" onclick="applyPreset('source', 'gmail')"
+                                title="Gmail">
+                                <span class="text-sm">📧</span> Gmail
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('source', 'office365')"
+                                title="Office 365">
+                                <span class="text-sm">📘</span> Office 365
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('source', 'yahoo')"
+                                title="Yahoo Mail">
+                                <span class="text-sm">💜</span> Yahoo
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('source', 'outlook')"
+                                title="Outlook.com">
+                                <span class="text-sm">📬</span> Outlook
+                            </button>
                         </div>
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">IMAP
                                     Host <span class="text-red-500">*</span></label>
-                                <input type="text" name="source_host" required placeholder="imap.gmail.com"
-                                    class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation shadow-sm">
+                                <div class="relative">
+                                    <input type="text" name="source_host" required placeholder="imap.gmail.com"
+                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation shadow-sm pr-10">
+                                    <span class="validation-icon"></span>
+                                </div>
                                 <p class="mt-1 text-xs text-red-500 hidden error-message">Please enter IMAP host</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
@@ -152,27 +191,67 @@
                         </div>
                     </div>
 
+                    <!-- Flow Indicator (visible on md+) -->
+                    <div class="flow-indicator hidden md:flex">
+                        <div class="flow-indicator-inner">
+                            <div class="flow-arrow-line"></div>
+                            <div class="flow-arrow-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </div>
+                            <div class="flow-arrow-line"></div>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-2">MIGRATE</span>
+                    </div>
+
                     <!-- Target Server -->
                     <div id="target-server-card"
                         class="glass-card rounded-2xl p-6 shadow-lg border border-white/20 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div
-                                class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                                </svg>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                                    </svg>
+                                </div>
+                                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Target Server</h2>
                             </div>
-                            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Target Server</h2>
+                        </div>
+                        <!-- Server Presets -->
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <button type="button" class="preset-btn" onclick="applyPreset('target', 'gmail')"
+                                title="Gmail">
+                                <span class="text-sm">📧</span> Gmail
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('target', 'office365')"
+                                title="Office 365">
+                                <span class="text-sm">📘</span> Office 365
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('target', 'yahoo')"
+                                title="Yahoo Mail">
+                                <span class="text-sm">💜</span> Yahoo
+                            </button>
+                            <button type="button" class="preset-btn" onclick="applyPreset('target', 'outlook')"
+                                title="Outlook.com">
+                                <span class="text-sm">📬</span> Outlook
+                            </button>
                         </div>
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">IMAP
                                     Host <span class="text-red-500">*</span></label>
-                                <input type="text" name="target_host" required placeholder="mail.yourdomain.com"
-                                    class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation shadow-sm">
+                                <div class="relative">
+                                    <input type="text" name="target_host" required placeholder="mail.yourdomain.com"
+                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation shadow-sm pr-10">
+                                    <span class="validation-icon"></span>
+                                </div>
                                 <p class="mt-1 text-xs text-red-500 hidden error-message">Please enter IMAP host</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
@@ -215,63 +294,87 @@
 
                 <!-- Migration Options -->
                 <div
-                    class="glass-card rounded-2xl p-6 shadow-lg border border-white/20 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 mb-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div
-                            class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
+                    class="glass-card rounded-2xl shadow-lg border border-white/20 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 mb-8 overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div
+                                class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Migration Options</h2>
                         </div>
-                        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Migration Options</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                    Job Password <span class="text-red-500">*</span>
+                                    <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 inline"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span
+                                            class="tooltip-content shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">Set
+                                            a password to protect this job. Anyone wanting to view details or download
+                                            logs will need this password.</span>
+                                    </span>
+                                </label>
+                                <div class="relative">
+                                    <input type="password" id="job-password" name="job_password" required
+                                        placeholder="Enter a secure password"
+                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation shadow-sm pr-10">
+                                    <span class="validation-icon"></span>
+                                </div>
+                                <p class="mt-1 text-xs text-red-500 hidden error-message">Job password is required</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                    Concurrent Threads (Bulk Only)
+                                    <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 inline"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span
+                                            class="tooltip-content shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">Number
+                                            of simultaneous email syncs. Higher value = faster but uses more
+                                            resources.</span>
+                                    </span>
+                                </label>
+                                <input type="number" id="opt-concurrency" value="10" min="1" max="50"
+                                    class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                            </div>
+                        </div>
                     </div>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                Job Password <span class="text-red-500">*</span>
-                                <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 inline"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span
-                                        class="tooltip-content shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">Set
-                                        a password to protect this job. Anyone wanting to
-                                        view details or download logs will need this password.</span>
-                                </span>
-                            </label>
-                            <input type="password" id="job-password" name="job_password" required
-                                placeholder="Enter a secure password"
-                                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all input-validation shadow-sm">
-                            <p class="mt-1 text-xs text-red-500 hidden error-message">Job password is required</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                Concurrent Threads (Bulk Only)
-                                <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 inline"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span
-                                        class="tooltip-content shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">Number
-                                        of simultaneous email syncs. Higher value =
-                                        faster but uses more resources.</span>
-                                </span>
-                            </label>
-                            <input type="number" id="opt-concurrency" value="10" min="1" max="50"
-                                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Additional
-                                Options</label>
-                            <div class="flex flex-wrap gap-4">
+                    <!-- Collapsible Advanced Options -->
+                    <div class="border-t border-slate-200/50 dark:border-slate-700/50">
+                        <button type="button" id="advanced-toggle"
+                            class="w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors"
+                            onclick="toggleAdvancedOptions()">
+                            <div class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                </svg>
+                                Advanced Settings
+                            </div>
+                            <svg id="advanced-chevron" xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div id="advanced-options" class="hidden px-6 pb-4">
+                            <div class="flex flex-wrap gap-x-6 gap-y-3 pt-2">
                                 <label class="inline-flex items-center gap-2 cursor-pointer group">
                                     <input type="checkbox" id="opt-sync-dates" checked
                                         class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
@@ -285,7 +388,8 @@
                                 <label class="inline-flex items-center gap-2 cursor-pointer group">
                                     <input type="checkbox" id="opt-dry-run"
                                         class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm text-slate-700 dark:text-slate-300">Dry Run</span>
+                                    <span class="text-sm text-slate-700 dark:text-slate-300">Dry Run (Simulate
+                                        only)</span>
                                 </label>
                             </div>
                         </div>
@@ -401,23 +505,54 @@
         </main>
 
         <!-- Footer -->
-        <footer class="mt-auto pt-8 border-t border-slate-200 dark:border-slate-800">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p class="text-slate-500 text-sm">© 2026 IMAP Sync Pro. Developed by PhongDH.</p>
-                <div class="flex items-center gap-4">
-                    <a href="guide.html"
-                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">Guide</a>
-                    <span class="text-slate-300 dark:text-slate-700">|</span>
-                    <a href="index.html"
-                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">Dashboard</a>
-                    <span class="text-slate-300 dark:text-slate-700">|</span>
-                    <span class="text-slate-400 text-sm">v5.0</span>
+        <footer class="mt-auto pt-8">
+            <div class="glass-card rounded-2xl p-6 border border-white/20 dark:border-slate-700">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-lg flex items-center justify-center">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                                    stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M22 6L12 13L2 6" stroke="white" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">IMAP Sync Pro</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">© 2026 Developed by PhongDH</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <a href="guide.html"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            Guide
+                        </a>
+                        <a href="index.html"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Dashboard
+                        </a>
+                        <span
+                            class="px-2 py-1 bg-gradient-to-r from-blue-600/10 to-violet-600/10 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-md">v5.1</span>
+                    </div>
                 </div>
             </div>
         </footer>
     </div>
 
-    <script src="js/app.js?v=8.0"></script>
+    <script src="js/app.js?v=9.0"></script>
     <script>
         // Theme Logic for Create Job Page
         function initTheme() {

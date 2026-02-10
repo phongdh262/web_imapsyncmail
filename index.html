@@ -12,7 +12,7 @@
         content="Migrate emails securely and efficiently between IMAP servers with an intuitive interface.">
     <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=8.0">
+    <link rel="stylesheet" href="css/style.css?v=9.0">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
@@ -125,7 +125,7 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div
                 class="glass-card rounded-2xl p-5 shadow-lg border border-white/20 dark:border-slate-700 card-lift stats-card">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center justify-between mb-3">
                     <div
                         class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400"
@@ -134,14 +134,20 @@
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <span class="text-sm text-slate-500 dark:text-slate-400">Total Jobs</span>
+                    <div class="stat-trend stat-trend-neutral" id="trend-total">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14" />
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-3xl font-bold text-gradient-accent stat-value" id="stat-total-jobs">0</span>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">All migration jobs</p>
             </div>
 
             <div
                 class="glass-card rounded-2xl p-5 shadow-lg border border-white/20 dark:border-slate-700 card-lift stats-card">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center justify-between mb-3">
                     <div
                         class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400"
@@ -150,15 +156,22 @@
                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <span class="text-sm text-slate-500 dark:text-slate-400">Running</span>
+                    <div class="stat-trend stat-trend-up" id="trend-running">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 stat-value"
                     id="stat-active-jobs">0</span>
-
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Currently active</p>
             </div>
+
             <div
                 class="glass-card rounded-2xl p-5 shadow-lg border border-white/20 dark:border-slate-700 card-lift stats-card">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center justify-between mb-3">
                     <div
                         class="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-600 dark:text-violet-400"
@@ -167,15 +180,22 @@
                                 d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
                         </svg>
                     </div>
-                    <span class="text-sm text-slate-500 dark:text-slate-400">Synced</span>
+                    <div class="stat-trend stat-trend-up" id="trend-synced">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-3xl font-bold text-violet-600 dark:text-violet-400 stat-value"
                     id="stat-completed-mailboxes">0</span>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Mailboxes synced</p>
             </div>
 
             <div
                 class="glass-card rounded-2xl p-5 shadow-lg border border-white/20 dark:border-slate-700 card-lift stats-card">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center justify-between mb-3">
                     <div
                         class="w-10 h-10 bg-cyan-100 dark:bg-cyan-900/30 rounded-xl flex items-center justify-center stats-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-600 dark:text-cyan-400"
@@ -184,10 +204,17 @@
                                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                     </div>
-                    <span class="text-sm text-slate-500 dark:text-slate-400">Data</span>
+                    <div class="stat-trend stat-trend-neutral" id="trend-data">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                    </div>
                 </div>
                 <span class="text-3xl font-bold text-cyan-600 dark:text-cyan-400 stat-value"
                     id="stat-data-transferred">0 GB</span>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Data transferred</p>
             </div>
 
         </div>
@@ -219,6 +246,35 @@
                         </svg>
                         Refresh
                     </button>
+                </div>
+            </div>
+            <!-- Search/Filter Bar -->
+            <div class="px-6 py-3 border-b border-gray-100 dark:border-slate-700/50 bg-gray-50/30 dark:bg-slate-900/20">
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <div class="relative flex-1 w-full">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" id="dashboard-search" placeholder="Search jobs by name, server..."
+                            class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="filter-chip active" data-filter="all" onclick="filterDashboardJobs('all')">
+                            All
+                        </button>
+                        <button class="filter-chip" data-filter="running" onclick="filterDashboardJobs('running')">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full inline-block"></span> Running
+                        </button>
+                        <button class="filter-chip" data-filter="completed" onclick="filterDashboardJobs('completed')">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full inline-block"></span> Completed
+                        </button>
+                        <button class="filter-chip" data-filter="failed" onclick="filterDashboardJobs('failed')">
+                            <span class="w-2 h-2 bg-red-500 rounded-full inline-block"></span> Failed
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -300,24 +356,51 @@
     </div>
 
     <!-- Footer -->
-    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-auto border-t border-slate-200 dark:border-slate-800">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p class="text-slate-500 text-sm">© 2026 IMAP Sync Pro. Developed by PhongDH.</p>
-            <div class="flex items-center gap-4">
-                <a href="guide.html"
-                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">Guide</a>
-                <span class="text-slate-300 dark:text-slate-700">|</span>
-                <a href="create-job.html"
-                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors">Create
-                    New
-                    Job</a>
-                <span class="text-slate-300 dark:text-slate-700">|</span>
-                <span class="text-slate-400 text-sm">v5.0</span>
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-auto">
+        <div class="glass-card rounded-2xl p-6 border border-white/20 dark:border-slate-700">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-lg flex items-center justify-center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M22 6L12 13L2 6" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">IMAP Sync Pro</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500">© 2026 Developed by PhongDH</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="guide.html"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Guide
+                    </a>
+                    <a href="create-job.html"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        New Job
+                    </a>
+                    <span
+                        class="px-2 py-1 bg-gradient-to-r from-blue-600/10 to-violet-600/10 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-md">v5.1</span>
+                </div>
             </div>
         </div>
     </footer>
 
-    <script src="js/app.js?v=8.0"></script>
+    <script src="js/app.js?v=9.0"></script>
     <script>
         // Init theme
         const savedTheme = localStorage.getItem('theme');

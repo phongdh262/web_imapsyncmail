@@ -91,6 +91,9 @@ const injectFAB = () => {
 
 
 // 1. Dashboard Logic
+let allJobs = []; // Store all jobs for filtering
+let currentFilter = 'all';
+
 const initDashboard = async () => {
     const jobListEl = document.getElementById('jobs-table-body');
     const emptyState = document.getElementById('empty-state');
@@ -148,7 +151,7 @@ const initDashboard = async () => {
             emptyState?.classList.add('hidden');
 
             jobListEl.innerHTML = jobs.map((job, index) => `
-                <tr class="hover:bg-blue-50/50 transition-colors stagger-item ${job.status === 'running' ? 'pulse-running' : ''}">
+                <tr class="hover:bg-blue-50/50 transition-colors stagger-item ${job.status === 'running' ? 'pulse-running' : ''}" data-status="${job.status}">
 
                     <td class="px-6 py-4">
                         <div class="font-medium text-gray-900">${job.name}</div>
@@ -348,17 +351,24 @@ const initCreateJob = () => {
 
     // --- Form Validation ---
     const validateField = (input) => {
-        const errorEl = input.parentElement.querySelector('.error-message');
+        // Navigate to the correct parent for error message
+        const wrapper = input.closest('.relative') || input.parentElement;
+        const fieldContainer = wrapper.parentElement;
+        const errorEl = fieldContainer.querySelector('.error-message');
+        const iconEl = wrapper.querySelector('.validation-icon');
 
         if (input.required && !input.value.trim()) {
-            input.classList.add('border-red-500', 'focus:ring-red-500');
-            input.classList.remove('border-gray-200', 'focus:ring-blue-500');
+            input.classList.add('border-red-500', 'focus:ring-red-500', 'input-invalid');
+            input.classList.remove('border-gray-200', 'border-slate-200', 'focus:ring-blue-500', 'input-valid');
             errorEl?.classList.remove('hidden');
+            if (iconEl) { iconEl.style.display = 'block'; iconEl.textContent = '✗'; iconEl.style.color = '#dc2626'; }
             return false;
         } else {
-            input.classList.remove('border-red-500', 'focus:ring-red-500');
-            input.classList.add('border-gray-200', 'focus:ring-blue-500');
+            input.classList.remove('border-red-500', 'focus:ring-red-500', 'input-invalid');
+            input.classList.add('border-slate-200', 'focus:ring-blue-500', 'input-valid');
             errorEl?.classList.add('hidden');
+            if (iconEl && input.value.trim()) { iconEl.style.display = 'block'; iconEl.textContent = '✓'; iconEl.style.color = '#16a34a'; }
+            else if (iconEl) { iconEl.style.display = 'none'; }
             return true;
         }
     };
@@ -680,6 +690,36 @@ window.showConfirm = (message, callback) => {
         modal.classList.remove('flex');
         if (result) callback();
     };
+};
+
+// --- Dashboard Search & Filter ---
+const applyDashboardFilters = () => {
+    const searchInput = document.getElementById('dashboard-search');
+    const query = (searchInput?.value || '').toLowerCase();
+    const rows = document.querySelectorAll('#jobs-table-body tr');
+
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const status = row.dataset.status || '';
+
+        const matchesSearch = !query || text.includes(query);
+        const matchesFilter = currentFilter === 'all' ||
+            status === currentFilter ||
+            (currentFilter === 'completed' && (status === 'completed' || status === 'success'));
+
+        row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+    });
+};
+
+window.filterDashboardJobs = (filter) => {
+    currentFilter = filter;
+
+    // Update active chip
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.filter === filter);
+    });
+
+    applyDashboardFilters();
 };
 
 // Password Modal for protected jobs
@@ -1553,6 +1593,63 @@ document.addEventListener('DOMContentLoaded', () => {
         initJobDetail();
     } else if (!path.includes('guide.html')) {
         initDashboard();
-        injectFAB(); // Add floating action button on dashboard
+        injectFAB();
+
+        // Setup dashboard search/filter after init
+        const searchInput = document.getElementById('dashboard-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => applyDashboardFilters());
+        }
     }
 });
+
+// ============================================
+// Server Presets
+// ============================================
+const serverPresets = {
+    gmail: { host: 'imap.gmail.com', port: 993, security: 'SSL/TLS' },
+    office365: { host: 'outlook.office365.com', port: 993, security: 'SSL/TLS' },
+    yahoo: { host: 'imap.mail.yahoo.com', port: 993, security: 'SSL/TLS' },
+    outlook: { host: 'imap-mail.outlook.com', port: 993, security: 'SSL/TLS' }
+};
+
+window.applyPreset = (side, provider) => {
+    const preset = serverPresets[provider];
+    if (!preset) return;
+
+    const card = document.getElementById(`${side}-server-card`);
+    if (!card) return;
+
+    const hostInput = card.querySelector('input[name*="host"]');
+    const portInput = card.querySelector('input[name*="port"]');
+    const securitySelect = card.querySelector('select[name*="security"]');
+
+    if (hostInput) {
+        hostInput.value = preset.host;
+        // Trigger validation icon
+        hostInput.dispatchEvent(new Event('input', { bubbles: true }));
+        hostInput.dispatchEvent(new Event('blur', { bubbles: true }));
+    }
+    if (portInput) portInput.value = preset.port;
+    if (securitySelect) securitySelect.value = preset.security;
+
+    // Highlight the selected preset button
+    card.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('selected'));
+    const clickedBtn = card.querySelector(`.preset-btn[onclick*="'${provider}'"]`);
+    if (clickedBtn) clickedBtn.classList.add('selected');
+
+    window.showToast?.(`${provider.charAt(0).toUpperCase() + provider.slice(1)} preset applied`, 'success');
+};
+
+// ============================================
+// Advanced Options Toggle
+// ============================================
+window.toggleAdvancedOptions = () => {
+    const options = document.getElementById('advanced-options');
+    const chevron = document.getElementById('advanced-chevron');
+    if (!options) return;
+
+    const isHidden = options.classList.contains('hidden');
+    options.classList.toggle('hidden');
+    chevron?.classList.toggle('rotate-180', isHidden);
+};
