@@ -1,0 +1,177 @@
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 155, in create_job
+    password_hash = get_password_hash(job_data.password)
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/auth.py", line 44, in get_password_hash
+    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 155, in create_job
+    password_hash = get_password_hash(job_data.password)
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/auth.py", line 44, in get_password_hash
+    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 155, in create_job
+    password_hash = get_password_hash(job_data.password)
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/auth.py", line 44, in get_password_hash
+    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 155, in create_job
+    password_hash = get_password_hash(job_data.password)
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/auth.py", line 44, in get_password_hash
+    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 155, in create_job
+    password_hash = get_password_hash(job_data.password)
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/auth.py", line 44, in get_password_hash
+    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 155, in create_job
+    password_hash = get_password_hash(job_data.password)
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/auth.py", line 44, in get_password_hash
+    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)
+Traceback (most recent call last):
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/backend/main.py", line 157, in create_job
+    response.set_cookie(
+    ~~~~~~~~~~~~~~~~~~~^
+        key="job_password",
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        samesite="lax"
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/phongdinh/Desktop/Phong-DH/Website/web_imapsyncmail/venv/lib/python3.13/site-packages/starlette/responses.py", line 133, in set_cookie
+    self.raw_headers.append((b"set-cookie", cookie_val.encode("latin-1")))
+                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 14-22: ordinal not in range(256)

@@ -8,6 +8,7 @@ import csv
 import io
 import os
 import sys
+from urllib.parse import quote, unquote
 
 # Add current directory to sys.path to ensure modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -156,7 +157,7 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, res
             # Set cookie from backend for reliability
             response.set_cookie(
                 key="job_password", 
-                value=job_data.password, 
+                value=quote(job_data.password, safe=''), 
                 max_age=3600*24, 
                 httponly=False,
                 samesite="lax"
@@ -343,8 +344,9 @@ def get_job(job_id: str, request: Request, db: Session = Depends(get_db), passwo
     if job.password_hash:
         x_job_password = request.headers.get("X-Job-Password")
         
-        # Priority: 1. Query Param, 2. Header, 3. Cookie
-        effective_password = password or x_job_password or job_password
+        # Priority: 1. Query Param, 2. Header, 3. Cookie (URL-decoded)
+        cookie_password = unquote(job_password) if job_password else None
+        effective_password = password or x_job_password or cookie_password
         
         print(f"--- [GET_JOB] DEBUG VERIFY {job_id} ---", flush=True)
         print(f"Query Param: {password}", flush=True)
@@ -439,7 +441,8 @@ def get_mailbox_logs(mailbox_id: int, request: Request, db: Session = Depends(ge
     job = db.query(Job).filter(Job.id == mb.job_id).first()
     if job and job.password_hash:
         x_job_password = request.headers.get("X-Job-Password")
-        effective_password = password or x_job_password or job_password
+        cookie_password = unquote(job_password) if job_password else None
+        effective_password = password or x_job_password or cookie_password
         
         if not effective_password or not verify_password(effective_password, job.password_hash):
             raise HTTPException(status_code=401, detail="Password required")
@@ -471,7 +474,7 @@ def verify_job_password(job_id: str, data: PasswordVerify, response: Response, d
         # Set cookie from backend for reliability
         response.set_cookie(
             key="job_password", 
-            value=data.password, 
+            value=quote(data.password, safe=''), 
             max_age=3600*24, # 1 day
             httponly=False,  # Allow JS access for redundancy if needed
             samesite="lax"

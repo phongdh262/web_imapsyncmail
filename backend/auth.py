@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 import bcrypt
+import hashlib
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
@@ -15,7 +16,9 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 1 day
 
 # --- Password Hashing with raw bcrypt ---
-# pwd_context removed because passlib is incompatible with new bcrypt
+# Uses SHA-256 pre-hashing to safely handle any password length/encoding.
+# This is the same approach used by Dropbox and recommended by security experts.
+# bcrypt has a 72-byte limit, so we normalize passwords to a 64-char hex digest first.
 
 # --- OAuth2 Scheme ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
@@ -30,18 +33,25 @@ class TokenData(BaseModel):
 
 # --- Helper Functions ---
 
-def verify_password(plain_password, hashed_password):
-    # bcrypt.checkpw requires bytes
-    if isinstance(plain_password, str):
-        plain_password = plain_password.encode('utf-8')
-    if isinstance(hashed_password, str):
-        hashed_password = hashed_password.encode('utf-8')
-    return bcrypt.checkpw(plain_password, hashed_password)
-
-def get_password_hash(password):
+def _prehash_password(password) -> bytes:
+    """SHA-256 pre-hash to normalize password to 64-byte hex string.
+    This ensures bcrypt never receives >72 bytes, regardless of
+    password length or unicode character encoding."""
     if isinstance(password, str):
         password = password.encode('utf-8')
-    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+    return hashlib.sha256(password).hexdigest().encode('utf-8')
+
+def verify_password(plain_password, hashed_password):
+    """Verify a plain password against a bcrypt hash."""
+    prehashed = _prehash_password(plain_password)
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(prehashed, hashed_password)
+
+def get_password_hash(password):
+    """Hash a password using SHA-256 pre-hash + bcrypt."""
+    prehashed = _prehash_password(password)
+    return bcrypt.hashpw(prehashed, bcrypt.gensalt()).decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
