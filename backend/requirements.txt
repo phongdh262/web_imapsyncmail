@@ -5,7 +5,7 @@ pydantic
 python-multipart
 cryptography
 python-jose[cryptography]
-passlib[bcrypt]
+bcrypt
 pymysql
 python-dotenv
 a2wsgi
