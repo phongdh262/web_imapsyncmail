@@ -392,15 +392,41 @@ const initCreateJob = () => {
         const btnIcon = submitBtn.querySelector('.btn-icon');
 
         // Validate required fields
+        // Validate required fields with specific messages
         const sourceHost = form.querySelector('[name="source_host"]');
         const targetHost = form.querySelector('[name="target_host"]');
+        const passwordInput = document.getElementById('job-password');
+        let missingFields = [];
 
-        let isValid = true;
-        isValid = validateField(sourceHost) && isValid;
-        isValid = validateField(targetHost) && isValid;
+        // Common Fields
+        if (!sourceHost.value.trim()) { validateField(sourceHost); missingFields.push('Source Host'); }
+        if (!targetHost.value.trim()) { validateField(targetHost); missingFields.push('Target Host'); }
+        if (!passwordInput.value.trim()) { validateField(passwordInput); missingFields.push('Job Password'); }
 
-        if (!isValid) {
-            window.showToast('Please fill in all required fields', 'error');
+        // Specific Tab Fields
+        if (activeTab === 'bulk') {
+            const csvInput = document.getElementById('csv-file-input');
+            if (csvInput.files.length === 0) {
+                missingFields.push('CSV File');
+                // Highlight dropzone
+                const dropzone = document.getElementById('drop-zone');
+                dropzone.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-900/10');
+                setTimeout(() => dropzone.classList.remove('border-red-500', 'bg-red-50', 'dark:bg-red-900/10'), 2000);
+            }
+        } else if (activeTab === 'single') {
+            const sUser = document.getElementById('single-source-user');
+            const sPass = document.getElementById('single-source-pass');
+            const tUser = document.getElementById('single-target-user');
+            const tPass = document.getElementById('single-target-pass');
+
+            if (!sUser.value.trim()) { validateField(sUser); missingFields.push('Source Email'); }
+            if (!sPass.value.trim()) { validateField(sPass); missingFields.push('Source Password'); }
+            if (!tUser.value.trim()) { validateField(tUser); missingFields.push('Target Email'); }
+            if (!tPass.value.trim()) { validateField(tPass); missingFields.push('Target Password'); }
+        }
+
+        if (missingFields.length > 0) {
+            window.showToast(`Please fill in: ${missingFields.join(', ')}`, 'error');
             return;
         }
 
@@ -424,7 +450,7 @@ const initCreateJob = () => {
         const jobName = `Migration ${now.toLocaleDateString('en-US')} ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
 
         // Get password - only send if not empty
-        const passwordInput = document.getElementById('job-password');
+        // passwordInput already defined above
         const password = passwordInput?.value?.trim() || null;
 
         const jobPayload = {
@@ -1115,7 +1141,8 @@ window.closeModal = () => {
 };
 
 // --- Download All Logs ---
-window.downloadAllLogs = async () => {
+// --- Download All Logs (ZIP) ---
+window.downloadAllLogs = () => {
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get('id');
 
@@ -1124,94 +1151,18 @@ window.downloadAllLogs = async () => {
         return;
     }
 
+    // Secure download handling
+    let downloadUrl = `${API_BASE}/jobs/${jobId}/logs/zip`;
+    const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
 
-    const downloadBtn = document.getElementById('download-logs-btn');
-    const originalText = downloadBtn?.innerHTML;
-
-    // Show loading state
-    if (downloadBtn) {
-        downloadBtn.disabled = true;
-        downloadBtn.innerHTML = `
-            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Loading...
-        `;
+    // Create a temporary link to trigger download
+    // If password exists, add it to query param (backend also checks cookie)
+    if (savedPassword) {
+        downloadUrl += `?password=${encodeURIComponent(savedPassword)}`;
     }
 
-
-    try {
-        // Get job details with mailboxes
-        const jobRes = await request(`${API_BASE}/jobs/${jobId}`);
-        if (!jobRes.ok) throw new Error('Failed to fetch job details');
-        const job = await jobRes.json();
-
-
-        // Fetch all logs
-        let allLogs = `========================================\n`;
-        allLogs += `IMAP SYNC PRO - LOGS EXPORT\n`;
-        allLogs += `Job: ${job.name}\n`;
-        allLogs += `Source: ${job.source} → Target: ${job.target}\n`;
-        allLogs += `Exported at: ${new Date().toLocaleString('en-US')}\n`;
-
-        allLogs += `========================================\n\n`;
-
-        if (job.mailboxes && job.mailboxes.length > 0) {
-            for (const mb of job.mailboxes) {
-                allLogs += `\n========================================\n`;
-                allLogs += `MAILBOX: ${mb.user} → ${mb.target_user}\n`;
-                allLogs += `Status: ${mb.status}\n`;
-                allLogs += `Message: ${mb.msg || 'N/A'}\n`;
-                allLogs += `========================================\n\n`;
-
-                try {
-                    // Include password if exists
-                    let logUrl = `${API_BASE}/mailboxes/${mb.id}/logs`;
-                    const savedPassword = sessionStorage.getItem(`job_password_${job.id}`);
-                    if (savedPassword) {
-                        logUrl += `?password=${encodeURIComponent(savedPassword)}`;
-                    }
-
-                    const logRes = await request(logUrl);
-                    if (logRes.ok) {
-                        const logData = await logRes.json();
-                        allLogs += logData.logs || 'No logs available';
-                    } else {
-                        allLogs += 'Failed to fetch logs for this mailbox';
-                    }
-                } catch (e) {
-                    allLogs += `Error fetching logs: ${e.message}`;
-                }
-                allLogs += '\n\n';
-            }
-        } else {
-            allLogs += 'No mailboxes found in this job.\n';
-        }
-
-        // Create and download file
-        const blob = new Blob([allLogs], { type: 'text/plain;charset=utf-8' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `imap_sync_logs_${job.name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-
-        window.showToast('Logs downloaded successfully!', 'success');
-
-    } catch (e) {
-        window.showToast('Error: ' + e.message, 'error');
-    } finally {
-
-        // Restore button
-        if (downloadBtn) {
-            downloadBtn.disabled = false;
-            downloadBtn.innerHTML = originalText;
-        }
-    }
+    window.location.href = downloadUrl;
+    window.showToast('Downloading logs archive...', 'success');
 };
 
 // ============================================

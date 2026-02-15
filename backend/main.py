@@ -455,6 +455,63 @@ def get_mailbox_logs(mailbox_id: int, request: Request, db: Session = Depends(ge
     
     return {"logs": f"Waiting for logs / Starting process...\nStatus: {mb.status}\nMessage: {mb.message}"}
 
+@app.get("/api/jobs/{job_id}/logs/zip")
+def download_logs_zip(job_id: str, request: Request, db: Session = Depends(get_db), password: Optional[str] = Query(None), job_password: Optional[str] = Cookie(None)):
+    """Download all logs for a job as a ZIP file"""
+    import zipfile
+    from io import BytesIO
+
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    # Password verification
+    if job.password_hash:
+        x_job_password = request.headers.get("X-Job-Password")
+        cookie_password = unquote(job_password) if job_password else None
+        effective_password = password or x_job_password or cookie_password
+        
+        if not effective_password or not verify_password(effective_password, job.password_hash):
+            raise HTTPException(status_code=401, detail="Password required")
+
+    # Create ZIP in memory
+    memory_file = BytesIO()
+    with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+        # Add summary file
+        summary = f"Job: {job.name}\nSource: {job.source_host}\nTarget: {job.target_host}\nDate: {job.created_at}\n"
+        zf.writestr("summary.txt", summary)
+
+        # Add each mailbox log
+        mailboxes = db.query(Mailbox).filter(Mailbox.job_id == job_id).all()
+        for mb in mailboxes:
+            log_path = f"logs/{mb.id}.log"
+            if os.path.exists(log_path):
+                # Clean filename: user_source_to_user_target.log
+                clean_source = mb.source_user.replace("@", "_at_").replace(".", "_")
+                clean_target = mb.target_user.replace("@", "_at_").replace(".", "_")
+                filename = f"{clean_source}_to_{clean_target}.log"
+                
+                with open(log_path, "r") as f:
+                    zf.writestr(filename, f.read())
+            else:
+                 # Add even if log missing, noting status
+                 clean_source = mb.source_user.replace("@", "_at_").replace(".", "_")
+                 filename = f"{clean_source}_no_log.txt"
+                 zf.writestr(filename, f"No log found.\nStatus: {mb.status}\nMessage: {mb.message}")
+
+    memory_file.seek(0)
+    
+    # Generate filename
+    clean_job_name = job.name.replace(" ", "_").replace("/", "").replace("\\", "")
+    zip_filename = f"logs_{clean_job_name}.zip"
+
+    from fastapi.responses import StreamingResponse
+    return StreamingResponse(
+        memory_file, 
+        media_type="application/zip", 
+        headers={"Content-Disposition": f"attachment; filename={zip_filename}"}
+    )
+
 class PasswordVerify(BaseModel):
     password: str
 
