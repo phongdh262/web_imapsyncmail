@@ -8,7 +8,10 @@ import csv
 import io
 import os
 import sys
+import logging
 from urllib.parse import quote, unquote
+
+logger = logging.getLogger(__name__)
 
 # Add current directory to sys.path to ensure modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -348,11 +351,6 @@ def get_job(job_id: str, request: Request, db: Session = Depends(get_db), passwo
         cookie_password = unquote(job_password) if job_password else None
         effective_password = password or x_job_password or cookie_password
         
-        print(f"--- [GET_JOB] DEBUG VERIFY {job_id} ---", flush=True)
-        print(f"Query Param: {password}", flush=True)
-        print(f"Header: {x_job_password}", flush=True)
-        print(f"Cookie: {job_password}", flush=True)
-        print(f"Effective: {effective_password}", flush=True)
 
         if not effective_password:
             raise HTTPException(
@@ -362,10 +360,9 @@ def get_job(job_id: str, request: Request, db: Session = Depends(get_db), passwo
             )
         
         if not verify_password(effective_password, job.password_hash):
-            print(f"ERROR: Password mismatch for job {job_id}", flush=True)
+            logger.warning(f"Password mismatch for job {job_id}")
             raise HTTPException(status_code=401, detail="Incorrect password")
-        
-        print(f"SUCCESS: Verification passed for job {job_id}", flush=True)
+    
     
     # Self-heal / Real-time Stats Calculation
     # Trust the mailboxes table more than the job counters
@@ -678,7 +675,6 @@ def format_job_response(job: Job):
         created_at=job.created_at.isoformat()
     )
 
-# Mount Static Files (Frontend)
 # Mount Static Files (Frontend)
 # Use absolute path relative to this file to ensure it works on cPanel
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

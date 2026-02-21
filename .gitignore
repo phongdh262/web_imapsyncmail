@@ -2,9 +2,14 @@ __pycache__/
 *.pyc
 *.db
 .DS_Store
+venv/
 backend/imapsync.db
 backend/logs/
 logs/
 LOG_imapsync/
 secret.key
+backend/secret.key
 .env
+backend/.env
+error_log.txt
+startup_error.log
