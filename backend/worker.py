@@ -95,8 +95,6 @@ def run_imapsync(mailbox_id: int):
             '--errorsmax', '200',           # Increase error tolerance (default 50)
             '--reconnectretry1', '5',       # Auto-reconnect source up to 5 times
             '--reconnectretry2', '5',       # Auto-reconnect target up to 5 times
-            '--relogin1', '5',              # Re-login source up to 5 times
-            '--relogin2', '5',              # Re-login target up to 5 times
             '--timeout1', '120',            # Source timeout 120s
             '--timeout2', '120',            # Target timeout 120s
             '--maxbytespersecond', '100000', # Throttle ~100KB/s to avoid server overload
