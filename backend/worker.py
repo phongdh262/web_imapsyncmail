@@ -93,14 +93,16 @@ def run_imapsync(mailbox_id: int):
             '--nofoldersizes',
             # --- Resilience: prevent ERR_APPEND / ERR_FETCH ---
             '--errorsmax', '200',           # Increase error tolerance (default 50)
-            '--reconnectretry1', '5',       # Auto-reconnect source up to 5 times
-            '--reconnectretry2', '5',       # Auto-reconnect target up to 5 times
+            '--reconnectretry1', '10',      # Auto-reconnect source up to 10 times
+            '--reconnectretry2', '10',      # Auto-reconnect target up to 10 times
             '--timeout1', '120',            # Source timeout 120s
             '--timeout2', '120',            # Target timeout 120s
             '--maxbytespersecond', '100000', # Throttle ~100KB/s to avoid server overload
+            '--maxmessagespersecond', '3',  # Limit 3 msgs/sec to avoid rate limiting
             '--split1', '100',              # Process 100 msgs per batch (source)
             '--split2', '100',              # Process 100 msgs per batch (target)
             '--skipcrossduplicates',        # Skip cross-folder duplicates
+            '--useheader', 'Message-Id',    # Only parse Message-Id header (faster for large folders)
         ]
         
         # Security Flags
