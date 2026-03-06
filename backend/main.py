@@ -366,7 +366,7 @@ def get_job(job_id: str, request: Request, db: Session = Depends(get_db), passwo
     
     # Self-heal / Real-time Stats Calculation
     # Trust the mailboxes table more than the job counters
-    completed_count = db.query(Mailbox).filter(Mailbox.job_id == job_id, Mailbox.status == 'success').count()
+    completed_count = db.query(Mailbox).filter(Mailbox.job_id == job_id, Mailbox.status.in_(['success', 'warning'])).count()
     failed_count = db.query(Mailbox).filter(Mailbox.job_id == job_id, Mailbox.status == 'failed').count()
     
     # Update Job record if out of sync

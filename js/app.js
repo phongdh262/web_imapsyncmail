@@ -898,7 +898,8 @@ const initJobDetail = async () => {
                     'completed': 'bg-emerald-100 text-emerald-700',
                     'success': 'bg-emerald-100 text-emerald-700',
                     'failed': 'bg-red-100 text-red-700',
-                    'pending': 'bg-amber-100 text-amber-700'
+                    'pending': 'bg-amber-100 text-amber-700',
+                    'warning': 'bg-orange-100 text-orange-700'
                 };
                 return statusMap[status] || 'bg-gray-100 text-gray-700';
             };
@@ -972,7 +973,7 @@ function renderMailboxes(mailboxes, getStatusBadge) {
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadge(mb.status === 'success' ? 'completed' : mb.status)}">
                         ${mb.status === 'running' ? '<span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>' : ''}
-                        ${mb.status}
+                        ${mb.status === 'warning' ? '⚠ Partial' : mb.status}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
@@ -992,7 +993,7 @@ function renderMailboxes(mailboxes, getStatusBadge) {
                     <div class="flex justify-end items-center gap-2">
                         <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">Log</button>
                         ${mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors">Stop</button>` : ''}
-                        ${mb.status === 'failed' ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Retry</button>` : ''}
+                        ${mb.status === 'failed' || mb.status === 'warning' ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Retry</button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -1421,7 +1422,7 @@ const initKeyboardShortcuts = () => {
 const calculateEstimatedTime = (mailboxes) => {
     if (!mailboxes || mailboxes.length === 0) return null;
 
-    const completedMailboxes = mailboxes.filter(mb => mb.status === 'success' || mb.status === 'failed');
+    const completedMailboxes = mailboxes.filter(mb => mb.status === 'success' || mb.status === 'failed' || mb.status === 'warning');
     const runningMailboxes = mailboxes.filter(mb => mb.status === 'running');
     const pendingMailboxes = mailboxes.filter(mb => mb.status === 'pending');
 

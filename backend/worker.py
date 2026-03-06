@@ -90,7 +90,19 @@ def run_imapsync(mailbox_id: int):
             '--user2', mailbox.target_user,
             '--passfile2', pass2_path,
             '--automap',
-            '--nofoldersizes'
+            '--nofoldersizes',
+            # --- Resilience: prevent ERR_APPEND / ERR_FETCH ---
+            '--errorsmax', '200',           # Increase error tolerance (default 50)
+            '--reconnectretry1', '5',       # Auto-reconnect source up to 5 times
+            '--reconnectretry2', '5',       # Auto-reconnect target up to 5 times
+            '--relogin1', '5',              # Re-login source up to 5 times
+            '--relogin2', '5',              # Re-login target up to 5 times
+            '--timeout1', '120',            # Source timeout 120s
+            '--timeout2', '120',            # Target timeout 120s
+            '--maxbytespersecond', '100000', # Throttle ~100KB/s to avoid server overload
+            '--split1', '100',              # Process 100 msgs per batch (source)
+            '--split2', '100',              # Process 100 msgs per batch (target)
+            '--skipcrossduplicates',        # Skip cross-folder duplicates
         ]
         
         # Security Flags
@@ -251,6 +263,19 @@ def run_imapsync(mailbox_id: int):
             elif process.returncode == -15 or process.returncode == -9: # Terminated
                 mailbox.status = 'failed'
                 mailbox.message = "Stopped by user"
+            elif process.returncode in (111, 112, 113, 114, 115, 116):
+                # Partial success: imapsync synced most messages but some had errors
+                # 111=ERR_OVER_QUOTA, 112=ERR_TRANSFER, 113=ERR_CREATE,
+                # 114=ERR_APPEND, 115=ERR_FETCH, 116=ERR_DELETE
+                mailbox.status = 'warning'
+                mailbox.progress = 100
+                exit_names = {
+                    111: 'OVER_QUOTA', 112: 'TRANSFER', 113: 'CREATE',
+                    114: 'APPEND', 115: 'FETCH', 116: 'DELETE'
+                }
+                err_name = exit_names.get(process.returncode, str(process.returncode))
+                mailbox.message = f"Partial sync (ERR_{err_name}). Some messages failed. Check logs."
+                job.completed += 1  # Count as completed since most messages synced
             else:
                 mailbox.status = 'failed'
                 mailbox.message = f"Exited with code {process.returncode}. Check logs."
@@ -272,7 +297,7 @@ def run_imapsync(mailbox_id: int):
             # Recalculate Job Stats to avoid race conditions and check completion
         if job:
             from sqlalchemy import func
-            completed_count = db.query(Mailbox).filter(Mailbox.job_id == job.id, Mailbox.status == 'success').count()
+            completed_count = db.query(Mailbox).filter(Mailbox.job_id == job.id, Mailbox.status.in_(['success', 'warning'])).count()
             failed_count = db.query(Mailbox).filter(Mailbox.job_id == job.id, Mailbox.status == 'failed').count()
             
             # Recalculate Data Transferred
