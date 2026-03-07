@@ -92,17 +92,19 @@ def run_imapsync(mailbox_id: int):
             '--automap',
             '--nofoldersizes',
             # --- Resilience: prevent ERR_APPEND / ERR_FETCH ---
-            '--errorsmax', '1000',          # High tolerance for corrupted/UNAVAILABLE emails
+            '--errorsmax', '2000',          # Extreme tolerance for corrupted/UNAVAILABLE emails
             '--reconnectretry1', '10',      # Auto-reconnect source up to 10 times
             '--reconnectretry2', '10',      # Auto-reconnect target up to 10 times
-            '--timeout1', '120',            # Source timeout 120s
-            '--timeout2', '120',            # Target timeout 120s
-            '--maxbytespersecond', '100000', # Throttle ~100KB/s to avoid server overload
-            '--maxmessagespersecond', '3',  # Limit 3 msgs/sec to avoid rate limiting
-            '--split1', '100',              # Process 100 msgs per batch (source)
-            '--split2', '100',              # Process 100 msgs per batch (target)
-            '--skipcrossduplicates',        # Skip cross-folder duplicates
-            '--useheader', 'Message-Id',    # Only parse Message-Id header (faster for large folders)
+            '--timeout1', '180',            # Extended source timeout to 180s (3 minutes)
+            '--timeout2', '180',            # Extended target timeout to 180s
+            '--maxbytespersecond', '50000', # Strict throttle ~50KB/s to avoid IP/Rate limiting 
+            '--maxmessagespersecond', '2',  # Strict limit 2 msgs/sec
+            '--split1', '50',               # Process in very small chunks of 50 msgs
+            '--split2', '50',               # Process in very small chunks of 50 msgs
+            '--skipcrossduplicates',        # Faster duplicate check
+            '--useheader', 'Message-Id',    # Fast header parsing for large folders
+            '--fast',                       # Skip several slow checks
+            '--nokeepsearch',               # Reduce memory on server side (vital for 14K+ folders)
         ]
         
         # Security Flags
