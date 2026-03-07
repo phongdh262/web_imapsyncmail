@@ -97,8 +97,6 @@ def run_imapsync(mailbox_id: int):
             '--reconnectretry2', '10',      # Auto-reconnect target up to 10 times
             '--timeout1', '180',            # Extended source timeout to 180s (3 minutes)
             '--timeout2', '180',            # Extended target timeout to 180s
-            '--maxbytespersecond', '50000', # Strict throttle ~50KB/s to avoid IP/Rate limiting 
-            '--maxmessagespersecond', '2',  # Strict limit 2 msgs/sec
             '--split1', '50',               # Process in very small chunks of 50 msgs
             '--split2', '50',               # Process in very small chunks of 50 msgs
             '--skipcrossduplicates',        # Faster duplicate check

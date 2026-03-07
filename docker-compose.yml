@@ -12,7 +12,7 @@ services:
       - DB_NAME=imapsync_db
       - DB_PORT=3306
       - APP_ENV=production
-      - MAX_WORKERS=2
+      - MAX_WORKERS=3
     networks:
       - web_network
     volumes:
