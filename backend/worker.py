@@ -92,7 +92,7 @@ def run_imapsync(mailbox_id: int):
             '--automap',
             '--nofoldersizes',
             # --- Resilience: prevent ERR_APPEND / ERR_FETCH ---
-            '--errorsmax', '200',           # Increase error tolerance (default 50)
+            '--errorsmax', '1000',          # High tolerance for corrupted/UNAVAILABLE emails
             '--reconnectretry1', '10',      # Auto-reconnect source up to 10 times
             '--reconnectretry2', '10',      # Auto-reconnect target up to 10 times
             '--timeout1', '120',            # Source timeout 120s
