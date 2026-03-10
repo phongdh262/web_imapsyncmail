@@ -442,7 +442,6 @@ const initCreateJob = () => {
             sync_internal_dates: document.getElementById('opt-sync-dates')?.checked || false,
             skip_trash: document.getElementById('opt-skip-trash')?.checked || false,
             dry_run: document.getElementById('opt-dry-run')?.checked || false,
-            concurrency: parseInt(document.getElementById('opt-concurrency')?.value || 10)
         };
 
         // Better job name with time

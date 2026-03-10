@@ -99,6 +99,15 @@
                         </svg>
                         Guide
                     </a>
+                    <a href="check-credentials.html"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all shadow-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        Check Credentials
+                    </a>
                     <a href="index.html"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shadow-sm font-medium">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -325,7 +334,7 @@
                             </div>
                             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Migration Options</h2>
                         </div>
-                        <div class="grid md:grid-cols-2 gap-6">
+                        <div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Job Password <span class="text-red-500">*</span>
@@ -348,24 +357,6 @@
                                     <span class="validation-icon"></span>
                                 </div>
                                 <p class="mt-1 text-xs text-red-500 hidden error-message">Job password is required</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Concurrent Threads (Bulk Only)
-                                    <span class="tooltip-trigger relative inline-block ml-1 cursor-help">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 inline"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span
-                                            class="tooltip-content shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">Number
-                                            of simultaneous email syncs. Higher value = faster but uses more
-                                            resources.</span>
-                                    </span>
-                                </label>
-                                <input type="number" id="opt-concurrency" value="10" min="1" max="50"
-                                    class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
                             </div>
                         </div>
                     </div>

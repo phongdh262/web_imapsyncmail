@@ -108,6 +108,15 @@
                                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                     </button>
+                    <a href="check-credentials.html"
+                        class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all font-medium text-sm shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        Check Credentials
+                    </a>
                     <a href="index.html"
                         class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-slate-600 transition-all font-medium text-sm shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -695,8 +704,9 @@
                                         ngày. Nếu vượt quá, tốc độ sẽ bị bóp nghẹt (throttling) hoặc tạm khóa.</li>
                                     <li><strong>Số lượng file nhỏ:</strong> Di chuyển 1000 email 1KB chậm hơn nhiều so
                                         với 1 email 1MB do overhead của giao thức IMAP.</li>
-                                    <li><strong>Giải pháp:</strong> Giảm số lượng <code>Concurrent Threads</code> xuống
-                                        (mặc định là 1-2) để tránh bị chặn.</li>
+                                    <li><strong>Giải pháp:</strong> Hệ thống đã được tối ưu với số luồng đồng thời
+                                        (<code>MAX_WORKERS=7</code>) phù hợp nhất cho hiệu suất và độ ổn định. Nếu bị
+                                        chặn, hãy thử lại sau vài giờ.</li>
                                 </ul>
                             </div>
                         </details>

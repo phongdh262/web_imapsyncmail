@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, UploadFile, File, Request, Response
+from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, UploadFile, File, Request, Response, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -191,7 +191,7 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, res
 from concurrent.futures import ThreadPoolExecutor
 
 # Global Executor
-max_workers = int(os.getenv("MAX_WORKERS", 10))
+max_workers = int(os.getenv("MAX_WORKERS", 7))
 executor = ThreadPoolExecutor(max_workers=max_workers) 
 
 @app.post("/api/jobs/{job_id}/mailboxes")
@@ -618,6 +618,74 @@ def cancel_job(job_id: str, db: Session = Depends(get_db)):
     
     return {"message": f"Cancelled {cancelled_count} mailboxes", "cancelled": cancelled_count}
 
+# --- Check Credentials API (Public) ---
+from check_credentials import check_imap_login, check_bulk, detect_provider, PROVIDER_MAP
+
+class CredentialCheck(BaseModel):
+    email: str
+    password: str
+    host: str = None  # Optional, auto-detect from email domain
+    port: int = 993
+
+@app.post("/api/check-credentials")
+async def check_single_credential(data: CredentialCheck):
+    """Check a single email credential via IMAP login."""
+    result = check_imap_login(
+        email=data.email,
+        password=data.password,
+        host=data.host,
+        port=data.port
+    )
+    return result
+
+@app.post("/api/check-credentials/bulk")
+async def check_bulk_credentials(
+    file: UploadFile = File(...),
+    host: str = Query(None),
+    port: int = Query(993)
+):
+    """Check multiple credentials from a CSV file (format: email,password per line)."""
+    content = await file.read()
+    csv_text = content.decode('utf-8')
+
+    import csv as csv_module
+    reader = csv_module.reader(io.StringIO(csv_text))
+
+    credentials = []
+    for row in reader:
+        if len(row) < 2:
+            continue
+        email = row[0].strip()
+        password = row[1].strip()
+        if email and password:
+            credentials.append({"email": email, "password": password})
+
+    if not credentials:
+        raise HTTPException(status_code=400, detail="No valid credentials found in CSV. Format: email,password")
+
+    results = check_bulk(credentials, host=host, port=port, max_concurrent=5)
+
+    success_count = sum(1 for r in results if r["status"] == "success")
+    failed_count = sum(1 for r in results if r["status"] == "failed")
+
+    return {
+        "results": results,
+        "total": len(results),
+        "success_count": success_count,
+        "failed_count": failed_count
+    }
+
+@app.get("/api/providers")
+def list_providers():
+    """List supported email providers."""
+    seen = {}
+    for domain, info in PROVIDER_MAP.items():
+        name = info["name"]
+        if name not in seen:
+            seen[name] = {"name": name, "host": info["host"], "port": info["port"], "domains": []}
+        seen[name]["domains"].append(domain)
+    return list(seen.values())
+
 @app.get("/api/stats")
 def get_dashboard_stats(db: Session = Depends(get_db)):
     from sqlalchemy import func
@@ -714,6 +782,10 @@ async def read_job_detail():
 @app.get("/guide.html")
 async def read_guide():
     return serve_html('guide.html')
+
+@app.get("/check-credentials.html")
+async def read_check_credentials():
+    return serve_html('check-credentials.html')
 
 if __name__ == "__main__":
     import uvicorn
