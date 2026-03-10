@@ -73,6 +73,45 @@ Tài liệu này bao gồm các test cases (kịch bản kiểm thử) thủ cô
 | SYS-02 | Giao diện Responsive | 1. Mở trang Web trên Điện thoại / màn hình nhỏ (hoặc F12 giả lập di động). | Các Sidebar ẩn hiện đúng, bảng dữ liệu (Table) có thanh cuộn ngang, nút bấm không bị chèn nhau. |
 | SYS-03 | Điều hướng thanh Menu | 1. Click từng menu trên Sidebar: Dashboard, Tạo Job Di Chuyển, Hướng Dẫn Sủ dụng. | Nội dung chính chuyển đổi tương ứng, URL cập nhật đúng. |
 
+## 7. Module Kiểm tra Mật khẩu Ứng dụng (Check Credentials)
+**Mục tiêu:** Đảm bảo tính năng kiểm tra thông tin đăng nhập IMAP (App Password) hoạt động chính xác cho cả chế độ Single và Bulk.
+
+### 7.1. Single Check
+
+| ID | Tên Test Case | Các bước thực hiện | Kết quả mong đợi |
+|---|---|---|---|
+| CC-01 | Kiểm tra với email Gmail hợp lệ | 1. Truy cập `check-credentials.html`.<br>2. Nhập email Gmail + App Password đúng.<br>3. Bấm **Verify Credentials**. | Hiển thị kết quả **SUCCESS ✓**, badge màu xanh, provider = "Gmail", message chứa "imap.gmail.com". |
+| CC-02 | Kiểm tra với email Yandex hợp lệ | 1. Nhập email Yandex + mật khẩu đúng.<br>2. Bấm **Verify Credentials**. | Hiển thị **SUCCESS ✓**, provider = "Yandex". |
+| CC-03 | Kiểm tra với sai mật khẩu | 1. Nhập email Gmail đúng + mật khẩu sai.<br>2. Bấm **Verify Credentials**. | Hiển thị **FAILED ✗**, message chứa "Authentication failed". |
+| CC-04 | Bỏ trống email hoặc mật khẩu | 1. Để trống một trong hai trường.<br>2. Bấm **Verify Credentials**. | Hiển thị toast cảnh báo "Please enter email and password", không gọi API. |
+| CC-05 | Kiểm tra với domain không hỗ trợ (không có custom host) | 1. Nhập email `user@custom-domain.vn` + mật khẩu.<br>2. Không nhập Custom IMAP Server.<br>3. Bấm Verify. | Hiển thị **FAILED ✗**, message chứa "Cannot detect IMAP server". |
+| CC-06 | Kiểm tra với Custom IMAP Server | 1. Nhập email `user@custom-domain.vn`.<br>2. Mở rộng **Custom IMAP Server**, nhập Host và Port.<br>3. Bấm **Verify Credentials**. | Hệ thống sử dụng host/port tuỳ chỉnh để kiểm tra, trả kết quả phù hợp. |
+| CC-07 | Giữ lại thông tin sau khi check | 1. Nhập email + password.<br>2. Bấm Verify Credentials.<br>3. Quan sát các trường nhập. | Sau khi hiển thị kết quả, các trường email và password **vẫn giữ nguyên** giá trị (không bị xoá/reload). |
+| CC-08 | Auto-detect provider từ email domain | 1. Nhập lần lượt: `x@gmail.com`, `x@yandex.ru`, `x@outlook.com`, `x@yahoo.com`.<br>2. Bấm Verify cho từng email. | Provider hiển thị đúng: Gmail, Yandex, Outlook, Yahoo tương ứng. |
+
+### 7.2. Bulk Check (CSV)
+
+| ID | Tên Test Case | Các bước thực hiện | Kết quả mong đợi |
+|---|---|---|---|
+| CC-09 | Chuyển tab sang Bulk Check | 1. Bấm tab **Bulk Check (CSV)**. | Nội dung chuyển sang phần upload CSV, tab active có highlight. |
+| CC-10 | Upload CSV hợp lệ | 1. Chuyển sang tab Bulk Check.<br>2. Bấm vùng upload, chọn file CSV (`email,password` mỗi dòng).<br>3. Quan sát CSV Preview. | Hiển thị tên file, kích thước, bảng preview 5 dòng đầu, mật khẩu hiện •••. |
+| CC-11 | Drag & Drop CSV | 1. Kéo thả file CSV vào vùng upload. | Tương tự CC-10, file được nhận và hiển thị preview. |
+| CC-12 | Check Bulk với CSV hợp lệ | 1. Upload CSV có 3+ email với mật khẩu.<br>2. Bấm **Check All Credentials**. | Bảng Results hiển thị từng email: Status (✓ Passed / ✗ Failed), Provider, Message. Stats badges hiện đúng số passed/failed/total. |
+| CC-13 | CSV rỗng hoặc sai format | 1. Upload file CSV chỉ có 1 cột (thiếu password).<br>2. Bấm Check All. | API trả lỗi 400, toast hiển thị "No valid credentials found in CSV". |
+| CC-14 | Upload file không phải CSV | 1. Kéo thả hoặc chọn file `.txt` / `.xlsx`.<br>2. Thao tác. | Hệ thống báo toast lỗi "Please select a CSV file". |
+| CC-15 | Export kết quả CSV | 1. Sau khi có kết quả (từ Single hoặc Bulk).<br>2. Bấm **Export CSV**. | Trình duyệt tải file `credential_check_YYYY-MM-DD.csv` chứa cột: Email, Provider, Status, Message. |
+
+### 7.3. UI & Navigation
+
+| ID | Tên Test Case | Các bước thực hiện | Kết quả mong đợi |
+|---|---|---|---|
+| CC-16 | Link Check Credentials trên Dashboard | 1. Vào `index.html`.<br>2. Bấm nút **Check Credentials** (màu amber) trên navbar. | Chuyển hướng đến `check-credentials.html`. |
+| CC-17 | Link Check Credentials trên Create Job | 1. Vào `create-job.html`.<br>2. Bấm nút **Check Credentials** trên navbar. | Chuyển hướng đến `check-credentials.html`. |
+| CC-18 | Link Check Credentials trên Guide | 1. Vào `guide.html`.<br>2. Bấm nút **Check Credentials** trên navbar. | Chuyển hướng đến `check-credentials.html`. |
+| CC-19 | Dark Mode hoạt động | 1. Trên trang Check Credentials, bấm nút toggle theme. | Giao diện chuyển Dark/Light mode, tất cả card, bảng, nút hiển thị đúng. |
+| CC-20 | Responsive trên mobile | 1. Mở `check-credentials.html` trên điện thoại hoặc F12 giả lập mobile. | Layout co giãn đúng, các card xếp dọc, bảng có thanh cuộn ngang. |
+
 ---
 
 > _**Lưu ý:** Các test case trên là kịch bản kiểm thử Black-box, tập trung vào kết quả phản hồi của API và UI. Nếu cần thiết lập Autotest, có thể ứng dụng Pytest cho Backend API và Playwright/Cypress cho các kịch bản UI._
+
