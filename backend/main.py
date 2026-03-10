@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, Up
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import uuid
 import csv
 import io
@@ -624,7 +624,7 @@ from check_credentials import check_imap_login, check_bulk, detect_provider, PRO
 class CredentialCheck(BaseModel):
     email: str
     password: str
-    host: str = None  # Optional, auto-detect from email domain
+    host: Optional[str] = None  # Optional, auto-detect from email domain
     port: int = 993
 
 @app.post("/api/check-credentials")
