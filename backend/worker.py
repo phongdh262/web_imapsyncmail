@@ -101,8 +101,8 @@ def run_imapsync(mailbox_id: int):
             '--split2', '50',               # Process in very small chunks of 50 msgs
             '--skipcrossduplicates',        # Faster duplicate check
             '--useheader', 'Message-Id',    # Fast header parsing for large folders
-            '--fast',                       # Skip several slow checks
-            '--nokeepsearch',               # Reduce memory on server side (vital for 14K+ folders)
+            '--fastio1',                    # Use fast I/O on source
+            '--fastio2',                    # Use fast I/O on target
         ]
         
         # Security Flags
