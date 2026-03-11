@@ -195,10 +195,8 @@ Tài liệu này bao gồm các test cases (kịch bản kiểm thử) thủ cô
 | IM-43 | Pulse DB mỗi 10 giây | DB commit | 1. Sync folder lớn, lâu.<br>2. Quan sát timestamp DB. | DB được commit ít nhất mỗi 10 giây dù không có progress mới. |
 | IM-44 | Bảo mật mật khẩu temp file | `tempfile`, `os.unlink` | 1. Sync mailbox.<br>2. Sau khi sync xong, kiểm tra thư mục temp. | File tạm chứa mật khẩu (`passfile1`, `passfile2`) bị xóa sau khi sync hoàn tất. |
 
----
-
 ## 9. Module Kiểm tra Mật khẩu - Backend & API (Check Credentials Backend)
-**Mục tiêu:** Kiểm tra chi tiết logic backend của tính năng kiểm tra mật khẩu ứng dụng, bao gồm hàm Python, API endpoints, và shell scripts.
+**Mục tiêu:** Kiểm tra chi tiết logic backend của tính năng kiểm tra mật khẩu ứng dụng, bao gồm hàm Python, API endpoints.
 
 ### 9.1. Hàm `detect_provider()` — Tự động nhận diện Provider
 
@@ -261,15 +259,7 @@ Tài liệu này bao gồm các test cases (kịch bản kiểm thử) thủ cô
 | CB-40 | POST bulk check với query host | `POST /api/check-credentials/bulk?host=mail.vn&port=993`. | HTTP 200, tất cả email check qua host từ query param. |
 | CB-41 | GET danh sách providers | `GET /api/providers`. | HTTP 200, JSON array chứa các provider (Gmail, Yandex, Outlook...) với domains tương ứng. |
 | CB-42 | GET providers không trùng lặp | `GET /api/providers`. | Mỗi provider name xuất hiện 1 lần dù có nhiều domains (gmail.com, googlemail.com → 1 Gmail). |
-
-## 10. Module Bảo mật & Triển khai (Security & Deployment)
-**Mục tiêu:** Kiểm tra lại quy trình triển khai và đảm bảo không có thông tin nhạy cảm bị rò rỉ.
-
-| ID | Tên Test Case | Các bước thực hiện | Kết quả mong đợi |
-|---|---|---|---|
-| SEC-01 | Kiểm tra cấu hình Docker | 1. Mở file `docker-compose.yml`.<br>2. Kiểm tra phần `environment` của service `app`. | Các biến chứa nội dung nhạy cảm như database password phải sử dụng biến môi trường dạng `${DB_PASSWORD}`, không hardcode mật khẩu trực tiếp. |
-| SEC-02 | Xác thực tệp tin bảo mật | 1. Kiểm tra trạng thái git status.<br>2. Xem xét các tệp tin trong thư mục gốc. | Tệp `secret.key` và `.env` không bị vô tình lưu vào kho lưu trữ mã nguồn, cần nằm trong `.gitignore`. |
-| SEC-03 | Đảm bảo xóa ứng dụng test mật khẩu legacy | 1. Tìm tệp `check_app_password_gg.sh` và `check_app_password_yandex.sh` trong kho. | Các ứng dụng kiểm tra mật khẩu dạng shell script cũ đã bị xóa sạch khỏi thư mục dự án vì có nguy cơ lưu trữ/xử lý mật khẩu không an toàn. |
+| RL-01 | Rate Limit Exceeded | Thực hiện 11 requests liên tiếp tới `/api/check-credentials`. | Request thứ 11 trả về HTTP 429 "Rate limit exceeded". |
 
 ---
 
