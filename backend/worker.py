@@ -2,6 +2,8 @@ import time
 import subprocess
 import os
 import sys
+import stat
+import glob
 
 # Add current directory to sys.path to ensure modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -13,6 +15,51 @@ from database import SessionLocal, Mailbox, engine, Job
 
 # Global registry for running processes {mailbox_id: process_object}
 active_processes = {}
+
+
+def secure_delete_file(filepath):
+    """
+    Securely delete a file by overwriting its content with zeros
+    before unlinking, so passwords can't be recovered from disk.
+    """
+    try:
+        if not filepath or not os.path.exists(filepath):
+            return
+        # Overwrite file content with zeros
+        file_size = os.path.getsize(filepath)
+        with open(filepath, 'wb') as f:
+            f.write(b'\x00' * file_size)
+            f.flush()
+            os.fsync(f.fileno())
+        # Then delete the file
+        os.unlink(filepath)
+    except Exception:
+        # Fallback: at least try to delete
+        try:
+            os.unlink(filepath)
+        except Exception:
+            pass
+
+
+def cleanup_stale_passfiles():
+    """
+    Clean up any leftover temporary password files from previous
+    crashed sessions. Called once when worker starts.
+    """
+    tmp_dir = tempfile.gettempdir()
+    count = 0
+    for f in glob.glob(os.path.join(tmp_dir, 'isp_*')):
+        try:
+            # Only clean files older than 1 hour to avoid deleting active ones
+            if os.path.isfile(f) and (time.time() - os.path.getmtime(f)) > 3600:
+                file_size = os.path.getsize(f)
+                if file_size < 1024:  # Password files are very small
+                    secure_delete_file(f)
+                    count += 1
+        except Exception:
+            pass
+    if count > 0:
+        print(f"[Security] Cleaned up {count} stale temp file(s).")
 
 def kill_sync(mailbox_id: int):
     """
@@ -61,8 +108,8 @@ def run_imapsync(mailbox_id: int):
         target_pass = decrypt_password(mailbox.target_pass)
 
         # Create temp files for passwords securely
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f_pass1, \
-             tempfile.NamedTemporaryFile(mode='w', delete=False) as f_pass2:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, prefix='isp_') as f_pass1, \
+             tempfile.NamedTemporaryFile(mode='w', delete=False, prefix='isp_') as f_pass2:
             
             f_pass1.write(source_pass)
             f_pass1.flush()
@@ -71,6 +118,10 @@ def run_imapsync(mailbox_id: int):
             f_pass2.write(target_pass)
             f_pass2.flush()
             pass2_path = f_pass2.name
+        
+        # Set strict file permissions (owner read/write only)
+        os.chmod(pass1_path, stat.S_IRUSR | stat.S_IWUSR)  # 0o600
+        os.chmod(pass2_path, stat.S_IRUSR | stat.S_IWUSR)  # 0o600
         
         # Parse Options
         options = {}
@@ -292,12 +343,9 @@ def run_imapsync(mailbox_id: int):
             del active_processes[mailbox_id]
         
         # Cleanup temp password files (ALWAYS, even on exception)
+        # Use secure_delete_file to overwrite content before deleting
         for _p in [pass1_path, pass2_path]:
-            if _p and os.path.exists(_p):
-                try:
-                    os.unlink(_p)
-                except Exception:
-                    pass
+            secure_delete_file(_p)
         
         # Recalculate Job Stats to avoid race conditions and check completion
         if job:

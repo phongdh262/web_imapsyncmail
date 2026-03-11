@@ -20,7 +20,7 @@ from database import SessionLocal, engine, Job, Mailbox, User, get_db, init_db
 from auth import Token, get_current_user, create_access_token, verify_password, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta
 from pydantic import BaseModel
-from worker import run_imapsync
+from worker import run_imapsync, cleanup_stale_passfiles
 
 # Initialize DB safely
 try:
@@ -40,6 +40,9 @@ except Exception as e:
 # Ensure logs directory exists
 if not os.path.exists("logs"):
     os.makedirs("logs")
+
+# Security: clean up any leftover temp password files from previous crashed sessions
+cleanup_stale_passfiles()
 
 app = FastAPI()
 
