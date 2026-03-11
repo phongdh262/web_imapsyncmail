@@ -10,3 +10,4 @@ pymysql
 python-dotenv
 a2wsgi
 aiofiles
+dnspython

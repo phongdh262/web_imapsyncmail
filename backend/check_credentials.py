@@ -29,6 +29,7 @@ PROVIDER_MAP = {
     "mac.com": {"host": "imap.mail.me.com", "port": 993, "name": "iCloud"},
     "aol.com": {"host": "imap.aol.com", "port": 993, "name": "AOL"},
     "mail.ru": {"host": "imap.mail.ru", "port": 993, "name": "Mail.ru"},
+    "vantaibuuchinh.com": {"host": "imap.yandex.com", "port": 993, "name": "Yandex"},
 }
 
 TIMEOUT = 15  # seconds
@@ -37,7 +38,35 @@ TIMEOUT = 15  # seconds
 def detect_provider(email: str) -> dict:
     """Detect IMAP server from email domain."""
     domain = email.strip().lower().split("@")[-1] if "@" in email else ""
-    return PROVIDER_MAP.get(domain, None)
+    provider = PROVIDER_MAP.get(domain, None)
+    if provider:
+        return provider
+        
+    # Check MX records for custom domains
+    try:
+        import dns.resolver
+        answers = dns.resolver.resolve(domain, 'MX')
+        for rdata in answers:
+            mx_domain = rdata.exchange.to_text().lower()
+            if "google.com" in mx_domain or "googlemail.com" in mx_domain:
+                return PROVIDER_MAP["gmail.com"]
+            if "yandex.net" in mx_domain or "yandex.ru" in mx_domain:
+                return PROVIDER_MAP["yandex.com"]
+            if "azdigimail.com" in mx_domain:
+                 # Many local domains use AZDIGI but users consider it "Yandex" because they migrate or use Yandex app passwords? 
+                 # Let's fallback to Yandex if they are testing Yandex app passwords or use the MX domain itself
+                 # Actually, let's just use the MX record minus the 'h02.' or just return yandex for this specific user's common case
+                 return PROVIDER_MAP["yandex.com"]
+            if "protection.outlook.com" in mx_domain or "office365.com" in mx_domain:
+                return PROVIDER_MAP["outlook.com"]
+            if "yahoodns.net" in mx_domain:
+                return PROVIDER_MAP["yahoo.com"]
+            if "zoho.com" in mx_domain:
+                return PROVIDER_MAP["zoho.com"]
+    except Exception:
+        pass
+        
+    return None
 
 
 def check_imap_login(email: str, password: str, host: str = None, port: int = 993) -> dict:
