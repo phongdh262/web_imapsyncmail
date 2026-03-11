@@ -187,7 +187,11 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, res
             target_security=job_data.target_security,
             options=options_json,
             password_hash=password_hash,
-            status="running" # Auto start for demo
+            status="running", # Auto start for demo
+            total_mailboxes=0,
+            completed=0,
+            failed=0,
+            data_transferred=0
         )
         db.add(db_job)
         db.commit()
