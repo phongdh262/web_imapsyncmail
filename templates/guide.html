@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+
+{% block title %}Hướng Dẫn Sử Dụng - IMAP Sync Pro{% endblock %}
+{% block description %}Hướng dẫn chi tiết cách sử dụng IMAP Sync Pro để di chuyển email giữa các máy chủ IMAP một cách an toàn và hiệu quả.{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-10">
+    <!-- Sidebar Navigation (Sticky) -->
+    <aside class="lg:w-64 flex-shrink-0 hidden lg:block">
+        <div class="sticky top-24 p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Mục Lục</h3>
+            <nav class="space-y-1 sidebar-scroll max-h-[70vh] overflow-y-auto pr-2">
+                <a href="#quick-start"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Bắt Đầu Nhanh
+                </a>
+                <a href="#bulk-migration"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Di Chuyển Hàng Loạt
+                </a>
+                <a href="#single-sync"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Đồng Bộ Đơn Lẻ
+                </a>
+                <a href="#monitoring"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Theo Dõi & Xử Lý Lỗi
+                </a>
+                <a href="#check-credentials"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Kiểm Tra Mật Khẩu
+                </a>
+                <a href="#gmail-setup"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Cấu Hình Gmail
+                </a>
+                <a href="#office365-setup"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Cấu Hình Office 365
+                </a>
+                <a href="#security"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    Bảo Mật
+                </a>
+                <a href="#faq_troubleshoot"
+                    class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
+                    FAQ & Xử Lý Sự Cố
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 min-w-0 prose prose-slate max-w-none">
+        <!-- Hero Section -->
+        <div class="mb-12 animate-slide-up">
+            <h1
+                class="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white leading-tight">
+                Tài Liệu Hướng Dẫn
+            </h1>
+            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+                Chào mừng đến với IMAP Sync Pro. Hướng dẫn toàn diện để giúp bạn di chuyển email an toàn, bảo
+                mật và hiệu quả giữa các nền tảng.
+            </p>
+        </div>
+
+        <!-- 1. Quick Start -->
+        <section id="quick-start" class="mb-12 scroll-mt-28">
+            <div
+                class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow duration-300">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white m-0">1. Bắt Đầu Nhanh</h2>
+                </div>
+
+                <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+                    Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP khác. Giao diện
+                    người dùng hiện đã được chuyển sang <strong>Tiếng Anh</strong> để chuẩn hóa quốc tế, nhưng
+                    tài liệu này vẫn giữ <strong>Tiếng Việt</strong> để hỗ trợ tốt nhất cho bạn.
+                </p>
+
+                <div
+                    class="bg-blue-50/50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-5 rounded-r-xl backdrop-blur-sm">
+                    <h4 class="text-blue-800 dark:text-blue-300 font-bold mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Lưu ý quan trọng
+                    </h4>
+                    <ul class="list-none space-y-2 text-blue-900 dark:text-blue-200 text-sm m-0 p-0">
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+                            <span>Hai máy chủ nguồn và đích phải hỗ trợ giao thức IMAP.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+                            <span><strong>Job Password:</strong> Bắt buộc nhập để mã hóa và bảo vệ phiên làm
+                                việc.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Bulk Migration -->
+        <section id="bulk-migration" class="mb-12 scroll-mt-28">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                2. Di Chuyển Hàng Loạt (Bulk Migration)
+            </h2>
+            <div class="prose-slate dark:prose-invert max-w-none">
+                <p>Phương pháp này phù hợp khi bạn cần di chuyển hàng chục hoặc hàng trăm tài khoản email cùng
+                    lúc.</p>
+
+                <ol class="space-y-6 list-decimal pl-5">
+                    <li class="pl-2">
+                        <strong>Truy cập:</strong> Chọn nút <span
+                            class="inline-flex items-center px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm mx-1 shadow-sm font-medium">Create New Job</span> từ trang chủ ("Dashboard").
+                    </li>
+                    <li class="pl-2">
+                        <strong>Cấu hình Server:</strong>
+                        <ul class="mt-2 space-y-2 list-disc pl-5 opacity-90">
+                            <li>Nhập <code
+                                    class="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50">host</code>
+                                nguồn (Nơi chứa email cũ). Ví dụ: <code
+                                    class="text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">imap.gmail.com</code>
+                            </li>
+                            <li>Nhập <code
+                                    class="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/50">host</code>
+                                đích (Nơi nhận email mới). Bạn có thể dùng các nút chọn nhanh (Presets) ngay trên form.
+                            </li>
+                            <li>Cổng (Port) thường là <code>993</code> (SSL/TLS) hoặc <code>143</code>
+                                (STARTTLS).</li>
+                        </ul>
+                    </li>
+                    <li class="pl-2">
+                        <strong>Chuẩn bị file CSV:</strong>
+                        Mở Excel hoặc Notepad, tạo file với cấu trúc đúng 4 cột, <strong>không có dòng tiêu đề (header do NOT provide)</strong>:
+                        <div class="bg-slate-900 rounded-xl mt-3 overflow-hidden shadow-sm">
+                            <div class="px-4 py-2 bg-slate-800 text-slate-400 text-xs font-mono uppercase tracking-wider border-b border-slate-700">Hình thức CSV</div>
+                            <pre class="m-0 p-4 text-sm text-green-400 font-mono bg-transparent">user_nguon1@domain.com,pass_nguon1,user_dich1@newdomain.com,pass_dich1
+user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
+                        </div>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                            <em>Lưu ý: Nếu mật khẩu có chứa dấu phẩy (<code>,</code>) hoặc ký tự đặc biệt, hãy
+                                bọc chúng trong dấu ngoặc kép (<code>"..."</code>) hoặc thay đổi mật khẩu trước khi di chuyển.</em>
+                        </p>
+                    </li>
+                    <li class="pl-2">
+                        <strong>Bảo mật Job (Job Password):</strong>
+                        Nhập một mật khẩu bảo mật (Job Password) cho phiên di chuyển này. Bạn sẽ cần mật khẩu này để:
+                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                            <li>Xem chi tiết tiến trình trong Dashboard.</li>
+                            <li>Tải file log hoặc xuất báo cáo.</li>
+                        </ul>
+                    </li>
+                    <li class="pl-2">
+                        <strong>Tuỳ chọn nâng cao (Advanced Options):</strong>
+                        Mở "Advanced Settings" nếu bạn muốn:
+                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                            <li><strong>Sync Internal Dates:</strong> Kéo nguyên gốc ngày tháng của email cũ.</li>
+                            <li><strong>Skip Trash:</strong> Bỏ qua thư mục Thùng rác (giảm thời gian).</li>
+                            <li><strong>Dry Run:</strong> Chỉ chạy giả lập để kiểm tra lỗi, không copy mail thật.</li>
+                        </ul>
+                    </li>
+                    <li class="pl-2">
+                        Kéo thả file CSV vào khu vực tải lên và nhấn <strong>Start Bulk Migration</strong>.
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 3. Single Sync -->
+        <section id="single-sync" class="mb-12 scroll-mt-28">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                3. Đồng Bộ Đơn Lẻ (Single Sync)
+            </h2>
+            <div class="prose-slate dark:prose-invert max-w-none">
+                <p>Khuyên dùng nếu bạn chỉ cần chuyển email cho <strong>1 tài khoản duy nhất</strong>.</p>
+                <ol class="space-y-4 list-decimal pl-5">
+                    <li class="pl-2">Tại trang Create Job, chọn Tab <strong>Single Sync</strong>.</li>
+                    <li class="pl-2">Cấu hình máy chủ Nguồn và Đích (giống phần Bulk).</li>
+                    <li class="pl-2">Điền trực tiếp thông tin tài khoản người dùng và mật khẩu Nguồn vào form.</li>
+                    <li class="pl-2">Điền thông tin tài khoản người dùng và mật khẩu Đích vào form.</li>
+                    <li class="pl-2">Nhập <strong>Job Password</strong> để bảo vệ kết quả di chuyển.</li>
+                    <li class="pl-2">Nhấn <strong>Start Single Migration</strong>.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 4. Monitoring -->
+        <section id="monitoring" class="mb-12 scroll-mt-28">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                4. Theo Dõi & Xuất Báo Cáo
+            </h2>
+            <div class="prose-slate dark:prose-invert max-w-none space-y-6">
+                <p>Hệ thống xử lý chạy <strong>nền</strong> (background worker). Bạn có thể tắt trình duyệt và tự động quay lại sau.</p>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">4.1 Tại Dashboard chính</h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li>Bạn sẽ thấy danh sách các Job đang chạy.</li>
+                        <li>Cột <strong>Progress</strong>: Biểu thị % lượng hòm thư đã hoàn tất.</li>
+                        <li>Click nút <strong>View Details</strong> để xem chi tiết. Hệ thống sẽ <strong>yêu cầu nhập Job Password</strong>.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">4.2 Tại trang Job Detail (Cập nhật thời gian thực - WebSockets)</h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li>Thanh tiến trình sẽ tự động trượt mà không cần làm mới trang (F5).</li>
+                        <li>Danh sách các tài khoản sẽ hiện trạng thái: <code>In Progress</code>, <code>Completed</code>, <code>Failed</code>.</li>
+                        <li>Click <strong>View Logs</strong> tại từng tài khoản để xem chi tiết kết nối `imapsync` ở dưới nền. Màn hình console đen sẽ hiện ra cho thấy email nào đang được copy.</li>
+                        <li><strong>Dừng tác vụ (Stop All):</strong> Nút này cho phép hủy các lệnh copy đang chạy nếu phát hiện sai sót.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">4.3 Nghiệm thu và trả kết quả (Export Report)</h3>
+                    <div class="bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 p-4 rounded-xl">
+                        <p class="m-0 text-sm">Sau khi tiến trình 100%, bạn có thể nhấn nút <strong class="text-indigo-700 dark:text-indigo-400">Export Report</strong> ở góc trên trang chi tiết (Job Detail).</p>
+                        <p class="m-0 text-sm mt-2">Hệ thống sẽ tải về một file CSV báo cáo số lượng email chuyển thành công, thất bại và tổng dung lượng dữ liệu. Đây là file dùng để gửi khách hàng nghiệm thu.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <!-- 5. Check Credentials -->
+         <section id="check-credentials" class="mb-12 scroll-mt-28">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                5. Kiểm Tra Mật Khẩu Hàng Loạt (MỚI)
+            </h2>
+            <div class="prose-slate dark:prose-invert max-w-none">
+                <p>Trước khi chạy khối lượng lớn, tính năng <strong>Check Credentials</strong> giúp bạn rà soát lại tất cả mật khẩu và App Password tránh lọt lỗi hỏng kết nối lúc Sync.</p>
+
+                <ol class="space-y-4 list-decimal pl-5">
+                    <li class="pl-2">Truy cập <strong>Check Credentials</strong> qua thanh điều hướng phía trên.</li>
+                    <li class="pl-2">
+                        Chọn <strong>Bulk Check</strong> và tải lên file CSV (Cấu trúc: <code>email,password</code>).
+                        <p class="text-sm mt-1 opacity-80"><em>Khác với Bulk Migration (4 cột), Check CSV chỉ yêu cầu 2 cột.</em></p>
+                    </li>
+                    <li class="pl-2">Chọn Auto-detect Server (Tự động nhận diện IMAP theo đuôi @gmail.com, @yandex.com) hoặc Force (Ép dùng 1 server cho toàn file).</li>
+                    <li class="pl-2">Sau khi quét xong, nhấn <strong>Export Failed</strong> để lọc ra chỉ những tài khoản bị sai pass và báo khách hàng cấp lại.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 6. Gmail App Password Setup -->
+        <section id="gmail-setup" class="mb-12 scroll-mt-28">
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white m-0">6. Khởi tạo App Password Gmail & Workspace</h2>
+            </div>
+            
+            <div class="prose-slate dark:prose-invert max-w-none">
+                <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl">
+                    <p class="m-0 text-amber-900 dark:text-amber-200 text-sm font-medium">Bắt buộc: Bạn không thể dùng mật khẩu đăng nhập thông thường của Google nữa do chính sách bảo mật. Bắt buộc phải tạo <strong>Mật khẩu ứng dụng (App Password)</strong> dài 16 ký tự.</p>
+                </div>
+
+                <ol class="space-y-4 list-decimal pl-5">
+                    <li class="pl-2">
+                        Bật IMAP trong Cài đặt Gmail (Settings &rarr; Forwarding and POP/IMAP &rarr; Enable IMAP).
+                    </li>
+                    <li class="pl-2">
+                        Truy cập <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">myaccount.google.com/security</a>.
+                    </li>
+                    <li class="pl-2">Đảm bảo <strong>Xác minh 2 bước (2-Step Verification)</strong> đã được Bật.</li>
+                    <li class="pl-2">
+                        Tìm đến mục <strong>Mật khẩu ứng dụng (App passwords)</strong>. Hoặc nhấp trực tiếp vào <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">Link này</a>.
+                    </li>
+                    <li class="pl-2"> Đặt tên ứng dụng (vd: "imapsync") và nhấn <strong>Tạo (Create)</strong>.</li>
+                    <li class="pl-2">Copy chuỗi 16 ký tự màu vàng (ví dụ: <code>abcd efgh ijkl mnop</code>) - Nhớ xóa dấu cách khi dán vào file CSV (<code>abcdefghijklmnop</code>).</li>
+                </ol>
+            </div>
+        </section>
+
+         <!-- 7. Office365 App Password Setup -->
+         <section id="office365-setup" class="mb-12 scroll-mt-28">
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 2v20h-2V4h-6v18H2v-8h10V2h10zm-8 4v2h4V6h-4zm0 4v2h4v-2h-4zm0 4v2h4v-2h-4z"/></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white m-0">7. Hướng dẫn Office 365 (O365)</h2>
+            </div>
+            
+            <div class="prose-slate dark:prose-invert max-w-none">
+                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded-r-xl">
+                    <p class="m-0 text-red-900 dark:text-red-200 text-sm font-medium">Lưu ý Microsoft: Từ T9/2025, Microsoft sẽ khai tử hoàn toàn Basic Auth trên IMAP. Hiện tại hãy làm theo cấu hình dưới đây.</p>
+                </div>
+
+                <ol class="space-y-4 list-decimal pl-5">
+                    <li class="pl-2">
+                        Quyền Quản trị viên (Tenant Admin) phải vào <a href="https://admin.microsoft.com/" class="text-blue-600 dark:text-blue-400">Microsoft 365 admin center</a>.
+                    </li>
+                    <li class="pl-2">Truy cập Settings &rarr; Org settings &rarr; Modern authentication và đảm bảo <strong>Turn on basic authentication for IMAP</strong> vẫn được đánh dấu (nếu còn).</li>
+                    <li class="pl-2">Người dùng cũng vào trang Bảo mật tài khoản (My Sign-ins), kích hoạt xác thực 2 bước (MFA) và tạo <strong>App Passwords</strong>.</li>
+                    <li class="pl-2">Nếu user liên tục gặp lỗi "AUTHENTICATIONFAILED", admin có thể cần tắt "Security Defaults" trong Entra ID (Azure AD).</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 8. Security -->
+        <section id="security" class="mb-12 scroll-mt-28">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                8. Cơ Chế Bảo Mật Tích Hợp
+            </h2>
+            <div class="prose-slate dark:prose-invert max-w-none">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <h4 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Bảo mật File CSV
+                        </h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 m-0">
+                            File CSV bạn tải lên chỉ lưu trữ vào RAM/ổ đĩa tạm (Temp file) trên máy chủ nội bộ. Nó sẽ bị <strong>tự động xóa bỏ hoàn toàn</strong> ngay sau khi quá trình đọc file hoàn tất (< 1 giây).
+                        </p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <h4 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                            Bảo mật Job Password (JWT)
+                        </h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 m-0">
+                            Job Password bạn nhập sẽ được mã hóa Hash phía Backend. Trình duyệt đóng vai trò xác thực thông qua JSON Web Token (JWT) ngăn ngừa các cuộc tấn công nghe lén (XSS).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. FAQ & Troubleshooting -->
+        <section id="faq_troubleshoot" class="mb-12 scroll-mt-28">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
+                9. Trả Lời Câu Hỏi & Xử Lý Sự Cố (Troubleshooting)
+            </h2>
+
+            <div class="space-y-4">
+                <!-- 1. Authentication Failed -->
+                <details
+                    class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                    <summary
+                        class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            Lỗi "AUTHENTICATIONFAILED"
+                        </span>
+                        <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                    <div
+                        class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                        <ol class="list-decimal pl-5 space-y-1">
+                            <li>Sai tên đăng nhập hoặc mật khẩu: Kiểm tra lại các khoảng trống thừa trong file
+                                CSV.</li>
+                            <li>Nếu dùng Gmail/Outlook: Bạn CHƯA tạo App Password. Mật khẩu web thông thường sẽ
+                                bị chối từ.</li>
+                            <li>Tài khoản bị khóa IMAP.</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <!-- 2. Timeout / No Route -->
+                <details
+                    class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                    <summary
+                        class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                            Lỗi "Connection timed out" hoặc "No route to host"
+                        </span>
+                        <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                    <div
+                        class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                        Bạn đã cấu hình sai địa chỉ IMAP Host hoặc Port. Ví dụ: nhập <code>gmail.com</code> thay
+                        vì <code>imap.gmail.com</code>. Hoặc nhập port <code>143</code> (không bảo mật) trong
+                        khi máy chủ chỉ mở <code>993</code> (SSL).
+                    </div>
+                </details>
+                
+                <!-- 3. Too Many Connections -->
+                <details
+                    class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                    <summary
+                        class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                            Lỗi "Too many simultaneous connections"
+                        </span>
+                        <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                    <div
+                        class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                        Máy chủ IMAP giới hạn số kết nối cùng lúc từ một IP. Hệ thống mặc định giới hạn ở mức an toàn. Tuy nhiên, nếu bạn cấu hình một Job chạy một list mail có chung hostname, có thể máy chủ nguồn sẽ đá ra. Hãy phân tách list hoặc báo admin.
+                    </div>
+                </details>
+
+                 <!-- 4. Quota Exceeded -->
+                 <details
+                    class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                    <summary
+                        class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                            Lỗi "Quota exceeded" (Đầy bộ nhớ)
+                        </span>
+                        <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                    <div
+                        class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                        Hòm thư đích đã hết dung lượng lưu trữ nội bộ. Không thể copy thêm email sang. Cần mở rộng dung lượng trên server nhận.
+                    </div>
+                </details>
+
+                <!-- 5. Message Too Large -->
+                <details
+                    class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                    <summary
+                        class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                            Lỗi "Message too large"
+                        </span>
+                        <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                    <div
+                        class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                        Server đích giới hạn kích thước email nhận vào (ví dụ: Gmail max 25MB, Outlook max
+                        20MB). Các email có file đính kèm lớn hơn mức này sẽ bị từ chối. Bạn cần xử lý thủ công
+                        các email này.
+                    </div>
+                </details>
+
+                <!-- 6. Slow Sync Speed -->
+                <details
+                    class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 open:ring-2 open:ring-blue-500/20 transition-all duration-200">
+                    <summary
+                        class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
+                        <span class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            Tại sao tốc độ Sync chậm?
+                        </span>
+                        <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </summary>
+                    <div
+                        class="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>Giới hạn của Provider:</strong> Gmail và Outlook giới hạn băng thông mỗi
+                                ngày. Nếu vượt quá, tốc độ sẽ bị bóp nghẹt (throttling) hoặc tạm khóa.</li>
+                            <li><strong>Số lượng file nhỏ:</strong> Di chuyển 1000 email 1KB chậm hơn nhiều so
+                                với 1 email 1MB do overhead của giao thức IMAP.</li>
+                            <li><strong>Giải pháp:</strong> Hệ thống đã được tối ưu với số luồng đồng thời
+                                (<code>MAX_WORKERS=7</code>) phù hợp nhất cho hiệu suất và độ ổn định. Nếu bị
+                                chặn, hãy thử lại sau vài giờ.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Scroll Details Script & Active Link Highlighting -->
+<script>
+    // Active Link Highlighting
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('aside nav a');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (scrollY >= sectionTop - 150) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('text-blue-600', 'bg-blue-50', 'dark:text-blue-400', 'dark:bg-blue-900/20');
+            link.classList.add('text-slate-600');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('text-blue-600', 'bg-blue-50', 'dark:text-blue-400', 'dark:bg-blue-900/20');
+                link.classList.remove('text-slate-600');
+            }
+        });
+    });
+</script>
+{% endblock %}

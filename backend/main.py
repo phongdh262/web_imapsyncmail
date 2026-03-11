@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, UploadFile, File, Request, Response, Query
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -789,39 +790,35 @@ from fastapi.responses import HTMLResponse
 # Note: StaticFiles needs 'aiofiles' installed.
 app.mount("/css", StaticFiles(directory=os.path.join(base_dir, "css")), name="css")
 app.mount("/js", StaticFiles(directory=os.path.join(base_dir, "js")), name="js")
+app.mount("/images", StaticFiles(directory=os.path.join(base_dir, "images")), name="images")
 
-def serve_html(filename):
-    path = os.path.join(base_dir, filename)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-             return HTMLResponse(content=f.read())
-    return HTMLResponse(content=f"File not found: {path} (Base: {base_dir})", status_code=404)
+# Setup Jinja2 Templates
+templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
-# Serve HTML Files explicitly (Sync read is safer without aiofiles)
-@app.get("/")
-async def read_root():
-    return serve_html('index.html')
+# Serve HTML Files via Jinja2Templates
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/index.html")
-async def read_index():
-    return serve_html('index.html')
+@app.get("/index.html", response_class=HTMLResponse)
+async def read_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/create-job.html", response_class=HTMLResponse)
+async def read_create_job(request: Request):
+    return templates.TemplateResponse("create-job.html", {"request": request})
 
-@app.get("/create-job.html")
-async def read_create_job():
-    return serve_html('create-job.html')
+@app.get("/job-detail.html", response_class=HTMLResponse)
+async def read_job_detail(request: Request):
+    return templates.TemplateResponse("job-detail.html", {"request": request})
 
-@app.get("/job-detail.html")
-async def read_job_detail():
-    return serve_html('job-detail.html')
+@app.get("/guide.html", response_class=HTMLResponse)
+async def read_guide(request: Request):
+    return templates.TemplateResponse("guide.html", {"request": request})
 
-@app.get("/guide.html")
-async def read_guide():
-    return serve_html('guide.html')
-
-@app.get("/check-credentials.html")
-async def read_check_credentials():
-    return serve_html('check-credentials.html')
+@app.get("/check-credentials.html", response_class=HTMLResponse)
+async def read_check_credentials(request: Request):
+    return templates.TemplateResponse("check-credentials.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

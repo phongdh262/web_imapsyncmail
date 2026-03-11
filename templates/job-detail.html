@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Job Details - IMAP Sync Pro{% endblock %}
+{% block description %}Track email migration progress in detail with real-time logs.{% endblock %}
+
+{% block extra_head %}
+<!-- Specific extra head elements for job detail if needed -->
+{% endblock %}
+
+{% block content %}
+<main>
+    <!-- Header Info -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+            <h1 id="job-name" class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Loading...</h1>
+            <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                <span id="source-host"
+                    class="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">...</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+                <span id="target-host"
+                    class="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">...</span>
+            </div>
+        </div>
+        
+        <div class="flex flex-col items-end gap-3">
+             <span id="job-status"
+            class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Loading</span>
+            
+            <div class="flex gap-2">
+                <button id="download-logs-btn" onclick="downloadAllLogs()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 dark:bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-500 transition-colors shadow-sm text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download Logs
+                </button>
+                 <!-- New Export CSV Report Button -->
+                 <button id="export-report-btn" onclick="exportJobReport()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors shadow-sm text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export Report
+                </button>
+                <button id="cancel-all-btn" onclick="cancelAllMailboxes()"
+                    class="hidden items-center gap-2 px-4 py-2 bg-red-600 dark:bg-red-600 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-500 transition-colors shadow-sm text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Stop All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="bg-blue-600 dark:bg-blue-900/40 rounded-xl p-6 shadow-sm border border-blue-700 dark:border-blue-800 mb-8 text-white relative overflow-hidden">
+        <div class="relative z-10">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold opacity-90">Overall Progress</h2>
+                <span id="progress-percent" class="text-4xl font-bold">0%</span>
+            </div>
+            <div class="bg-black/20 rounded-full h-3 overflow-hidden mb-6 backdrop-blur-sm">
+                <div id="main-progress-bar"
+                    class="h-full bg-white rounded-full transition-all duration-500 progress-bar-animated progress-shimmer"
+                    style="width: 0%"></div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
+                    <div id="stat-total" class="text-2xl font-mono font-bold stat-value">0</div>
+                    <div class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Total Mailboxes</div>
+                </div>
+                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
+                    <div id="stat-completed" class="text-2xl font-mono font-bold text-emerald-300 stat-value">0</div>
+                    <div class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Completed</div>
+                </div>
+                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
+                    <div id="stat-failed" class="text-2xl font-mono font-bold text-red-300 stat-value">0</div>
+                    <div class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Failed</div>
+                </div>
+                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
+                    <div id="stat-data" class="text-2xl font-mono font-bold text-cyan-300 stat-value">0 B</div>
+                    <div class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Data Transferred</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mailbox List -->
+    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 border-b border-gray-100 dark:border-slate-700/50">
+            <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Mailbox List</h2>
+            <div class="relative w-full sm:w-64">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" id="mailbox-search" placeholder="Search mailbox..."
+                    class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm shadow-sm">
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50/50 dark:bg-slate-900/30">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Source User</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Target User</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Message</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="mailbox-list" class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <!-- Injected by JS -->
+                </tbody>
+            </table>
+        </div>
+        <!-- Empty State for Mailboxes -->
+        <div id="mailbox-empty-state" class="hidden py-12 px-6 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900 dark:text-white mb-1">No mailboxes found</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">Have you uploaded a CSV yet?</p>
+        </div>
+    </div>
+</main>
+
+<!-- Log Modal -->
+<div id="log-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 glass-overlay"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="relative bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col animate-slide-up border border-slate-700">
+            <div class="flex justify-between items-center p-6 border-b border-slate-700">
+                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Mailbox Logs
+                </h2>
+                <div class="flex items-center gap-3">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                        <input type="checkbox" id="log-autoscroll" checked
+                            class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900">
+                        Auto-scroll
+                    </label>
+                    <button onclick="closeModal()"
+                        class="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <pre id="log-content"
+                class="flex-1 p-6 overflow-auto font-mono text-sm text-emerald-400 bg-slate-950 log-scrollbar leading-relaxed">Loading logs...</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}
