@@ -44,9 +44,14 @@ if not os.path.exists("logs"):
 app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
+
+# Read allowed origins from ENV; default to same-origin only
+_cors_origins = os.getenv("CORS_ORIGINS", "").strip()
+allowed_origins = [o.strip() for o in _cors_origins.split(",") if o.strip()] if _cors_origins else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -90,7 +95,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     # Auto-create admin user if not exists (For simple setup)
     # Password should be set via environment variable
     if not user and form_data.username == "phongdh":
-        admin_password = os.getenv("ADMIN_PASSWORD", "changeme123")
+        admin_password = os.getenv("ADMIN_PASSWORD")
+        if not admin_password:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="ADMIN_PASSWORD environment variable not set. Cannot auto-create admin."
+            )
         user = User(username="phongdh", hashed_password=get_password_hash(admin_password))
         db.add(user)
         db.commit()
@@ -162,7 +172,7 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, res
                 key="job_password", 
                 value=quote(job_data.password, safe=''), 
                 max_age=3600*24, 
-                httponly=False,
+                httponly=True,
                 samesite="lax"
             )
         
@@ -530,7 +540,7 @@ def verify_job_password(job_id: str, data: PasswordVerify, response: Response, d
             key="job_password", 
             value=quote(data.password, safe=''), 
             max_age=3600*24, # 1 day
-            httponly=False,  # Allow JS access for redundancy if needed
+            httponly=True,
             samesite="lax"
         )
         return {"valid": True, "password_required": True}
@@ -618,8 +628,24 @@ def cancel_job(job_id: str, db: Session = Depends(get_db)):
     
     return {"message": f"Cancelled {cancelled_count} mailboxes", "cancelled": cancelled_count}
 
-# --- Check Credentials API (Public) ---
+# --- Check Credentials API (Public, Rate-Limited) ---
 from check_credentials import check_imap_login, check_bulk, detect_provider, PROVIDER_MAP
+import time as _time
+from collections import defaultdict as _defaultdict
+
+# Simple in-memory rate limiter
+_rate_limit_store = _defaultdict(list)
+_RATE_LIMIT_MAX = 10  # max requests
+_RATE_LIMIT_WINDOW = 60  # per 60 seconds
+
+def _check_rate_limit(client_ip: str):
+    now = _time.time()
+    window_start = now - _RATE_LIMIT_WINDOW
+    # Clean old entries
+    _rate_limit_store[client_ip] = [t for t in _rate_limit_store[client_ip] if t > window_start]
+    if len(_rate_limit_store[client_ip]) >= _RATE_LIMIT_MAX:
+        raise HTTPException(status_code=429, detail=f"Rate limit exceeded. Max {_RATE_LIMIT_MAX} requests per {_RATE_LIMIT_WINDOW}s.")
+    _rate_limit_store[client_ip].append(now)
 
 class CredentialCheck(BaseModel):
     email: str
@@ -628,8 +654,9 @@ class CredentialCheck(BaseModel):
     port: int = 993
 
 @app.post("/api/check-credentials")
-async def check_single_credential(data: CredentialCheck):
+async def check_single_credential(data: CredentialCheck, request: Request):
     """Check a single email credential via IMAP login."""
+    _check_rate_limit(request.client.host)
     result = check_imap_login(
         email=data.email,
         password=data.password,
@@ -640,11 +667,13 @@ async def check_single_credential(data: CredentialCheck):
 
 @app.post("/api/check-credentials/bulk")
 async def check_bulk_credentials(
+    request: Request,
     file: UploadFile = File(...),
     host: str = Query(None),
     port: int = Query(993)
 ):
     """Check multiple credentials from a CSV file (format: email,password per line)."""
+    _check_rate_limit(request.client.host)
     content = await file.read()
     csv_text = content.decode('utf-8')
 

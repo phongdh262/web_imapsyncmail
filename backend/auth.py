@@ -3,6 +3,7 @@ from typing import Optional
 from jose import JWTError, jwt
 import bcrypt
 import hashlib
+import os
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
@@ -10,8 +11,10 @@ from sqlalchemy.orm import Session
 from database import User, SessionLocal, get_db
 
 # --- Configuration ---
-# In a real app, use environment variables!
-SECRET_KEY = "super-secret-key-change-this-in-production"
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-fallback-key-CHANGE-IN-PRODUCTION")
+if SECRET_KEY == "dev-only-fallback-key-CHANGE-IN-PRODUCTION":
+    import warnings
+    warnings.warn("⚠️ SECRET_KEY not set! Using insecure fallback. Set SECRET_KEY in .env for production.", stacklevel=2)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 1 day
 

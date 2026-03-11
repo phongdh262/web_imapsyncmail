@@ -46,6 +46,8 @@ def run_imapsync(mailbox_id: int):
         
     log_file_path = f"{log_dir}/{mailbox.id}.log"
     
+    pass1_path = None
+    pass2_path = None
     try:
         mailbox.status = 'running'
         mailbox.message = "Starting imapsync..."
@@ -251,10 +253,6 @@ def run_imapsync(mailbox_id: int):
             if mailbox_id in active_processes:
                 del active_processes[mailbox_id]
 
-            # Cleanup temp files
-            if os.path.exists(pass1_path): os.unlink(pass1_path)
-            if os.path.exists(pass2_path): os.unlink(pass2_path)
-
             if process.returncode == 0:
                 mailbox.status = 'success'
                 mailbox.progress = 100
@@ -293,8 +291,15 @@ def run_imapsync(mailbox_id: int):
         if mailbox_id in active_processes:
             del active_processes[mailbox_id]
         
+        # Cleanup temp password files (ALWAYS, even on exception)
+        for _p in [pass1_path, pass2_path]:
+            if _p and os.path.exists(_p):
+                try:
+                    os.unlink(_p)
+                except Exception:
+                    pass
+        
         # Recalculate Job Stats to avoid race conditions and check completion
-            # Recalculate Job Stats to avoid race conditions and check completion
         if job:
             from sqlalchemy import func
             completed_count = db.query(Mailbox).filter(Mailbox.job_id == job.id, Mailbox.status.in_(['success', 'warning'])).count()
