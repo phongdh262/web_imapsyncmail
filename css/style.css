@@ -66,12 +66,10 @@
     --border-secondary: rgba(255, 255, 255, 0.1);
 
     /* Premium colored shadows for refined glow */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.1);
-    /* Blue glow */
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4), 0 0 30px rgba(124, 58, 237, 0.15);
-    /* Violet glow */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
 
     --log-bg: #0b1120;
     /* Darker log background */
@@ -114,7 +112,6 @@ body {
 
 /* Dark mode body background - override Tailwind gradient classes */
 [data-theme="dark"] body {
-    background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%) !important;
     background-color: var(--bg-primary) !important;
 }
 
@@ -447,14 +444,12 @@ body {
 }
 
 @keyframes floatUp {
-
     0%,
     100% {
         transform: translateY(0px);
     }
-
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-2px);
     }
 }
 
@@ -571,30 +566,28 @@ body {
    Glass Effect
    ============================================ */
 .glass-overlay {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid var(--border-primary);
 }
 
 [data-theme="dark"] .glass-overlay {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--border-primary);
 }
 
-/* Glass Card - Universal Premium Style */
+/* Minimalist Tech Card */
 .glass-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    box-shadow: none;
 }
 
 [data-theme="dark"] .glass-card {
     background: var(--bg-card);
     border: 1px solid var(--border-primary);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: none;
 }
 
 /* ============================================
@@ -632,30 +625,24 @@ body {
    Card Styles
    ============================================ */
 .card-hover {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-xl);
+    border-color: var(--accent-primary);
 }
 
 /* Stats card micro-animation */
 .stats-card {
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .stats-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: var(--shadow-xl);
-}
-
-.stats-card:hover .stats-icon {
-    transform: scale(1.1);
+    border-color: var(--accent-primary);
 }
 
 .stats-icon {
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
 }
 
 /* ============================================

@@ -133,13 +133,13 @@ const initDashboard = async () => {
 
         const getStatusClasses = (status) => {
             const statusMap = {
-                'running': 'bg-blue-100 text-blue-700 border border-blue-200',
-                'completed': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-                'success': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-                'failed': 'bg-red-100 text-red-700 border border-red-200',
-                'pending': 'bg-amber-100 text-amber-700 border border-amber-200'
+                'running': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
+                'completed': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
+                'success': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
+                'failed': 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
+                'pending': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
             };
-            return statusMap[status] || 'bg-gray-100 text-gray-700 border border-gray-200';
+            return statusMap[status] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700';
         };
 
         if (jobs.length === 0) {
@@ -151,11 +151,11 @@ const initDashboard = async () => {
             emptyState?.classList.add('hidden');
 
             jobListEl.innerHTML = jobs.map((job, index) => `
-                <tr class="hover:bg-blue-50/50 transition-colors stagger-item ${job.status === 'running' ? 'pulse-running' : ''}" data-status="${job.status}">
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors stagger-item ${job.status === 'running' ? 'pulse-running' : ''}" data-status="${job.status}">
 
                     <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900">${job.name}</div>
-                        <div class="text-sm text-gray-500">${new Date(job.created_at).toLocaleString()}</div>
+                        <div class="font-medium text-slate-900 dark:text-white">${job.name}</div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400">${new Date(job.created_at).toLocaleString()}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusClasses(job.status)}">
@@ -173,12 +173,12 @@ const initDashboard = async () => {
                     </td>
 
                     <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-gray-900">${job.source}</div>
-                        <div class="text-sm text-gray-500">→ ${job.target}</div>
+                        <div class="text-sm font-medium text-slate-900 dark:text-white">${job.source}</div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400">→ ${job.target}</div>
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                            <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
                                 View
                             </a>
                             <button onclick="deleteSingleJob('${job.id}', '${job.name.replace(/'/g, "\\'")}')" 
@@ -609,9 +609,9 @@ const initCreateJob = () => {
 
                 let html = `
                     <div class="csv-preview-card">
-                        <div class="csv-preview-header">
+                        <div class="csv-preview-header bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
                             <h3 class="font-bold text-slate-800 dark:text-slate-200">CSV Preview</h3>
-                            <span class="csv-count-badge">
+                            <span class="csv-count-badge bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                 ${lines.length} mailboxes
                             </span>
                         </div>
@@ -686,7 +686,7 @@ window.showToast = (message, type = 'info') => {
     };
 
     const toast = document.createElement('div');
-    toast.className = `min-w-[300px] p-4 rounded-xl shadow-lg border border-gray-200 border-l-4 ${typeStyles[type] || typeStyles.info} animate-slide-in-right cursor-pointer flex items-center gap-3`;
+    toast.className = `min-w-[300px] p-4 rounded-xl shadow-sm border ${typeStyles[type] || typeStyles.info} animate-slide-in-right cursor-pointer flex items-center gap-3 relative overflow-hidden`;
     toast.innerHTML = `
         ${icons[type] || icons.info}
         <span class="text-gray-800 text-sm font-medium">${message}</span>
@@ -769,31 +769,31 @@ window.showPasswordModal = (jobId, isWrongPassword = false) => {
 
     const modal = document.createElement('div');
     modal.id = 'password-modal';
-    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+    modal.className = 'fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50';
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <div class="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl border border-slate-200 dark:border-slate-800">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Job Protected</h3>
-                    <p class="text-sm text-gray-500">Enter password to view this job</p>
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Job Protected</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Enter password to view this job</p>
                 </div>
             </div>
             ${isWrongPassword ? '<p class="text-red-500 text-sm mb-3">Incorrect password. Please try again.</p>' : ''}
             <input type="password" id="job-password-input" placeholder="Enter password..."
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4 font-mono transition-shadow h-12"
                 onkeypress="if(event.key==='Enter') submitJobPassword('${jobId}')">
             <div class="flex gap-3">
                 <button onclick="window.location.href='index.html'" 
-                    class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
+                    class="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
                     Back
                 </button>
                 <button onclick="submitJobPassword('${jobId}')"
-                    class="flex-1 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors">
+                    class="flex-1 px-4 py-2.5 bg-blue-600 dark:bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors">
                     Confirm
                 </button>
 
@@ -893,14 +893,14 @@ const initJobDetail = async () => {
             // Status badge classes helper
             const getStatusBadge = (status) => {
                 const statusMap = {
-                    'running': 'bg-blue-100 text-blue-700',
-                    'completed': 'bg-emerald-100 text-emerald-700',
-                    'success': 'bg-emerald-100 text-emerald-700',
-                    'failed': 'bg-red-100 text-red-700',
-                    'pending': 'bg-amber-100 text-amber-700',
-                    'warning': 'bg-orange-100 text-orange-700'
+                    'running': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
+                    'completed': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
+                    'success': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
+                    'failed': 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
+                    'pending': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800',
+                    'warning': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800'
                 };
-                return statusMap[status] || 'bg-gray-100 text-gray-700';
+                return statusMap[status] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700';
             };
 
             // Setup Header
@@ -966,9 +966,9 @@ function renderMailboxes(mailboxes, getStatusBadge) {
     if (mailboxes && mailboxes.length > 0) {
         emptyState?.classList.add('hidden');
         tableBody.innerHTML = mailboxes.map(mb => `
-            <tr class="hover:bg-blue-50/50 transition-colors" data-user="${mb.user?.toLowerCase()}" data-target="${mb.target_user?.toLowerCase()}">
-                <td class="px-6 py-4 font-mono text-sm text-gray-900">${mb.user}</td>
-                <td class="px-6 py-4 font-mono text-sm text-gray-900">${mb.target_user}</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" data-user="${mb.user?.toLowerCase()}" data-target="${mb.target_user?.toLowerCase()}">
+                <td class="px-6 py-4 font-mono text-sm text-slate-900 dark:text-white">${mb.user}</td>
+                <td class="px-6 py-4 font-mono text-sm text-slate-900 dark:text-white">${mb.target_user}</td>
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadge(mb.status === 'success' ? 'completed' : mb.status)}">
                         ${mb.status === 'running' ? '<span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>' : ''}
@@ -990,9 +990,9 @@ function renderMailboxes(mailboxes, getStatusBadge) {
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex justify-end items-center gap-2">
-                        <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">Log</button>
-                        ${mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors">Stop</button>` : ''}
-                        ${mb.status === 'failed' || mb.status === 'warning' ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Retry</button>` : ''}
+                        <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">Log</button>
+                        ${mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition-colors border border-transparent">Stop</button>` : ''}
+                        ${mb.status === 'failed' || mb.status === 'warning' ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 dark:bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors border border-transparent">Retry</button>` : ''}
                     </div>
                 </td>
             </tr>

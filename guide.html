@@ -59,37 +59,28 @@
 </head>
 
 <body class="font-sans bg-gray-50 text-slate-800 transition-colors duration-300 min-h-screen flex flex-col">
-    <!-- Background Gradients -->
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div
-            class="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl opacity-50 mix-blend-multiply animate-blob">
-        </div>
-        <div
-            class="absolute top-0 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl opacity-50 mix-blend-multiply animate-blob animation-delay-2000">
-        </div>
-        <div
-            class="absolute -bottom-32 left-1/3 w-96 h-96 bg-pink-400/20 rounded-full blur-3xl opacity-50 mix-blend-multiply animate-blob animation-delay-4000">
-        </div>
-    </div>
+    <!-- Background base -->
+    <div class="fixed inset-0 -z-10 bg-slate-50 dark:bg-slate-950 pointer-events-none"></div>
 
     <!-- Navigation Bar -->
-    <nav class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-white/20 dark:border-slate-700 shadow-sm transition-all duration-300"
+    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-all duration-300 shadow-sm"
         id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <a href="index.html" class="flex items-center gap-3 group">
                     <div
-                        class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
+                        class="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
-                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M22 6L12 13L2 6" stroke="white" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="text-white dark:text-slate-900" />
+                            <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="text-white dark:text-slate-900" />
                         </svg>
                     </div>
                     <span
-                        class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-violet-700 dark:from-blue-400 dark:to-violet-400">IMAP
+                        class="text-lg font-semibold text-slate-900 dark:text-white tracking-tight">IMAP
                         Sync Pro</span>
                 </a>
 
@@ -109,7 +100,7 @@
                         </svg>
                     </button>
                     <a href="check-credentials.html"
-                        class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all font-medium text-sm shadow-sm">
+                        class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors font-medium text-sm shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -118,7 +109,7 @@
                         Check Credentials
                     </a>
                     <a href="index.html"
-                        class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-slate-600 transition-all font-medium text-sm shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors font-medium text-sm shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -135,7 +126,7 @@
         <div class="flex flex-col lg:flex-row gap-10">
             <!-- Sidebar Navigation (Sticky) -->
             <aside class="lg:w-64 flex-shrink-0 hidden lg:block">
-                <div class="sticky top-24 p-5 rounded-2xl glass-card border border-white/20 shadow-xl backdrop-blur-md">
+                <div class="sticky top-24 p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Mục Lục</h3>
                     <nav class="space-y-1 sidebar-scroll max-h-[70vh] overflow-y-auto pr-2">
                         <a href="#quick-start"
@@ -201,7 +192,7 @@
                 <!-- Hero Section -->
                 <div class="mb-12 animate-slide-up">
                     <h1
-                        class="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 leading-tight">
+                        class="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white leading-tight">
                         Tài Liệu Hướng Dẫn
                     </h1>
                     <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
@@ -213,7 +204,7 @@
                 <!-- 1. Quick Start -->
                 <section id="quick-start" class="mb-12 scroll-mt-28">
                     <div
-                        class="glass-card rounded-2xl p-8 border border-white/20 shadow-lg relative overflow-hidden group hover:shadow-xl transition-shadow duration-300">
+                        class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow duration-300">
                         <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                             <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -268,7 +259,7 @@
 
                 <!-- 2. Bulk Migration -->
                 <section id="bulk-migration" class="mb-12 scroll-mt-28">
-                    <div class="glass-card rounded-2xl p-8 border border-white/20 shadow-lg">
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div class="flex items-center gap-4 mb-8">
                             <div
                                 class="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-xl flex items-center justify-center text-violet-600 dark:text-violet-400">
@@ -354,7 +345,7 @@
 
                 <!-- 3. Single Sync -->
                 <section id="single-sync" class="mb-12 scroll-mt-28">
-                    <div class="glass-card rounded-2xl p-8 border border-white/20 shadow-lg">
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
                             <div
                                 class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-xl flex items-center justify-center text-cyan-600 dark:text-cyan-400">
@@ -397,7 +388,7 @@
 
                 <!-- 4. Monitoring -->
                 <section id="monitoring" class="mb-12 scroll-mt-28">
-                    <div class="glass-card rounded-2xl p-8 border border-white/20 shadow-lg">
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
                             <div
                                 class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -451,7 +442,7 @@
 
                 <!-- 4b. Check Credentials -->
                 <section id="check-credentials" class="mb-12 scroll-mt-28">
-                    <div class="glass-card rounded-2xl p-8 border border-white/20 shadow-lg">
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
                         <div class="flex items-center gap-4 mb-6">
                             <div
                                 class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center text-amber-600 dark:text-amber-400">
@@ -596,7 +587,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                     <!-- 5. Gmail Setup -->
                     <section id="gmail-setup"
-                        class="scroll-mt-28 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-md border border-slate-100 dark:border-slate-700">
+                        class="scroll-mt-28 bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600">G
                             </div>
@@ -628,7 +619,7 @@
 
                     <!-- 6. Office 365 -->
                     <section id="office365-setup"
-                        class="scroll-mt-28 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-md border border-slate-100 dark:border-slate-700">
+                        class="scroll-mt-28 bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
                         <div class="flex items-center gap-3 mb-4">
                             <div
                                 class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
@@ -663,7 +654,7 @@
                 <!-- 7. Security -->
                 <section id="security" class="mb-12 scroll-mt-28">
                     <div
-                        class="glass-card rounded-2xl p-8 border border-white/20 shadow-lg bg-green-50/30 dark:bg-green-900/10">
+                        class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
                         <h2 class="text-2xl font-bold text-green-800 dark:text-green-400 mb-6 flex items-center gap-2">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -884,7 +875,7 @@
                         Guide
                     </a>
                     <a href="index.html"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
