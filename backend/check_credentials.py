@@ -79,10 +79,16 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
 
     # Auto-detect provider if host not specified
     provider_info = detect_provider(email)
-    if not host:
+    
+    if host:
+        # If user explicitly provided a host, use it
+        provider_name = provider_info["name"] if provider_info else host
+    else:
+        # No host provided, rely on auto-detection
         if provider_info:
             host = provider_info["host"]
             port = provider_info["port"]
+            provider_name = provider_info["name"]
         else:
             return {
                 "email": email,
@@ -90,8 +96,6 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
                 "message": f"Cannot detect IMAP server for domain. Please specify host manually.",
                 "provider": "Unknown"
             }
-
-    provider_name = provider_info["name"] if provider_info else host
 
     try:
         # Create SSL context
