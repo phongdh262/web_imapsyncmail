@@ -11,3 +11,4 @@ python-dotenv
 a2wsgi
 aiofiles
 dnspython
+jinja2
