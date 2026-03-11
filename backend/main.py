@@ -788,6 +788,10 @@ from fastapi.responses import HTMLResponse
 
 # Mount Static Assets
 # Note: StaticFiles needs 'aiofiles' installed.
+os.makedirs(os.path.join(base_dir, "css"), exist_ok=True)
+os.makedirs(os.path.join(base_dir, "js"), exist_ok=True)
+os.makedirs(os.path.join(base_dir, "images"), exist_ok=True)
+
 app.mount("/css", StaticFiles(directory=os.path.join(base_dir, "css")), name="css")
 app.mount("/js", StaticFiles(directory=os.path.join(base_dir, "js")), name="js")
 app.mount("/images", StaticFiles(directory=os.path.join(base_dir, "images")), name="images")
