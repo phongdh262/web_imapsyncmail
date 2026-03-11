@@ -262,16 +262,14 @@ Tài liệu này bao gồm các test cases (kịch bản kiểm thử) thủ cô
 | CB-41 | GET danh sách providers | `GET /api/providers`. | HTTP 200, JSON array chứa các provider (Gmail, Yandex, Outlook...) với domains tương ứng. |
 | CB-42 | GET providers không trùng lặp | `GET /api/providers`. | Mỗi provider name xuất hiện 1 lần dù có nhiều domains (gmail.com, googlemail.com → 1 Gmail). |
 
-### 9.5. Shell Scripts — Kiểm tra App Password (Legacy)
+## 10. Module Bảo mật & Triển khai (Security & Deployment)
+**Mục tiêu:** Kiểm tra lại quy trình triển khai và đảm bảo không có thông tin nhạy cảm bị rò rỉ.
 
-| ID | Tên Test Case | Script | Các bước thực hiện | Kết quả mong đợi |
-|---|---|---|---|---|
-| CB-43 | Check Gmail qua curl | `check_app_password_gg.sh` | 1. Tạo file `user.csv` (email,password).<br>2. Chạy `bash check_app_password_gg.sh user.csv`. | In ra "Email: user@gmail.com - HTTP Status Code: 200" nếu đúng, 401 nếu sai. |
-| CB-44 | Check Gmail sai password | `check_app_password_gg.sh` | 1. CSV có password sai.<br>2. Chạy script. | HTTP Status Code: 401 (Unauthorized). |
-| CB-45 | Check Yandex qua IMAP | `check_app_password_yandex.sh` | 1. Tạo file `user.csv` (email,password).<br>2. Chạy `bash check_app_password_yandex.sh user.csv`. | In "Email: user@yandex.com - SUCCESS" nếu đúng. |
-| CB-46 | Check Yandex sai password | `check_app_password_yandex.sh` | 1. CSV có password sai cho Yandex.<br>2. Chạy script. | In "Email: user@yandex.com - FAILED". |
-| CB-47 | CSV có ký tự carriage return | Cả 2 script | 1. Tạo CSV trên Windows (có `\r`).<br>2. Chạy script. | Script tự xóa `\r` bằng `tr -d '\r'`, kết quả chính xác. |
-| CB-48 | CSV nhiều dòng | Cả 2 script | 1. CSV có 10 dòng email,password.<br>2. Chạy script. | In kết quả cho từng dòng, tổng 10 dòng output. |
+| ID | Tên Test Case | Các bước thực hiện | Kết quả mong đợi |
+|---|---|---|---|
+| SEC-01 | Kiểm tra cấu hình Docker | 1. Mở file `docker-compose.yml`.<br>2. Kiểm tra phần `environment` của service `app`. | Các biến chứa nội dung nhạy cảm như database password phải sử dụng biến môi trường dạng `${DB_PASSWORD}`, không hardcode mật khẩu trực tiếp. |
+| SEC-02 | Xác thực tệp tin bảo mật | 1. Kiểm tra trạng thái git status.<br>2. Xem xét các tệp tin trong thư mục gốc. | Tệp `secret.key` và `.env` không bị vô tình lưu vào kho lưu trữ mã nguồn, cần nằm trong `.gitignore`. |
+| SEC-03 | Đảm bảo xóa ứng dụng test mật khẩu legacy | 1. Tìm tệp `check_app_password_gg.sh` và `check_app_password_yandex.sh` trong kho. | Các ứng dụng kiểm tra mật khẩu dạng shell script cũ đã bị xóa sạch khỏi thư mục dự án vì có nguy cơ lưu trữ/xử lý mật khẩu không an toàn. |
 
 ---
 
