@@ -387,9 +387,9 @@ const initCreateJob = () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const submitBtn = activeTab === 'bulk' ? document.getElementById('submit-btn') : document.getElementById('submit-single-btn');
-        const btnText = submitBtn.querySelector('.btn-text') || submitBtn.querySelector('.single-btn-text');
-        const btnIcon = submitBtn.querySelector('.btn-icon') || submitBtn.querySelector('.single-btn-icon');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnIcon = submitBtn.querySelector('.btn-icon');
 
         // Validate required fields
         // Validate required fields with specific messages
