@@ -156,6 +156,7 @@ def run_imapsync(mailbox_id: int):
             '--useheader', 'Message-Id',    # Fast header parsing for large folders
             '--fastio1',                    # Use fast I/O on source
             '--fastio2',                    # Use fast I/O on target
+            '--allowsizemismatch',          # Handle CRLF/LF encoding size differences between environments
         ]
         
         # Security Flags
@@ -168,6 +169,32 @@ def run_imapsync(mailbox_id: int):
             cmd.append('--ssl2')
         elif job.target_security == "STARTTLS":
             cmd.append('--tls2')
+
+        # Provider-specific Flags (Source)
+        source_host_lower = job.source_host.lower()
+        if 'gmail.com' in source_host_lower or 'googlemail.com' in source_host_lower:
+            cmd.append('--gmail1')
+        elif 'office365.com' in source_host_lower or 'outlook.com' in source_host_lower or 'hotmail.com' in source_host_lower:
+            cmd.append('--office3651')
+        elif 'exchange' in source_host_lower:
+            cmd.append('--exchange1')
+        elif 'yahoo.com' in source_host_lower:
+            cmd.append('--yahoo1')
+        elif 'zoho.com' in source_host_lower:
+            cmd.append('--zoho1')
+
+        # Provider-specific Flags (Target)
+        target_host_lower = job.target_host.lower()
+        if 'gmail.com' in target_host_lower or 'googlemail.com' in target_host_lower:
+            cmd.append('--gmail2')
+        elif 'office365.com' in target_host_lower or 'outlook.com' in target_host_lower or 'hotmail.com' in target_host_lower:
+            cmd.append('--office3652')
+        elif 'exchange' in target_host_lower:
+            cmd.append('--exchange2')
+        elif 'yahoo.com' in target_host_lower:
+            cmd.append('--yahoo2')
+        elif 'zoho.com' in target_host_lower:
+            cmd.append('--zoho2')
             
         # Feature Flags
         if options.get('sync_internal_dates'):
