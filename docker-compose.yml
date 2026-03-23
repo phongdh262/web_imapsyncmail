@@ -11,6 +11,9 @@ services:
       - DB_NAME=${DB_NAME:-imapsync_db}
       - DB_PORT=${DB_PORT:-3306}
       - APP_ENV=${APP_ENV:-production}
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
       - MAX_WORKERS=7
     networks:
       - web_network
