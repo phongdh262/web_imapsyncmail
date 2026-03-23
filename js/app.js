@@ -10,6 +10,61 @@ const ADMIN_USERNAME_KEY = 'admin_username';
 const PUBLIC_PATHS = ['guide.html', 'job-detail.html'];
 let adminSessionActive = false;
 
+const tr = (key, params = {}, fallback = '') => {
+    if (typeof window.t === 'function') {
+        return window.t(key, params, fallback || key);
+    }
+    return String(fallback || key).replace(/\{(\w+)\}/g, (_, token) => (
+        Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+    ));
+};
+
+const getLocale = () => {
+    if (typeof window.getCurrentLocale === 'function') {
+        return window.getCurrentLocale();
+    }
+    return typeof window.getCurrentLanguage === 'function' && window.getCurrentLanguage() === 'vi' ? 'vi-VN' : 'en-US';
+};
+
+const translateStatus = (status) => tr(`status.${status}`, {}, status);
+
+const localizeErrorMessage = (message = '') => {
+    const mappings = {
+        'Incorrect username or password': 'runtime.auth.loginFailed',
+        'Admin login required': 'runtime.auth.adminRequired',
+        'Unauthorized': 'runtime.auth.unauthorized',
+        'Incorrect password': 'runtime.auth.wrongPassword',
+        'Password required': 'runtime.auth.passwordRequired',
+        'Failed to create job': 'runtime.createJob.failedCreateJob',
+        'CSV Upload failed': 'runtime.createJob.csvUploadFailed',
+        'Failed to add mailbox': 'runtime.createJob.failedAddMailbox',
+        'Failed to cancel': 'runtime.jobDetail.failedCancel',
+        'Failed to stop': 'runtime.jobDetail.failedStop',
+        'Failed to retry': 'runtime.jobDetail.failedRetry',
+        'Failed to fetch logs': 'runtime.jobDetail.failedFetchLogs',
+        'Job ID not found': 'runtime.jobDetail.jobIdNotFound',
+        'Unexpected jobs response from server': 'runtime.dashboard.unexpectedJobsResponse',
+        'Failed to load jobs': 'runtime.dashboard.loadJobsFailed',
+        'Bulk check failed on server': 'runtime.check.bulkCheckFailed'
+    };
+
+    if (mappings[message]) {
+        return tr(mappings[message], {}, message);
+    }
+
+    return message;
+};
+
+const formatErrorMessage = (message = '') => `${tr('runtime.common.errorPrefix', {}, 'Error')}: ${localizeErrorMessage(message)}`;
+const getPresetProviderLabel = (provider) => ({
+    gmail: 'Gmail',
+    office365: 'Office 365',
+    yahoo: 'Yahoo',
+    outlook: 'Outlook',
+    h01: 'H01',
+    h02: 'H02'
+}[provider] || `${provider.charAt(0).toUpperCase()}${provider.slice(1)}`);
+
 const escapeHtml = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -51,7 +106,7 @@ const updateAdminAuthUI = () => {
         loginBtn?.classList.add('hidden');
         logoutBtn?.classList.remove('hidden');
         statusEl?.classList.remove('hidden');
-        if (statusEl) statusEl.textContent = `Admin: ${username}`;
+        if (statusEl) statusEl.textContent = tr('header.adminStatus', { username }, `Admin: ${username}`);
     } else {
         loginBtn?.classList.remove('hidden');
         logoutBtn?.classList.add('hidden');
@@ -65,7 +120,7 @@ const showAdminLoginError = (message = '') => {
     const errorEl = document.getElementById('admin-login-error');
     if (!errorEl) return;
     if (message) {
-        errorEl.textContent = message;
+        errorEl.textContent = localizeErrorMessage(message);
         errorEl.classList.remove('hidden');
     } else {
         errorEl.textContent = '';
@@ -112,7 +167,7 @@ const loginAdmin = async (username, password) => {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Login failed');
+        throw new Error(errorData.detail || tr('runtime.auth.loginFailed', {}, 'Login failed'));
     }
 
     const data = await response.json();
@@ -236,7 +291,7 @@ const injectFAB = () => {
     const fab = document.createElement('a');
     fab.href = '/admin/create-job.html';
     fab.className = 'fab ripple';
-    fab.title = 'Create New Job';
+    fab.title = tr('dashboard.empty.action', {}, 'Create New Job');
     fab.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -294,7 +349,7 @@ const initDashboard = async () => {
         }
         const payload = await res.json().catch(() => ({}));
         if (!res.ok) {
-            throw new Error(payload.detail || payload.message || `Failed to load jobs (${res.status})`);
+            throw new Error(payload.detail || payload.message || `${tr('runtime.dashboard.loadJobsFailed', {}, 'Failed to load jobs')} (${res.status})`);
         }
 
         const jobs = Array.isArray(payload)
@@ -304,7 +359,7 @@ const initDashboard = async () => {
                 : null;
 
         if (!jobs) {
-            throw new Error(payload.detail || 'Unexpected jobs response from server');
+            throw new Error(payload.detail || tr('runtime.dashboard.unexpectedJobsResponse', {}, 'Unexpected jobs response from server'));
         }
 
         const getStatusClasses = (status) => {
@@ -331,12 +386,12 @@ const initDashboard = async () => {
 
                     <td class="px-6 py-4">
                         <div class="font-medium text-slate-900 dark:text-white">${escapeHtml(job.name)}</div>
-                        <div class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(new Date(job.created_at).toLocaleString())}</div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(new Date(job.created_at).toLocaleString(getLocale()))}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusClasses(job.status)}">
                             ${job.status === 'running' ? '<span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>' : ''}
-                            ${escapeHtml(job.status)}
+                            ${escapeHtml(translateStatus(job.status))}
                         </span>
                     </td>
                     <td class="px-6 py-4">
@@ -355,11 +410,11 @@ const initDashboard = async () => {
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
                             <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
-                                View
+                                ${escapeHtml(tr('runtime.actions.view', {}, 'View'))}
                             </a>
                             <button onclick="deleteSingleJob('${job.id}', '${escapeHtml(job.name).replace(/'/g, "\\'")}')" 
                                 class="inline-flex items-center justify-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                title="Delete this job">
+                                title="${escapeHtml(tr('runtime.dashboard.deleteThisJobTitle', {}, 'Delete this job'))}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
@@ -383,7 +438,7 @@ const initDashboard = async () => {
 
     } catch (e) {
         console.error(e);
-        jobListEl.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">Error loading jobs: ${escapeHtml(e.message)}</td></tr>`;
+        jobListEl.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">${escapeHtml(tr('runtime.dashboard.errorLoadingJobs', { message: localizeErrorMessage(e.message) }, `Error loading jobs: ${e.message}`))}</td></tr>`;
     }
 };
 
@@ -411,47 +466,47 @@ window.refreshDashboard = async () => {
 
 window.deleteAllJobs = async () => {
     if (!await ensureAdminAuth()) return;
-    window.showConfirm("Are you sure you want to delete ALL jobs and logs? This action cannot be undone.", async () => {
+    window.showConfirm(tr('runtime.dashboard.deleteAllConfirm', {}, 'Are you sure you want to delete ALL jobs and logs? This action cannot be undone.'), async () => {
         try {
             const res = await request(`${API_BASE}/jobs`, { method: 'DELETE' });
             if (res.status === 401) {
                 await ensureAdminAuth();
-                throw new Error('Admin login required');
+                throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
             }
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                throw new Error(err.detail || "Failed to delete jobs");
+                throw new Error(err.detail || tr('runtime.dashboard.failedDeleteJobs', {}, 'Failed to delete jobs'));
             }
 
-            window.showToast("All history cleared", "success");
+            window.showToast(tr('runtime.dashboard.allHistoryCleared', {}, 'All history cleared'), "success");
 
             // Refresh dashboard
             await initDashboard();
 
         } catch (e) {
-            window.showToast("Error: " + e.message, "error");
+            window.showToast(formatErrorMessage(e.message), "error");
         }
     });
 };
 
 window.deleteSingleJob = async (jobId, jobName) => {
     if (!await ensureAdminAuth()) return;
-    window.showConfirm(`Are you sure you want to delete "${jobName}"? This will permanently remove its logs.`, async () => {
+    window.showConfirm(tr('runtime.dashboard.deleteJobConfirm', { jobName }, `Are you sure you want to delete "${jobName}"? This will permanently remove its logs.`), async () => {
         try {
             const res = await request(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' });
             if (res.status === 401) {
                 await ensureAdminAuth();
-                throw new Error('Admin login required');
+                throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
             }
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                throw new Error(err.detail || "Failed to delete job");
+                throw new Error(err.detail || tr('runtime.dashboard.failedDeleteJob', {}, 'Failed to delete job'));
             }
 
-            window.showToast("Job and logs deleted", "success");
+            window.showToast(tr('runtime.dashboard.jobDeleted', {}, 'Job and logs deleted'), "success");
             await initDashboard();
         } catch (e) {
-            window.showToast("Error: " + e.message, "error");
+            window.showToast(formatErrorMessage(e.message), "error");
         }
     });
 };
@@ -575,9 +630,14 @@ const initCreateJob = () => {
 
         if (!await ensureAdminAuth()) return;
 
-        const submitBtn = document.getElementById('submit-btn');
-        const btnText = submitBtn.querySelector('.btn-text');
-        const btnIcon = submitBtn.querySelector('.btn-icon');
+        const submitBtn = activeTab === 'single'
+            ? document.getElementById('submit-single-btn')
+            : document.getElementById('submit-btn');
+        const btnText = submitBtn?.querySelector(activeTab === 'single' ? '.single-btn-text' : '.btn-text');
+        const btnIcon = submitBtn?.querySelector(activeTab === 'single' ? '.single-btn-icon' : '.btn-icon');
+        const defaultSubmitText = activeTab === 'single'
+            ? tr('createJob.submit.single', {}, 'Start Single Migration')
+            : tr('createJob.submit.bulk', {}, 'Start Bulk Migration');
 
         // Validate required fields
         // Validate required fields with specific messages
@@ -587,15 +647,15 @@ const initCreateJob = () => {
         let missingFields = [];
 
         // Common Fields
-        if (!sourceHost.value.trim()) { validateField(sourceHost); missingFields.push('Source Host'); }
-        if (!targetHost.value.trim()) { validateField(targetHost); missingFields.push('Target Host'); }
-        if (!passwordInput.value.trim()) { validateField(passwordInput); missingFields.push('Job Password'); }
+        if (!sourceHost.value.trim()) { validateField(sourceHost); missingFields.push(tr('runtime.createJob.fieldSourceHost', {}, 'Source Host')); }
+        if (!targetHost.value.trim()) { validateField(targetHost); missingFields.push(tr('runtime.createJob.fieldTargetHost', {}, 'Target Host')); }
+        if (!passwordInput.value.trim()) { validateField(passwordInput); missingFields.push(tr('runtime.createJob.fieldJobPassword', {}, 'Job Password')); }
 
         // Specific Tab Fields
         if (activeTab === 'bulk') {
             const csvInput = document.getElementById('csv-file-input');
             if (csvInput.files.length === 0) {
-                missingFields.push('CSV File');
+                missingFields.push(tr('runtime.createJob.fieldCsvFile', {}, 'CSV File'));
                 // Highlight dropzone
                 const dropzone = document.getElementById('drop-zone');
                 dropzone.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-900/10');
@@ -607,21 +667,21 @@ const initCreateJob = () => {
             const tUser = document.getElementById('single-target-user');
             const tPass = document.getElementById('single-target-pass');
 
-            if (!sUser.value.trim()) { validateField(sUser); missingFields.push('Source Email'); }
-            if (!sPass.value.trim()) { validateField(sPass); missingFields.push('Source Password'); }
-            if (!tUser.value.trim()) { validateField(tUser); missingFields.push('Target Email'); }
-            if (!tPass.value.trim()) { validateField(tPass); missingFields.push('Target Password'); }
+            if (!sUser.value.trim()) { validateField(sUser); missingFields.push(tr('runtime.createJob.fieldSourceEmail', {}, 'Source Email')); }
+            if (!sPass.value.trim()) { validateField(sPass); missingFields.push(tr('runtime.createJob.fieldSourcePassword', {}, 'Source Password')); }
+            if (!tUser.value.trim()) { validateField(tUser); missingFields.push(tr('runtime.createJob.fieldTargetEmail', {}, 'Target Email')); }
+            if (!tPass.value.trim()) { validateField(tPass); missingFields.push(tr('runtime.createJob.fieldTargetPassword', {}, 'Target Password')); }
         }
 
         if (missingFields.length > 0) {
-            window.showToast(`Please fill in: ${missingFields.join(', ')}`, 'error');
+            window.showToast(tr('runtime.createJob.fillIn', { fields: missingFields.join(', ') }, `Please fill in: ${missingFields.join(', ')}`), 'error');
             return;
         }
 
         // Show loading state
-        submitBtn.disabled = true;
-        btnText.textContent = 'Creating...';
-        btnIcon.classList.add('animate-spin-slow');
+        if (submitBtn) submitBtn.disabled = true;
+        if (btnText) btnText.textContent = tr('runtime.createJob.creating', {}, 'Creating...');
+        btnIcon?.classList.add('animate-spin-slow');
 
         const formData = new FormData(form);
 
@@ -634,7 +694,9 @@ const initCreateJob = () => {
 
         // Better job name with time
         const now = new Date();
-        const jobName = `Migration ${now.toLocaleDateString('en-US')} ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+        const dateLabel = now.toLocaleDateString(getLocale());
+        const timeLabel = now.toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
+        const jobName = tr('runtime.createJob.jobName', { date: dateLabel, time: timeLabel }, `Migration ${dateLabel} ${timeLabel}`);
 
         // Get password - only send if not empty
         // passwordInput already defined above
@@ -662,9 +724,9 @@ const initCreateJob = () => {
 
             if (res.status === 401) {
                 await ensureAdminAuth();
-                throw new Error('Admin login required');
+                throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
             }
-            if (!res.ok) throw new Error('Failed to create job');
+            if (!res.ok) throw new Error(tr('runtime.createJob.failedCreateJob', {}, 'Failed to create job'));
             const job = await res.json();
 
             // Save password to sessionStorage and Cookie for later use
@@ -687,17 +749,17 @@ const initCreateJob = () => {
 
                     if (uploadRes.status === 401) {
                         await ensureAdminAuth();
-                        throw new Error('Admin login required');
+                        throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
                     }
                     if (!uploadRes.ok) {
                         const err = await uploadRes.json().catch(() => ({}));
-                        throw new Error(err.detail || 'CSV Upload failed');
+                        throw new Error(err.detail || tr('runtime.createJob.csvUploadFailed', {}, 'CSV Upload failed'));
                     }
                 } else {
-                    window.showToast('Please select a CSV file', 'warning');
-                    submitBtn.disabled = false;
-                    btnText.textContent = 'Start Migration';
-                    btnIcon.classList.remove('animate-spin-slow');
+                    window.showToast(tr('runtime.createJob.selectCsvFile', {}, 'Please select a CSV file'), 'warning');
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (btnText) btnText.textContent = defaultSubmitText;
+                    btnIcon?.classList.remove('animate-spin-slow');
                     return;
                 }
             } else if (activeTab === 'single') {
@@ -709,11 +771,11 @@ const initCreateJob = () => {
                 };
 
                 if (!singlePayload.source_user || !singlePayload.target_user) {
-                    throw new Error("Please enter both source and target email");
+                    throw new Error(tr('runtime.createJob.enterSourceAndTargetEmail', {}, 'Please enter both source and target email'));
                 }
 
                 if (!singlePayload.source_pass || !singlePayload.target_pass) {
-                    throw new Error("Please enter both passwords");
+                    throw new Error(tr('runtime.createJob.enterBothPasswords', {}, 'Please enter both passwords'));
                 }
 
                 const mailboxRes = await request(`${API_BASE}/jobs/${job.id}/mailboxes`, {
@@ -723,21 +785,21 @@ const initCreateJob = () => {
                 });
                 if (mailboxRes.status === 401) {
                     await ensureAdminAuth();
-                    throw new Error('Admin login required');
+                    throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
                 }
                 if (!mailboxRes.ok) {
                     const err = await mailboxRes.json().catch(() => ({}));
-                    throw new Error(err.detail || 'Failed to add mailbox');
+                    throw new Error(err.detail || tr('runtime.createJob.failedAddMailbox', {}, 'Failed to add mailbox'));
                 }
             }
 
             window.location.href = `job-detail.html?id=${job.id}`;
 
         } catch (error) {
-            window.showToast('Error: ' + error.message, 'error');
-            submitBtn.disabled = false;
-            btnText.textContent = 'Start Migration';
-            btnIcon.classList.remove('animate-spin-slow');
+            window.showToast(formatErrorMessage(error.message), 'error');
+            if (submitBtn) submitBtn.disabled = false;
+            if (btnText) btnText.textContent = defaultSubmitText;
+            btnIcon?.classList.remove('animate-spin-slow');
         }
     });
 
@@ -778,7 +840,7 @@ const initCreateJob = () => {
                     fileInput.files = files;
                     handleFileSelect(file);
                 } else {
-                    window.showToast('Please select a CSV file', 'error');
+                    window.showToast(tr('runtime.createJob.selectCsvFile', {}, 'Please select a CSV file'), 'error');
                 }
             }
         });
@@ -814,18 +876,18 @@ const initCreateJob = () => {
                 let html = `
                     <div class="csv-preview-card">
                         <div class="csv-preview-header bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
-                            <h3 class="font-bold text-slate-800 dark:text-slate-200">CSV Preview</h3>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-200">${escapeHtml(tr('runtime.createJob.csvPreviewTitle', {}, 'CSV Preview'))}</h3>
                             <span class="csv-count-badge bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                ${lines.length} mailboxes
+                                ${escapeHtml(tr('runtime.createJob.mailboxesCount', { count: lines.length }, `${lines.length} mailboxes`))}
                             </span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="csv-preview-table">
                                 <thead>
                                     <tr>
-                                        <th>Source User</th>
-                                        <th>Target User</th>
-                                        <th>Password</th>
+                                        <th>${escapeHtml(tr('runtime.createJob.sourceUser', {}, 'Source User'))}</th>
+                                        <th>${escapeHtml(tr('runtime.createJob.targetUser', {}, 'Target User'))}</th>
+                                        <th>${escapeHtml(tr('runtime.createJob.password', {}, 'Password'))}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -841,7 +903,7 @@ const initCreateJob = () => {
                                 <td class="font-mono text-xs">${escapeHtml(parts[2] || '-')}</td>
                                 <td>
                                     <span class="password-badge ${hasPass ? 'password-present' : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'}">
-                                        ${hasPass ? '✓ Present' : '✗ Missing'}
+                                        ${hasPass ? `✓ ${escapeHtml(tr('runtime.createJob.passwordPresent', {}, 'Present'))}` : `✗ ${escapeHtml(tr('runtime.createJob.passwordMissing', {}, 'Missing'))}`}
                                     </span>
                                 </td>
                             </tr>
@@ -855,7 +917,7 @@ const initCreateJob = () => {
                         </div>
                         ${lines.length > 5 ? `
                         <div class="px-6 py-3 bg-slate-50/50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-800 text-center">
-                            <p class="text-xs text-slate-400 italic">Showing first 5 of ${lines.length} mailboxes</p>
+                            <p class="text-xs text-slate-400 italic">${escapeHtml(tr('runtime.createJob.showingFirst', { count: lines.length }, `Showing first 5 of ${lines.length} mailboxes`))}</p>
                         </div>
                         ` : ''}
                     </div>
@@ -958,8 +1020,16 @@ window.filterDashboardJobs = (filter) => {
     currentFilter = filter;
 
     // Update active chip
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-        chip.classList.toggle('active', chip.dataset.filter === filter);
+    document.querySelectorAll('.filter-btn').forEach(chip => {
+        const active = chip.dataset.filter === filter;
+        chip.classList.toggle('active', active);
+        if (active) {
+            chip.classList.add('bg-blue-500', 'text-white');
+            chip.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-400');
+        } else {
+            chip.classList.remove('bg-blue-500', 'text-white');
+            chip.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-400');
+        }
     });
 
     applyDashboardFilters();
@@ -983,22 +1053,22 @@ window.showPasswordModal = (jobId, isWrongPassword = false) => {
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Job Protected</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Enter password to view this job</p>
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">${escapeHtml(tr('runtime.auth.jobProtectedTitle', {}, 'Job Protected'))}</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(tr('runtime.auth.jobProtectedSubtitle', {}, 'Enter password to view this job'))}</p>
                 </div>
             </div>
-            ${isWrongPassword ? '<p class="text-red-500 text-sm mb-3">Incorrect password. Please try again.</p>' : ''}
-            <input type="password" id="job-password-input" placeholder="Enter password..."
+            ${isWrongPassword ? `<p class="text-red-500 text-sm mb-3">${escapeHtml(tr('runtime.auth.wrongPassword', {}, 'Incorrect password. Please try again.'))}</p>` : ''}
+            <input type="password" id="job-password-input" placeholder="${escapeHtml(tr('runtime.auth.passwordPlaceholder', {}, 'Enter password...'))}"
                 class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4 font-mono transition-shadow h-12"
                 onkeypress="if(event.key==='Enter') submitJobPassword('${jobId}')">
             <div class="flex gap-3">
                 <button onclick="window.location.href='/admin/'" 
                     class="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
-                    Back
+                    ${escapeHtml(tr('runtime.actions.back', {}, 'Back'))}
                 </button>
                 <button onclick="submitJobPassword('${jobId}')"
                     class="flex-1 px-4 py-2.5 bg-blue-600 dark:bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors">
-                    Confirm
+                    ${escapeHtml(tr('runtime.actions.confirm', {}, 'Confirm'))}
                 </button>
 
             </div>
@@ -1013,7 +1083,7 @@ window.submitJobPassword = async (jobId) => {
     const password = passwordInput.value;
 
     if (!password) {
-        window.showToast('Please enter password', 'warning');
+        window.showToast(tr('runtime.auth.passwordRequired', {}, 'Please enter password'), 'warning');
         return;
     }
 
@@ -1034,7 +1104,7 @@ window.submitJobPassword = async (jobId) => {
             showPasswordModal(jobId, true);
         }
     } catch (e) {
-        window.showToast('Error: ' + e.message, 'error');
+        window.showToast(formatErrorMessage(e.message), 'error');
     }
 
 };
@@ -1076,10 +1146,10 @@ const initJobDetail = async () => {
                     showPasswordModal(jobId, data.detail === 'Incorrect password');
                     return;
                 }
-                throw new Error('Unauthorized');
+                throw new Error(tr('runtime.auth.unauthorized', {}, 'Unauthorized'));
             }
 
-            if (!res.ok) throw new Error('Job not found');
+            if (!res.ok) throw new Error(tr('runtime.jobDetail.jobNotFound', {}, 'Job not found'));
             const job = await res.json();
 
             // Store mailboxes for filtering
@@ -1101,7 +1171,7 @@ const initJobDetail = async () => {
             // Setup Header
             document.getElementById('job-name').textContent = job.name;
             const statusEl = document.getElementById('job-status');
-            statusEl.textContent = job.status;
+            statusEl.textContent = translateStatus(job.status);
             statusEl.className = `inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadge(job.status)}`;
             document.getElementById('source-host').textContent = job.source;
             document.getElementById('target-host').textContent = job.target;
@@ -1126,7 +1196,7 @@ const initJobDetail = async () => {
             // Format data transferred
             const dataEl = document.getElementById('stat-data');
             if (dataEl) {
-                dataEl.textContent = job.data_transferred || '0 B';
+                dataEl.textContent = job.data_transferred || tr('runtime.jobDetail.zeroBytes', {}, '0 B');
             }
 
             document.getElementById('main-progress-bar').style.width = `${job.progress}%`;
@@ -1145,7 +1215,7 @@ const initJobDetail = async () => {
             document.getElementById('job-name').textContent = job.name;
         } catch (e) {
             console.error(e);
-            document.getElementById('job-name').textContent = "Error loading job";
+            document.getElementById('job-name').textContent = tr('runtime.jobDetail.errorLoadingJob', {}, 'Error loading job');
             isJobPolling = false;
         }
 
@@ -1168,7 +1238,7 @@ function renderMailboxes(mailboxes, getStatusBadge) {
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadge(mb.status === 'success' ? 'completed' : mb.status)}">
                         ${mb.status === 'running' ? '<span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>' : ''}
-                        ${mb.status === 'warning' ? '⚠ Partial' : escapeHtml(mb.status)}
+                        ${mb.status === 'warning' ? `⚠ ${escapeHtml(tr('runtime.jobDetail.partial', {}, 'Partial'))}` : escapeHtml(translateStatus(mb.status))}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
@@ -1179,16 +1249,16 @@ function renderMailboxes(mailboxes, getStatusBadge) {
                             </div>
                             <span class="text-xs font-medium text-blue-600 min-w-[35px]">${mb.progress || 0}%</span>
                         </div>
-                        <div class="text-xs text-gray-500 mt-1 truncate" title="${escapeHtml(mb.msg || '')}">${escapeHtml(mb.msg || 'Starting...')}</div>
+                        <div class="text-xs text-gray-500 mt-1 truncate" title="${escapeHtml(mb.msg || '')}">${escapeHtml(mb.msg || tr('runtime.jobDetail.starting', {}, 'Starting...'))}</div>
                     ` : `
                         <span class="truncate" title="${escapeHtml(mb.msg || '')}">${escapeHtml(mb.msg || '-')}</span>
                     `}
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex justify-end items-center gap-2">
-                        <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">Log</button>
-                        ${isAdmin && mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition-colors border border-transparent">Stop</button>` : ''}
-                        ${isAdmin && (mb.status === 'failed' || mb.status === 'warning') ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 dark:bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors border border-transparent">Retry</button>` : ''}
+                        <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">${escapeHtml(tr('runtime.actions.log', {}, 'Log'))}</button>
+                        ${isAdmin && mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition-colors border border-transparent">${escapeHtml(tr('runtime.actions.stop', {}, 'Stop'))}</button>` : ''}
+                        ${isAdmin && (mb.status === 'failed' || mb.status === 'warning') ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 dark:bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors border border-transparent">${escapeHtml(tr('runtime.actions.retry', {}, 'Retry'))}</button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -1221,20 +1291,20 @@ window.cancelAllMailboxes = async () => {
 
     if (!await ensureAdminAuth()) return;
 
-    window.showConfirm('Are you sure you want to stop ALL running mailboxes?', async () => {
+    window.showConfirm(tr('runtime.jobDetail.stopAllConfirm', {}, 'Are you sure you want to stop ALL running mailboxes?'), async () => {
         try {
             const res = await request(`${API_BASE}/jobs/${jobId}/cancel`, { method: 'POST' });
             if (res.status === 401) {
                 await ensureAdminAuth();
-                throw new Error('Admin login required');
+                throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
             }
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.detail || 'Failed to cancel');
+                throw new Error(data.detail || tr('runtime.jobDetail.failedCancel', {}, 'Failed to cancel'));
             }
-            window.showToast('Stop command sent for all mailboxes', 'info');
+            window.showToast(tr('runtime.jobDetail.stopAllSent', {}, 'Stop command sent for all mailboxes'), 'info');
         } catch (e) {
-            window.showToast('Error: ' + e.message, 'error');
+            window.showToast(formatErrorMessage(e.message), 'error');
         }
     });
 
@@ -1242,20 +1312,20 @@ window.cancelAllMailboxes = async () => {
 
 window.stopSync = async (mailboxId) => {
     if (!await ensureAdminAuth()) return;
-    window.showConfirm('Are you sure you want to stop this sync?', async () => {
+    window.showConfirm(tr('runtime.jobDetail.stopConfirm', {}, 'Are you sure you want to stop this sync?'), async () => {
         try {
             const res = await request(`${API_BASE}/mailboxes/${mailboxId}/stop`, { method: 'POST' });
             if (res.status === 401) {
                 await ensureAdminAuth();
-                throw new Error('Admin login required');
+                throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
             }
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
-                throw new Error(data.detail || 'Failed to stop');
+                throw new Error(data.detail || tr('runtime.jobDetail.failedStop', {}, 'Failed to stop'));
             }
-            window.showToast('Stop command sent', 'info');
+            window.showToast(tr('runtime.jobDetail.stopSent', {}, 'Stop command sent'), 'info');
         } catch (e) {
-            window.showToast('Error: ' + e.message, 'error');
+            window.showToast(formatErrorMessage(e.message), 'error');
         }
     });
 };
@@ -1263,18 +1333,18 @@ window.stopSync = async (mailboxId) => {
 
 window.retrySync = async (mailboxId) => {
     if (!await ensureAdminAuth()) return;
-    window.showConfirm('Retry this mailbox sync?', async () => {
+    window.showConfirm(tr('runtime.jobDetail.retryConfirm', {}, 'Retry this mailbox sync?'), async () => {
         try {
             const res = await request(`${API_BASE}/mailboxes/${mailboxId}/retry`, { method: 'POST' });
             if (res.status === 401) {
                 await ensureAdminAuth();
-                throw new Error('Admin login required');
+                throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
             }
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.detail || 'Failed to retry');
+                throw new Error(data.detail || tr('runtime.jobDetail.failedRetry', {}, 'Failed to retry'));
             }
-            window.showToast('Retrying...', 'success');
+            window.showToast(tr('runtime.jobDetail.retrying', {}, 'Retrying...'), 'success');
 
             // Force restart polling if it stopped
             if (!isJobPolling) {
@@ -1285,7 +1355,7 @@ window.retrySync = async (mailboxId) => {
             }
 
         } catch (e) {
-            window.showToast('Error: ' + e.message, 'error');
+            window.showToast(formatErrorMessage(e.message), 'error');
         }
     });
 };
@@ -1302,13 +1372,13 @@ window.viewLogs = async (mailboxId) => {
     if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        logContent.textContent = 'Loading logs...';
+        logContent.textContent = tr('runtime.jobDetail.loadingLogs', {}, 'Loading logs...');
 
         const fetchLogs = async () => {
 
             try {
                 const res = await request(`${API_BASE}/mailboxes/${mailboxId}/logs`);
-                if (!res.ok) throw new Error('Failed to fetch logs');
+                if (!res.ok) throw new Error(tr('runtime.jobDetail.failedFetchLogs', {}, 'Failed to fetch logs'));
                 const data = await res.json();
 
                 const previousScrollTop = logContent.scrollTop;
@@ -1353,13 +1423,13 @@ window.downloadAllLogs = () => {
     const jobId = params.get('id');
 
     if (!jobId) {
-        window.showToast('Job ID not found', 'error');
+        window.showToast(tr('runtime.jobDetail.jobIdNotFound', {}, 'Job ID not found'), 'error');
         return;
     }
 
     // Secure download handling
     window.location.href = `${API_BASE}/jobs/${jobId}/logs/zip`;
-    window.showToast('Downloading logs archive...', 'success');
+    window.showToast(tr('runtime.jobDetail.downloadingLogs', {}, 'Downloading logs archive...'), 'success');
 };
 
 // ============================================
@@ -1428,24 +1498,24 @@ window.toggleTheme = toggleTheme;
 // ============================================
 // Command Palette (Ctrl+K)
 // ============================================
-const commandPaletteCommands = [
-    { id: 'new-job', title: 'Create New Job', subtitle: 'Create a new migration job', icon: '➕', action: () => window.location.href = '/admin/create-job.html', shortcut: ['⌘', 'N'] },
-    { id: 'dashboard', title: 'Dashboard', subtitle: 'View jobs overview', icon: '📊', action: () => window.location.href = '/admin/' },
-    { id: 'guide', title: 'User Guide', subtitle: 'View detailed guide', icon: '📖', action: () => window.location.href = 'guide.html' },
-    { id: 'refresh', title: 'Refresh Page', subtitle: 'Refresh current data', icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
-    { id: 'toggle-theme', title: 'Toggle Theme', subtitle: 'Light/Dark mode', icon: '🌓', action: () => toggleTheme() },
-];
+const getCommandPaletteCommands = () => ([
+    { id: 'new-job', title: tr('runtime.commandPalette.newJobTitle', {}, 'Create New Job'), subtitle: tr('runtime.commandPalette.newJobSubtitle', {}, 'Create a new migration job'), icon: '➕', action: () => window.location.href = '/admin/create-job.html', shortcut: ['⌘', 'N'] },
+    { id: 'dashboard', title: tr('runtime.commandPalette.dashboardTitle', {}, 'Dashboard'), subtitle: tr('runtime.commandPalette.dashboardSubtitle', {}, 'View jobs overview'), icon: '📊', action: () => window.location.href = '/admin/' },
+    { id: 'guide', title: tr('runtime.commandPalette.guideTitle', {}, 'User Guide'), subtitle: tr('runtime.commandPalette.guideSubtitle', {}, 'View detailed guide'), icon: '📖', action: () => window.location.href = 'guide.html' },
+    { id: 'refresh', title: tr('runtime.commandPalette.refreshTitle', {}, 'Refresh Page'), subtitle: tr('runtime.commandPalette.refreshSubtitle', {}, 'Refresh current data'), icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
+    { id: 'toggle-theme', title: tr('runtime.commandPalette.themeTitle', {}, 'Toggle Theme'), subtitle: tr('runtime.commandPalette.themeSubtitle', {}, 'Light/Dark mode'), icon: '🌓', action: () => toggleTheme() },
+]);
 
 
 let commandPaletteOpen = false;
 let selectedCommandIndex = 0;
-let filteredCommands = [...commandPaletteCommands];
+let filteredCommands = [...getCommandPaletteCommands()];
 
 const openCommandPalette = () => {
     if (commandPaletteOpen) return;
     commandPaletteOpen = true;
     selectedCommandIndex = 0;
-    filteredCommands = [...commandPaletteCommands];
+    filteredCommands = [...getCommandPaletteCommands()];
 
     const palette = document.createElement('div');
     palette.id = 'command-palette';
@@ -1456,7 +1526,7 @@ const openCommandPalette = () => {
             <input 
                 type="text" 
                 class="command-palette-input" 
-                placeholder="Search commands..." 
+                placeholder="${escapeHtml(tr('runtime.commandPalette.searchPlaceholder', {}, 'Search commands...'))}" 
                 id="command-search"
                 autocomplete="off"
             />
@@ -1475,7 +1545,7 @@ const openCommandPalette = () => {
 
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
-        filteredCommands = commandPaletteCommands.filter(cmd =>
+        filteredCommands = getCommandPaletteCommands().filter(cmd =>
             cmd.title.toLowerCase().includes(query) ||
             cmd.subtitle.toLowerCase().includes(query)
         );
@@ -1486,7 +1556,7 @@ const openCommandPalette = () => {
 
 const renderCommandItems = () => {
     if (filteredCommands.length === 0) {
-        return '<div class="px-4 py-8 text-center text-gray-500">No matching commands found</div>';
+        return `<div class="px-4 py-8 text-center text-gray-500">${escapeHtml(tr('runtime.commandPalette.noMatches', {}, 'No matching commands found'))}</div>`;
     }
 
     return filteredCommands.map((cmd, index) => `
@@ -1518,7 +1588,7 @@ const closeCommandPalette = () => {
 };
 
 const executeCommand = (cmdId) => {
-    const cmd = commandPaletteCommands.find(c => c.id === cmdId);
+    const cmd = getCommandPaletteCommands().find(c => c.id === cmdId);
     if (cmd) {
         closeCommandPalette();
         cmd.action();
@@ -1630,11 +1700,11 @@ const calculateEstimatedTime = (mailboxes) => {
     const remainingCount = runningMailboxes.length + pendingMailboxes.length;
     const estimatedMinutes = remainingCount * 3; // 3 minutes average per mailbox
 
-    if (estimatedMinutes < 1) return 'Almost done';
-    if (estimatedMinutes < 60) return `~${estimatedMinutes} min`;
+    if (estimatedMinutes < 1) return tr('runtime.estimated.almostDone', {}, 'Almost done');
+    if (estimatedMinutes < 60) return tr('runtime.estimated.minutes', { minutes: estimatedMinutes }, `~${estimatedMinutes} min`);
     const hours = Math.floor(estimatedMinutes / 60);
     const mins = estimatedMinutes % 60;
-    return `~${hours}h ${mins}m`;
+    return tr('runtime.estimated.hoursMinutes', { hours, minutes: mins }, `~${hours}h ${mins}m`);
 };
 
 window.calculateEstimatedTime = calculateEstimatedTime;
@@ -1648,9 +1718,9 @@ const renderEmptyState = (containerId, options = {}) => {
 
     const {
         icon = 'inbox',
-        title = 'No data yet',
-        description = 'Start by creating a new item',
-        actionText = 'Create New',
+        title = tr('runtime.emptyState.title', {}, 'No data yet'),
+        description = tr('runtime.emptyState.description', {}, 'Start by creating a new item'),
+        actionText = tr('runtime.emptyState.actionText', {}, 'Create New'),
         actionHref = '#'
     } = options;
 
@@ -1744,7 +1814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const password = document.getElementById('admin-password')?.value || '';
             const submitBtn = document.getElementById('admin-login-submit');
             if (!username || !password) {
-                showAdminLoginError('Please enter both username and password.');
+                showAdminLoginError(tr('runtime.auth.enterBothCredentials', {}, 'Please enter both username and password.'));
                 return;
             }
 
@@ -1804,6 +1874,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (searchInput) {
             searchInput.addEventListener('input', () => applyDashboardFilters());
         }
+        document.querySelectorAll('.filter-btn').forEach((button) => {
+            if (button.dataset.boundFilter === 'true') return;
+            button.dataset.boundFilter = 'true';
+            button.addEventListener('click', () => window.filterDashboardJobs(button.dataset.filter));
+        });
     }
 });
 
@@ -1844,7 +1919,8 @@ window.applyPreset = (side, provider) => {
     const clickedBtn = card.querySelector(`.preset-btn[onclick*="'${provider}'"]`);
     if (clickedBtn) clickedBtn.classList.add('selected');
 
-    window.showToast?.(`${provider.charAt(0).toUpperCase() + provider.slice(1)} preset applied`, 'success');
+    const providerLabel = getPresetProviderLabel(provider);
+    window.showToast?.(tr('runtime.createJob.presetApplied', { provider: providerLabel }, `${providerLabel} preset applied`), 'success');
 };
 
 // ============================================

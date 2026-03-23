@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% block page_id %}guide{% endblock %}
 {% block title %}Hướng Dẫn Sử Dụng - IMAP Sync Pro{% endblock %}
 {% block description %}Hướng dẫn chi tiết cách sử dụng IMAP Sync Pro để di chuyển email giữa các máy chủ IMAP một cách an toàn và hiệu quả.{% endblock %}
 
@@ -8,61 +9,61 @@
     <!-- Sidebar Navigation (Sticky) -->
     <aside class="lg:w-64 flex-shrink-0 hidden lg:block">
         <div class="sticky top-24 p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Mục Lục</h3>
+            <h3 data-i18n="guide.sidebar.title" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Mục Lục</h3>
             <nav class="space-y-1 sidebar-scroll max-h-[70vh] overflow-y-auto pr-2">
                 <a href="#quick-start"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Bắt Đầu Nhanh
+                    <span data-i18n="guide.sidebar.quickStart">Bắt Đầu Nhanh</span>
                 </a>
                 <a href="#bulk-migration"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Di Chuyển Hàng Loạt
+                    <span data-i18n="guide.sidebar.bulkMigration">Di Chuyển Hàng Loạt</span>
                 </a>
                 <a href="#single-sync"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Đồng Bộ Đơn Lẻ
+                    <span data-i18n="guide.sidebar.singleSync">Đồng Bộ Đơn Lẻ</span>
                 </a>
                 <a href="#monitoring"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Theo Dõi & Xử Lý Lỗi
+                    <span data-i18n="guide.sidebar.monitoring">Theo Dõi & Xử Lý Lỗi</span>
                 </a>
                 <a href="#check-credentials"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Kiểm Tra Mật Khẩu
+                    <span data-i18n="guide.sidebar.checkCredentials">Kiểm Tra Mật Khẩu</span>
                 </a>
                 <a href="#gmail-setup"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Cấu Hình Gmail
+                    <span data-i18n="guide.sidebar.gmailSetup">Cấu Hình Gmail</span>
                 </a>
                 <a href="#office365-setup"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Cấu Hình Office 365
+                    <span data-i18n="guide.sidebar.office365Setup">Cấu Hình Office 365</span>
                 </a>
                 <a href="#security"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    Bảo Mật
+                    <span data-i18n="guide.sidebar.security">Bảo Mật</span>
                 </a>
                 <a href="#faq_troubleshoot"
                     class="block px-3 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group flex items-center gap-2">
                     <span
                         class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-blue-500 transition-colors"></span>
-                    FAQ & Xử Lý Sự Cố
+                    <span data-i18n="guide.sidebar.faq">FAQ & Xử Lý Sự Cố</span>
                 </a>
             </nav>
         </div>
@@ -74,20 +75,20 @@
         <div class="mb-12 animate-slide-up page-hero">
             <div class="page-hero-grid">
                 <div>
-                    <span class="page-kicker">Public Documentation</span>
-                    <h1 class="page-title mt-4">Tài liệu vận hành rõ ràng cho các phiên di chuyển email.</h1>
-                    <p class="page-subtitle mt-4">
+                    <span data-i18n="guide.hero.kicker" class="page-kicker">Public Documentation</span>
+                    <h1 data-i18n="guide.hero.title" class="page-title mt-4">Tài liệu vận hành rõ ràng cho các phiên di chuyển email.</h1>
+                    <p data-i18n="guide.hero.subtitle" class="page-subtitle mt-4">
                         Hướng dẫn này ưu tiên khả năng đọc nhanh, nghiệm thu dễ, và xử lý sự cố thực tế cho các job migration đang chạy trên hệ thống.
                     </p>
                 </div>
                 <div class="hero-metrics">
                     <div class="hero-metric-card">
-                        <span class="hero-metric-label">Tập trung</span>
-                        <span class="hero-metric-value">Checklist thao tác, cấu hình IMAP, và xử lý lỗi phổ biến.</span>
+                        <span data-i18n="guide.hero.focusLabel" class="hero-metric-label">Tập trung</span>
+                        <span data-i18n="guide.hero.focusValue" class="hero-metric-value">Checklist thao tác, cấu hình IMAP, và xử lý lỗi phổ biến.</span>
                     </div>
                     <div class="hero-metric-card">
-                        <span class="hero-metric-label">Đối tượng</span>
-                        <span class="hero-metric-value">Admin triển khai, kỹ thuật viên vận hành, và khách hàng cần theo dõi kết quả.</span>
+                        <span data-i18n="guide.hero.audienceLabel" class="hero-metric-label">Đối tượng</span>
+                        <span data-i18n="guide.hero.audienceValue" class="hero-metric-value">Admin triển khai, kỹ thuật viên vận hành, và khách hàng cần theo dõi kết quả.</span>
                     </div>
                 </div>
             </div>
@@ -97,22 +98,22 @@
             <div class="signal-item">
                 <span class="signal-dot"></span>
                 <div>
-                    <span class="signal-title">1. Kiểm tra credential</span>
-                    <span class="signal-copy">Xác nhận host, app password và khả năng đăng nhập trước khi sync hàng loạt.</span>
+                    <span data-i18n="guide.signals.oneTitle" class="signal-title">1. Kiểm tra credential</span>
+                    <span data-i18n="guide.signals.oneCopy" class="signal-copy">Xác nhận host, app password và khả năng đăng nhập trước khi sync hàng loạt.</span>
                 </div>
             </div>
             <div class="signal-item">
                 <span class="signal-dot"></span>
                 <div>
-                    <span class="signal-title">2. Tạo job có password riêng</span>
-                    <span class="signal-copy">Giữ dashboard admin tách biệt khỏi link xem tiến độ chia sẻ cho khách.</span>
+                    <span data-i18n="guide.signals.twoTitle" class="signal-title">2. Tạo job có password riêng</span>
+                    <span data-i18n="guide.signals.twoCopy" class="signal-copy">Giữ dashboard admin tách biệt khỏi link xem tiến độ chia sẻ cho khách.</span>
                 </div>
             </div>
             <div class="signal-item">
                 <span class="signal-dot"></span>
                 <div>
-                    <span class="signal-title">3. Theo dõi và nghiệm thu</span>
-                    <span class="signal-copy">Dùng job detail để xem log, xác nhận trạng thái và tải report cuối cùng.</span>
+                    <span data-i18n="guide.signals.threeTitle" class="signal-title">3. Theo dõi và nghiệm thu</span>
+                    <span data-i18n="guide.signals.threeCopy" class="signal-copy">Dùng job detail để xem log, xác nhận trạng thái và tải report cuối cùng.</span>
                 </div>
             </div>
         </div>
@@ -136,17 +137,17 @@
                         </svg>
                     </div>
                     <div class="guide-section-copy">
-                        <span class="guide-section-kicker">Quick Start</span>
-                        <h2 class="section-title m-0">1. Bắt Đầu Nhanh</h2>
-                        <p class="section-note m-0">Những nguyên tắc cơ bản để người vận hành và người xem job cùng theo một flow rõ ràng, không lẫn giữa admin console và viewer.</p>
+                        <span data-i18n="guide.quickStart.kicker" class="guide-section-kicker">Quick Start</span>
+                        <h2 data-i18n="guide.quickStart.title" class="section-title m-0">1. Bắt Đầu Nhanh</h2>
+                        <p data-i18n="guide.quickStart.note" class="section-note m-0">Những nguyên tắc cơ bản để người vận hành và người xem job cùng theo một flow rõ ràng, không lẫn giữa admin console và viewer.</p>
                     </div>
                 </div>
 
-                <div class="guide-section-body">
+                <div data-i18n-html="guide.quickStart.body" class="guide-section-body">
                     <p class="mb-6">
                         Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP khác. Giao diện
-                        người dùng hiện đã được chuyển sang <strong>Tiếng Anh</strong> để chuẩn hóa quốc tế, nhưng
-                        tài liệu này vẫn giữ <strong>Tiếng Việt</strong> để hỗ trợ tốt nhất cho bạn.
+                        hiện hỗ trợ cả <strong>Tiếng Việt</strong> và <strong>Tiếng Anh</strong> để thuận tiện cho
+                        vận hành nội bộ lẫn chia sẻ với khách hàng.
                     </p>
 
                     <div class="guide-callout border-l-4 border-blue-500 rounded-r-xl">
@@ -183,12 +184,12 @@
                         </svg>
                     </div>
                     <div class="guide-section-copy">
-                        <span class="guide-section-kicker">Bulk Workflow</span>
-                        <h2 class="section-title m-0">2. Di Chuyển Hàng Loạt (Bulk Migration)</h2>
-                        <p class="section-note m-0">Checklist thao tác cho các đợt sync số lượng lớn, ưu tiên rõ host, CSV, job password và các tùy chọn an toàn trước khi chạy.</p>
+                        <span data-i18n="guide.bulk.kicker" class="guide-section-kicker">Bulk Workflow</span>
+                        <h2 data-i18n="guide.bulk.title" class="section-title m-0">2. Di Chuyển Hàng Loạt (Bulk Migration)</h2>
+                        <p data-i18n="guide.bulk.note" class="section-note m-0">Checklist thao tác cho các đợt sync số lượng lớn, ưu tiên rõ host, CSV, job password và các tùy chọn an toàn trước khi chạy.</p>
                     </div>
                 </div>
-                <div class="guide-section-body">
+                <div data-i18n-html="guide.bulk.body" class="guide-section-body">
                 <p>Phương pháp này phù hợp khi bạn cần di chuyển hàng chục hoặc hàng trăm tài khoản email cùng
                     lúc.</p>
 
@@ -261,12 +262,12 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         </svg>
                     </div>
                     <div class="guide-section-copy">
-                        <span class="guide-section-kicker">Single Mailbox</span>
-                        <h2 class="section-title m-0">3. Đồng Bộ Đơn Lẻ (Single Sync)</h2>
-                        <p class="section-note m-0">Gọn hơn cho các ca test, recovery hoặc các đợt chuyển từng mailbox cần kiểm soát thủ công cao hơn.</p>
+                        <span data-i18n="guide.single.kicker" class="guide-section-kicker">Single Mailbox</span>
+                        <h2 data-i18n="guide.single.title" class="section-title m-0">3. Đồng Bộ Đơn Lẻ (Single Sync)</h2>
+                        <p data-i18n="guide.single.note" class="section-note m-0">Gọn hơn cho các ca test, recovery hoặc các đợt chuyển từng mailbox cần kiểm soát thủ công cao hơn.</p>
                     </div>
                 </div>
-                <div class="guide-section-body">
+                <div data-i18n-html="guide.single.body" class="guide-section-body">
                 <p>Khuyên dùng nếu bạn chỉ cần chuyển email cho <strong>1 tài khoản duy nhất</strong>.</p>
                 <ol class="space-y-4 list-decimal pl-5">
                     <li class="pl-2">Tại trang Create Job, chọn Tab <strong>Single Sync</strong>.</li>
@@ -290,12 +291,12 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         </svg>
                     </div>
                     <div class="guide-section-copy">
-                        <span class="guide-section-kicker">Monitoring</span>
-                        <h2 class="section-title m-0">4. Theo Dõi & Xuất Báo Cáo</h2>
-                        <p class="section-note m-0">Theo dõi dashboard, xem log thời gian thực và tải báo cáo nghiệm thu sau khi toàn bộ mailbox hoàn tất.</p>
+                        <span data-i18n="guide.monitoring.kicker" class="guide-section-kicker">Monitoring</span>
+                        <h2 data-i18n="guide.monitoring.title" class="section-title m-0">4. Theo Dõi & Xuất Báo Cáo</h2>
+                        <p data-i18n="guide.monitoring.note" class="section-note m-0">Theo dõi dashboard, xem log thời gian thực và tải báo cáo nghiệm thu sau khi toàn bộ mailbox hoàn tất.</p>
                     </div>
                 </div>
-                <div class="guide-section-body space-y-6">
+                <div data-i18n-html="guide.monitoring.body" class="guide-section-body space-y-6">
                 <p>Hệ thống xử lý chạy <strong>nền</strong> (background worker). Bạn có thể tắt trình duyệt và tự động quay lại sau.</p>
                 
                 <div>
@@ -338,12 +339,12 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         </svg>
                     </div>
                     <div class="guide-section-copy">
-                        <span class="guide-section-kicker">Credential QA</span>
-                        <h2 class="section-title m-0">5. Kiểm Tra Mật Khẩu Hàng Loạt</h2>
-                        <p class="section-note m-0">Rà soát trước host, app password và khả năng đăng nhập để giảm lỗi phát sinh ở giữa phiên migration.</p>
+                        <span data-i18n="guide.credentials.kicker" class="guide-section-kicker">Credential QA</span>
+                        <h2 data-i18n="guide.credentials.title" class="section-title m-0">5. Kiểm Tra Mật Khẩu Hàng Loạt</h2>
+                        <p data-i18n="guide.credentials.note" class="section-note m-0">Rà soát trước host, app password và khả năng đăng nhập để giảm lỗi phát sinh ở giữa phiên migration.</p>
                     </div>
                 </div>
-                <div class="guide-section-body">
+                <div data-i18n-html="guide.credentials.body" class="guide-section-body">
                 <p>Trước khi chạy khối lượng lớn, tính năng <strong>Check Credentials</strong> giúp bạn rà soát lại tất cả mật khẩu và App Password tránh lọt lỗi hỏng kết nối lúc Sync.</p>
 
                 <ol class="space-y-4 list-decimal pl-5">
@@ -367,13 +368,13 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
                 </div>
                 <div class="guide-section-copy">
-                    <span class="guide-section-kicker">Gmail Setup</span>
-                    <h2 class="section-title m-0">6. Khởi tạo App Password Gmail & Workspace</h2>
-                    <p class="section-note m-0">Phần này dùng để xử lý nhanh nhóm lỗi đăng nhập Gmail và Google Workspace, đặc biệt khi người dùng đã bật xác thực hai lớp.</p>
+                    <span data-i18n="guide.gmail.kicker" class="guide-section-kicker">Gmail Setup</span>
+                    <h2 data-i18n="guide.gmail.title" class="section-title m-0">6. Khởi tạo App Password Gmail & Workspace</h2>
+                    <p data-i18n="guide.gmail.note" class="section-note m-0">Phần này dùng để xử lý nhanh nhóm lỗi đăng nhập Gmail và Google Workspace, đặc biệt khi người dùng đã bật xác thực hai lớp.</p>
                 </div>
             </div>
             
-            <div class="guide-section-body">
+            <div data-i18n-html="guide.gmail.body" class="guide-section-body">
                 <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl">
                     <p class="m-0 text-amber-900 dark:text-amber-200 text-sm font-medium">Bắt buộc: Bạn không thể dùng mật khẩu đăng nhập thông thường của Google nữa do chính sách bảo mật. Bắt buộc phải tạo <strong>Mật khẩu ứng dụng (App Password)</strong> dài 16 ký tự.</p>
                 </div>
@@ -404,13 +405,13 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 2v20h-2V4h-6v18H2v-8h10V2h10zm-8 4v2h4V6h-4zm0 4v2h4v-2h-4zm0 4v2h4v-2h-4z"/></svg>
                 </div>
                 <div class="guide-section-copy">
-                    <span class="guide-section-kicker">Office 365</span>
-                    <h2 class="section-title m-0">7. Hướng dẫn Office 365 (O365)</h2>
-                    <p class="section-note m-0">Tập hợp các bước tenant-admin và user-level để xử lý xác thực Microsoft 365 theo một luồng dễ đối chiếu.</p>
+                    <span data-i18n="guide.office.kicker" class="guide-section-kicker">Office 365</span>
+                    <h2 data-i18n="guide.office.title" class="section-title m-0">7. Hướng dẫn Office 365 (O365)</h2>
+                    <p data-i18n="guide.office.note" class="section-note m-0">Tập hợp các bước tenant-admin và user-level để xử lý xác thực Microsoft 365 theo một luồng dễ đối chiếu.</p>
                 </div>
             </div>
             
-            <div class="guide-section-body">
+            <div data-i18n-html="guide.office.body" class="guide-section-body">
                 <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded-r-xl">
                     <p class="m-0 text-red-900 dark:text-red-200 text-sm font-medium">Lưu ý Microsoft: Từ T9/2025, Microsoft sẽ khai tử hoàn toàn Basic Auth trên IMAP. Hiện tại hãy làm theo cấu hình dưới đây.</p>
                 </div>
@@ -437,12 +438,12 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         </svg>
                     </div>
                     <div class="guide-section-copy">
-                        <span class="guide-section-kicker">Security Model</span>
-                        <h2 class="section-title m-0">8. Cơ Chế Bảo Mật Tích Hợp</h2>
-                        <p class="section-note m-0">Tóm tắt ngắn các lớp bảo vệ áp vào file CSV, job password và session truy cập để người xem hiểu đúng phạm vi chia sẻ.</p>
+                        <span data-i18n="guide.security.kicker" class="guide-section-kicker">Security Model</span>
+                        <h2 data-i18n="guide.security.title" class="section-title m-0">8. Cơ Chế Bảo Mật Tích Hợp</h2>
+                        <p data-i18n="guide.security.note" class="section-note m-0">Tóm tắt ngắn các lớp bảo vệ áp vào file CSV, job password và session truy cập để người xem hiểu đúng phạm vi chia sẻ.</p>
                     </div>
                 </div>
-                <div class="guide-section-body">
+                <div data-i18n-html="guide.security.body" class="guide-section-body">
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700">
                         <h4 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
@@ -477,12 +478,12 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         </svg>
                     </div>
                     <div class="guide-section-copy">
-                        <span class="guide-section-kicker">Troubleshooting</span>
-                        <h2 class="section-title m-0">9. Trả Lời Câu Hỏi & Xử Lý Sự Cố</h2>
-                        <p class="section-note m-0">Các lỗi thường gặp được gom thành accordion để kỹ thuật viên và khách dễ tra cứu ngay trong lúc job đang chạy.</p>
+                        <span data-i18n="guide.faq.kicker" class="guide-section-kicker">Troubleshooting</span>
+                        <h2 data-i18n="guide.faq.title" class="section-title m-0">9. Trả Lời Câu Hỏi & Xử Lý Sự Cố</h2>
+                        <p data-i18n="guide.faq.note" class="section-note m-0">Các lỗi thường gặp được gom thành accordion để kỹ thuật viên và khách dễ tra cứu ngay trong lúc job đang chạy.</p>
                     </div>
                 </div>
-                <div class="guide-section-body">
+                <div data-i18n-html="guide.faq.body" class="guide-section-body">
             <div class="space-y-4">
                 <!-- 1. Authentication Failed -->
                 <details

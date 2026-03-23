@@ -2323,3 +2323,58 @@ button:disabled {
     background: rgba(22, 163, 74, 0.1);
     color: #4ade80;
 }
+
+.lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 0.95rem;
+    background: rgba(241, 245, 249, 0.92);
+    border: 1px solid rgba(203, 213, 225, 0.92);
+    box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.45);
+}
+
+.lang-switcher-btn {
+    min-width: 2.5rem;
+    padding: 0.45rem 0.65rem;
+    border: 0;
+    border-radius: 0.72rem;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.lang-switcher-btn:hover {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.lang-switcher-btn.active {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 20px -14px rgba(37, 99, 235, 0.95);
+}
+
+.lang-switcher-btn:focus-visible {
+    outline: 2px solid rgba(37, 99, 235, 0.4);
+    outline-offset: 2px;
+}
+
+[data-theme="dark"] .lang-switcher {
+    background: rgba(15, 23, 42, 0.84);
+    border-color: rgba(51, 65, 85, 0.95);
+}
+
+[data-theme="dark"] .lang-switcher-btn {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .lang-switcher-btn:hover {
+    color: #e2e8f0;
+    background: rgba(30, 41, 59, 0.95);
+}
