@@ -853,6 +853,26 @@ app.mount("/images", StaticFiles(directory=os.path.join(base_dir, "images")), na
 # Setup Jinja2 Templates
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
+def asset_version(path: str) -> str:
+    normalized_path = path.lstrip("/")
+    full_path = os.path.join(base_dir, normalized_path)
+    try:
+        return str(int(os.path.getmtime(full_path)))
+    except OSError:
+        return "1"
+
+templates.env.globals["asset_version"] = asset_version
+
+def render_template(request: Request, template_name: str, admin_mode: bool):
+    response = templates.TemplateResponse(
+        template_name,
+        {"request": request, "admin_mode": admin_mode}
+    )
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # Serve HTML Files via Jinja2Templates
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -864,11 +884,11 @@ async def read_index(request: Request):
 
 @app.get("/admin/", response_class=HTMLResponse)
 async def read_admin_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "admin_mode": True})
+    return render_template(request, "index.html", True)
 
 @app.get("/admin/index.html", response_class=HTMLResponse)
 async def read_admin_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "admin_mode": True})
+    return render_template(request, "index.html", True)
 
 @app.get("/create-job.html", response_class=HTMLResponse)
 async def read_create_job(request: Request):
@@ -876,15 +896,15 @@ async def read_create_job(request: Request):
 
 @app.get("/admin/create-job.html", response_class=HTMLResponse)
 async def read_admin_create_job(request: Request):
-    return templates.TemplateResponse("create-job.html", {"request": request, "admin_mode": True})
+    return render_template(request, "create-job.html", True)
 
 @app.get("/job-detail.html", response_class=HTMLResponse)
 async def read_job_detail(request: Request):
-    return templates.TemplateResponse("job-detail.html", {"request": request, "admin_mode": False})
+    return render_template(request, "job-detail.html", False)
 
 @app.get("/guide.html", response_class=HTMLResponse)
 async def read_guide(request: Request):
-    return templates.TemplateResponse("guide.html", {"request": request, "admin_mode": False})
+    return render_template(request, "guide.html", False)
 
 @app.get("/check-credentials.html", response_class=HTMLResponse)
 async def read_check_credentials(request: Request):
@@ -892,7 +912,7 @@ async def read_check_credentials(request: Request):
 
 @app.get("/admin/check-credentials.html", response_class=HTMLResponse)
 async def read_admin_check_credentials(request: Request):
-    return templates.TemplateResponse("check-credentials.html", {"request": request, "admin_mode": True})
+    return render_template(request, "check-credentials.html", True)
 
 if __name__ == "__main__":
     import uvicorn
