@@ -287,12 +287,25 @@ const initDashboard = async () => {
 
     try {
         const res = await request(`${API_BASE}/jobs`);
-        if (res.status === 401) {
+        if (res.status === 401 || res.status === 403) {
             await ensureAdminAuth();
             jobListEl.innerHTML = '';
             return;
         }
-        const jobs = await res.json();
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(payload.detail || payload.message || `Failed to load jobs (${res.status})`);
+        }
+
+        const jobs = Array.isArray(payload)
+            ? payload
+            : Array.isArray(payload.jobs)
+                ? payload.jobs
+                : null;
+
+        if (!jobs) {
+            throw new Error(payload.detail || 'Unexpected jobs response from server');
+        }
 
         const getStatusClasses = (status) => {
             const statusMap = {
