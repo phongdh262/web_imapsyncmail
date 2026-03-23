@@ -43,6 +43,38 @@ except Exception as e:
     except:
         pass
 
+def bootstrap_admin_account():
+    admin_username = os.getenv("ADMIN_USERNAME", "phongdh").strip() or "phongdh"
+    admin_password = os.getenv("ADMIN_PASSWORD")
+
+    if not admin_password:
+        logger.warning("ADMIN_PASSWORD environment variable not set; skipping admin bootstrap.")
+        return
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == admin_username).first()
+        if user:
+            if verify_password(admin_password, user.hashed_password):
+                logger.info("Admin account '%s' already matches environment password.", admin_username)
+                return
+
+            user.hashed_password = get_password_hash(admin_password)
+            logger.info("Admin account '%s' password synchronized from environment.", admin_username)
+        else:
+            user = User(username=admin_username, hashed_password=get_password_hash(admin_password))
+            db.add(user)
+            logger.info("Admin account '%s' created from environment.", admin_username)
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Failed to bootstrap admin account from environment.")
+    finally:
+        db.close()
+
+bootstrap_admin_account()
+
 from database import RateLimitEvent
 
 # Ensure logs directory exists

@@ -69,7 +69,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 min-w-0 prose prose-slate max-w-none">
+    <main class="flex-1 min-w-0 max-w-none">
         <!-- Hero Section -->
         <div class="mb-12 animate-slide-up page-hero">
             <div class="page-hero-grid">
@@ -120,61 +120,75 @@
         <!-- 1. Quick Start -->
         <section id="quick-start" class="mb-12 scroll-mt-28">
             <div
-                class="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow duration-300">
+                class="section-shell guide-section-shell relative group hover:shadow-md transition-shadow duration-300">
                 <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                     <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
 
-                <div class="flex items-center gap-4 mb-6">
-                    <div
-                        class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <div class="guide-section-head">
+                    <div class="guide-section-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white m-0">1. Bắt Đầu Nhanh</h2>
+                    <div class="guide-section-copy">
+                        <span class="guide-section-kicker">Quick Start</span>
+                        <h2 class="section-title m-0">1. Bắt Đầu Nhanh</h2>
+                        <p class="section-note m-0">Những nguyên tắc cơ bản để người vận hành và người xem job cùng theo một flow rõ ràng, không lẫn giữa admin console và viewer.</p>
+                    </div>
                 </div>
 
-                <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                    Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP khác. Giao diện
-                    người dùng hiện đã được chuyển sang <strong>Tiếng Anh</strong> để chuẩn hóa quốc tế, nhưng
-                    tài liệu này vẫn giữ <strong>Tiếng Việt</strong> để hỗ trợ tốt nhất cho bạn.
-                </p>
+                <div class="guide-section-body">
+                    <p class="mb-6">
+                        Công cụ này giúp bạn di chuyển email từ máy chủ IMAP này sang máy chủ IMAP khác. Giao diện
+                        người dùng hiện đã được chuyển sang <strong>Tiếng Anh</strong> để chuẩn hóa quốc tế, nhưng
+                        tài liệu này vẫn giữ <strong>Tiếng Việt</strong> để hỗ trợ tốt nhất cho bạn.
+                    </p>
 
-                <div
-                    class="bg-blue-50/50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-5 rounded-r-xl backdrop-blur-sm">
-                    <h4 class="text-blue-800 dark:text-blue-300 font-bold mb-2 flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Lưu ý quan trọng
-                    </h4>
-                    <ul class="list-none space-y-2 text-blue-900 dark:text-blue-200 text-sm m-0 p-0">
-                        <li class="flex items-start gap-2">
-                            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>
-                            <span>Hai máy chủ nguồn và đích phải hỗ trợ giao thức IMAP.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>
-                            <span><strong>Job Password:</strong> Bắt buộc nhập để mã hóa và bảo vệ phiên làm
-                                việc.</span>
-                        </li>
-                    </ul>
+                    <div class="guide-callout border-l-4 border-blue-500 rounded-r-xl">
+                        <h4 class="text-blue-800 dark:text-blue-300 font-bold mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Lưu ý quan trọng
+                        </h4>
+                        <ul class="list-none space-y-2 text-blue-900 dark:text-blue-200 text-sm m-0 p-0">
+                            <li class="flex items-start gap-2">
+                                <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+                                <span>Hai máy chủ nguồn và đích phải hỗ trợ giao thức IMAP.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+                                <span><strong>Job Password:</strong> Bắt buộc nhập để mã hóa và bảo vệ phiên làm
+                                    việc.</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- 2. Bulk Migration -->
         <section id="bulk-migration" class="mb-12 scroll-mt-28">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                2. Di Chuyển Hàng Loạt (Bulk Migration)
-            </h2>
-            <div class="prose-slate dark:prose-invert max-w-none">
+            <div class="section-shell guide-section-shell">
+                <div class="guide-section-head">
+                    <div class="guide-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h10" />
+                        </svg>
+                    </div>
+                    <div class="guide-section-copy">
+                        <span class="guide-section-kicker">Bulk Workflow</span>
+                        <h2 class="section-title m-0">2. Di Chuyển Hàng Loạt (Bulk Migration)</h2>
+                        <p class="section-note m-0">Checklist thao tác cho các đợt sync số lượng lớn, ưu tiên rõ host, CSV, job password và các tùy chọn an toàn trước khi chạy.</p>
+                    </div>
+                </div>
+                <div class="guide-section-body">
                 <p>Phương pháp này phù hợp khi bạn cần di chuyển hàng chục hoặc hàng trăm tài khoản email cùng
                     lúc.</p>
 
@@ -233,15 +247,26 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         Kéo thả file CSV vào khu vực tải lên và nhấn <strong>Start Bulk Migration</strong>.
                     </li>
                 </ol>
+                </div>
             </div>
         </section>
 
         <!-- 3. Single Sync -->
         <section id="single-sync" class="mb-12 scroll-mt-28">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                3. Đồng Bộ Đơn Lẻ (Single Sync)
-            </h2>
-            <div class="prose-slate dark:prose-invert max-w-none">
+            <div class="section-shell guide-section-shell">
+                <div class="guide-section-head">
+                    <div class="guide-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div class="guide-section-copy">
+                        <span class="guide-section-kicker">Single Mailbox</span>
+                        <h2 class="section-title m-0">3. Đồng Bộ Đơn Lẻ (Single Sync)</h2>
+                        <p class="section-note m-0">Gọn hơn cho các ca test, recovery hoặc các đợt chuyển từng mailbox cần kiểm soát thủ công cao hơn.</p>
+                    </div>
+                </div>
+                <div class="guide-section-body">
                 <p>Khuyên dùng nếu bạn chỉ cần chuyển email cho <strong>1 tài khoản duy nhất</strong>.</p>
                 <ol class="space-y-4 list-decimal pl-5">
                     <li class="pl-2">Tại trang Create Job, chọn Tab <strong>Single Sync</strong>.</li>
@@ -251,15 +276,26 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     <li class="pl-2">Nhập <strong>Job Password</strong> để bảo vệ kết quả di chuyển.</li>
                     <li class="pl-2">Nhấn <strong>Start Single Migration</strong>.</li>
                 </ol>
+                </div>
             </div>
         </section>
 
         <!-- 4. Monitoring -->
         <section id="monitoring" class="mb-12 scroll-mt-28">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                4. Theo Dõi & Xuất Báo Cáo
-            </h2>
-            <div class="prose-slate dark:prose-invert max-w-none space-y-6">
+            <div class="section-shell guide-section-shell">
+                <div class="guide-section-head">
+                    <div class="guide-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999A5.002 5.002 0 006 9a4 4 0 00-3 6z" />
+                        </svg>
+                    </div>
+                    <div class="guide-section-copy">
+                        <span class="guide-section-kicker">Monitoring</span>
+                        <h2 class="section-title m-0">4. Theo Dõi & Xuất Báo Cáo</h2>
+                        <p class="section-note m-0">Theo dõi dashboard, xem log thời gian thực và tải báo cáo nghiệm thu sau khi toàn bộ mailbox hoàn tất.</p>
+                    </div>
+                </div>
+                <div class="guide-section-body space-y-6">
                 <p>Hệ thống xử lý chạy <strong>nền</strong> (background worker). Bạn có thể tắt trình duyệt và tự động quay lại sau.</p>
                 
                 <div>
@@ -288,15 +324,26 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         <p class="m-0 text-sm mt-2">Hệ thống sẽ tải về một file CSV báo cáo số lượng email chuyển thành công, thất bại và tổng dung lượng dữ liệu. Đây là file dùng để gửi khách hàng nghiệm thu.</p>
                     </div>
                 </div>
+                </div>
             </div>
         </section>
 
          <!-- 5. Check Credentials -->
          <section id="check-credentials" class="mb-12 scroll-mt-28">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                5. Kiểm Tra Mật Khẩu Hàng Loạt (MỚI)
-            </h2>
-            <div class="prose-slate dark:prose-invert max-w-none">
+            <div class="section-shell guide-section-shell">
+                <div class="guide-section-head">
+                    <div class="guide-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </div>
+                    <div class="guide-section-copy">
+                        <span class="guide-section-kicker">Credential QA</span>
+                        <h2 class="section-title m-0">5. Kiểm Tra Mật Khẩu Hàng Loạt</h2>
+                        <p class="section-note m-0">Rà soát trước host, app password và khả năng đăng nhập để giảm lỗi phát sinh ở giữa phiên migration.</p>
+                    </div>
+                </div>
+                <div class="guide-section-body">
                 <p>Trước khi chạy khối lượng lớn, tính năng <strong>Check Credentials</strong> giúp bạn rà soát lại tất cả mật khẩu và App Password tránh lọt lỗi hỏng kết nối lúc Sync.</p>
 
                 <ol class="space-y-4 list-decimal pl-5">
@@ -308,19 +355,25 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     <li class="pl-2">Chọn Auto-detect Server (Tự động nhận diện IMAP theo đuôi @gmail.com, @yandex.com) hoặc Force (Ép dùng 1 server cho toàn file).</li>
                     <li class="pl-2">Sau khi quét xong, nhấn <strong>Export Failed</strong> để lọc ra chỉ những tài khoản bị sai pass và báo khách hàng cấp lại.</li>
                 </ol>
+                </div>
             </div>
         </section>
 
         <!-- 6. Gmail App Password Setup -->
         <section id="gmail-setup" class="mb-12 scroll-mt-28">
-            <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+            <div class="section-shell guide-section-shell">
+            <div class="guide-section-head">
+                <div class="guide-section-icon guide-section-icon-danger">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white m-0">6. Khởi tạo App Password Gmail & Workspace</h2>
+                <div class="guide-section-copy">
+                    <span class="guide-section-kicker">Gmail Setup</span>
+                    <h2 class="section-title m-0">6. Khởi tạo App Password Gmail & Workspace</h2>
+                    <p class="section-note m-0">Phần này dùng để xử lý nhanh nhóm lỗi đăng nhập Gmail và Google Workspace, đặc biệt khi người dùng đã bật xác thực hai lớp.</p>
+                </div>
             </div>
             
-            <div class="prose-slate dark:prose-invert max-w-none">
+            <div class="guide-section-body">
                 <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl">
                     <p class="m-0 text-amber-900 dark:text-amber-200 text-sm font-medium">Bắt buộc: Bạn không thể dùng mật khẩu đăng nhập thông thường của Google nữa do chính sách bảo mật. Bắt buộc phải tạo <strong>Mật khẩu ứng dụng (App Password)</strong> dài 16 ký tự.</p>
                 </div>
@@ -340,18 +393,24 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     <li class="pl-2">Copy chuỗi 16 ký tự màu vàng (ví dụ: <code>abcd efgh ijkl mnop</code>) - Nhớ xóa dấu cách khi dán vào file CSV (<code>abcdefghijklmnop</code>).</li>
                 </ol>
             </div>
+            </div>
         </section>
 
          <!-- 7. Office365 App Password Setup -->
          <section id="office365-setup" class="mb-12 scroll-mt-28">
-            <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <div class="section-shell guide-section-shell">
+            <div class="guide-section-head">
+                <div class="guide-section-icon">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 2v20h-2V4h-6v18H2v-8h10V2h10zm-8 4v2h4V6h-4zm0 4v2h4v-2h-4zm0 4v2h4v-2h-4z"/></svg>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white m-0">7. Hướng dẫn Office 365 (O365)</h2>
+                <div class="guide-section-copy">
+                    <span class="guide-section-kicker">Office 365</span>
+                    <h2 class="section-title m-0">7. Hướng dẫn Office 365 (O365)</h2>
+                    <p class="section-note m-0">Tập hợp các bước tenant-admin và user-level để xử lý xác thực Microsoft 365 theo một luồng dễ đối chiếu.</p>
+                </div>
             </div>
             
-            <div class="prose-slate dark:prose-invert max-w-none">
+            <div class="guide-section-body">
                 <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded-r-xl">
                     <p class="m-0 text-red-900 dark:text-red-200 text-sm font-medium">Lưu ý Microsoft: Từ T9/2025, Microsoft sẽ khai tử hoàn toàn Basic Auth trên IMAP. Hiện tại hãy làm theo cấu hình dưới đây.</p>
                 </div>
@@ -365,14 +424,25 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     <li class="pl-2">Nếu user liên tục gặp lỗi "AUTHENTICATIONFAILED", admin có thể cần tắt "Security Defaults" trong Entra ID (Azure AD).</li>
                 </ol>
             </div>
+            </div>
         </section>
 
         <!-- 8. Security -->
         <section id="security" class="mb-12 scroll-mt-28">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                8. Cơ Chế Bảo Mật Tích Hợp
-            </h2>
-            <div class="prose-slate dark:prose-invert max-w-none">
+            <div class="section-shell guide-section-shell">
+                <div class="guide-section-head">
+                    <div class="guide-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 .967-.784 1.75-1.75 1.75S8.5 11.967 8.5 11s.784-1.75 1.75-1.75S12 10.033 12 11zm0 0V8m0 7v1m7-5h1M4 11H3m14.95 4.95l.707.707M6.343 6.343l-.707-.707m12.314 0l-.707.707M6.343 15.657l-.707.707" />
+                        </svg>
+                    </div>
+                    <div class="guide-section-copy">
+                        <span class="guide-section-kicker">Security Model</span>
+                        <h2 class="section-title m-0">8. Cơ Chế Bảo Mật Tích Hợp</h2>
+                        <p class="section-note m-0">Tóm tắt ngắn các lớp bảo vệ áp vào file CSV, job password và session truy cập để người xem hiểu đúng phạm vi chia sẻ.</p>
+                    </div>
+                </div>
+                <div class="guide-section-body">
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700">
                         <h4 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
@@ -393,15 +463,26 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         </p>
                     </div>
                 </div>
+                </div>
             </div>
         </section>
 
         <!-- 9. FAQ & Troubleshooting -->
         <section id="faq_troubleshoot" class="mb-12 scroll-mt-28">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-800 pb-2">
-                9. Trả Lời Câu Hỏi & Xử Lý Sự Cố (Troubleshooting)
-            </h2>
-
+            <div class="section-shell guide-section-shell">
+                <div class="guide-section-head">
+                    <div class="guide-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.257 3.099c.765-1.36 2.722-1.36 3.487 0l6.518 11.591c.75 1.334-.213 2.99-1.742 2.99H3.48c-1.53 0-2.492-1.656-1.743-2.99L8.257 3.1z" />
+                        </svg>
+                    </div>
+                    <div class="guide-section-copy">
+                        <span class="guide-section-kicker">Troubleshooting</span>
+                        <h2 class="section-title m-0">9. Trả Lời Câu Hỏi & Xử Lý Sự Cố</h2>
+                        <p class="section-note m-0">Các lỗi thường gặp được gom thành accordion để kỹ thuật viên và khách dễ tra cứu ngay trong lúc job đang chạy.</p>
+                    </div>
+                </div>
+                <div class="guide-section-body">
             <div class="space-y-4">
                 <!-- 1. Authentication Failed -->
                 <details
@@ -546,6 +627,8 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                         </ul>
                     </div>
                 </details>
+            </div>
+            </div>
             </div>
         </section>
 
