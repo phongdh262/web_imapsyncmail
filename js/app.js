@@ -6,13 +6,154 @@
  */
 
 const API_BASE = '/api';
+const ADMIN_USERNAME_KEY = 'admin_username';
+const PUBLIC_PATHS = ['guide.html', 'job-detail.html'];
+let adminSessionActive = false;
 
-// --- Simple Request Helper (No Auth) ---
+const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const getCookieValue = (name) => {
+    const cookies = document.cookie ? document.cookie.split('; ') : [];
+    const match = cookies.find((cookie) => cookie.startsWith(`${name}=`));
+    return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : '';
+};
+
+const getCsrfToken = () => getCookieValue('csrf_token');
+const setAdminSession = (username) => {
+    localStorage.setItem(ADMIN_USERNAME_KEY, username || 'Admin');
+    adminSessionActive = true;
+};
+const clearAdminSession = () => {
+    localStorage.removeItem(ADMIN_USERNAME_KEY);
+    adminSessionActive = false;
+};
+
+const updateAdminAuthUI = () => {
+    const loginBtn = document.getElementById('admin-login-btn');
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    const statusEl = document.getElementById('admin-auth-status');
+    const username = localStorage.getItem(ADMIN_USERNAME_KEY) || 'Admin';
+    const isAdminMode = document.body?.dataset?.adminMode === 'true';
+
+    if (!isAdminMode) {
+        loginBtn?.classList.add('hidden');
+        logoutBtn?.classList.add('hidden');
+        statusEl?.classList.add('hidden');
+        return;
+    }
+
+    if (adminSessionActive) {
+        loginBtn?.classList.add('hidden');
+        logoutBtn?.classList.remove('hidden');
+        statusEl?.classList.remove('hidden');
+        if (statusEl) statusEl.textContent = `Admin: ${username}`;
+    } else {
+        loginBtn?.classList.remove('hidden');
+        logoutBtn?.classList.add('hidden');
+        statusEl?.classList.add('hidden');
+    }
+};
+
+const isPublicPage = () => PUBLIC_PATHS.some((segment) => window.location.pathname.includes(segment));
+
+const showAdminLoginError = (message = '') => {
+    const errorEl = document.getElementById('admin-login-error');
+    if (!errorEl) return;
+    if (message) {
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+    } else {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+    }
+};
+
+window.showAdminLoginModal = () => {
+    const modal = document.getElementById('admin-login-modal');
+    if (!modal) return;
+    showAdminLoginError('');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.getElementById('admin-username')?.focus();
+};
+
+window.closeAdminLoginModal = () => {
+    const modal = document.getElementById('admin-login-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+window.logoutAdmin = () => {
+    fetch(`${API_BASE}/logout`, { method: 'POST' }).catch(() => null).finally(() => {
+        clearAdminSession();
+        updateAdminAuthUI();
+        if (!isPublicPage()) {
+            window.showAdminLoginModal();
+        }
+    });
+};
+
+const loginAdmin = async (username, password) => {
+    const body = new URLSearchParams();
+    body.set('username', username);
+    body.set('password', password);
+
+    const response = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Login failed');
+    }
+
+    const data = await response.json();
+    setAdminSession(data.username || username);
+    updateAdminAuthUI();
+    closeAdminLoginModal();
+    return data;
+};
+
+const ensureAdminAuth = async ({ showModal = true, forceCheck = false } = {}) => {
+    if (adminSessionActive && !forceCheck) {
+        updateAdminAuthUI();
+        return true;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/me`, { credentials: 'same-origin' });
+        if (response.ok) {
+            const data = await response.json();
+            setAdminSession(data.username);
+            updateAdminAuthUI();
+            return true;
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
+    clearAdminSession();
+    updateAdminAuthUI();
+    if (showModal) {
+        window.showAdminLoginModal();
+    }
+    return false;
+};
+
+// --- Request Helper ---
 const request = async (url, options = {}) => {
-    // Try to find jobId to pick up password for header safety
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get('id');
     const headers = { ...options.headers };
+    const method = (options.method || 'GET').toUpperCase();
 
     if (jobId) {
         const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
@@ -21,13 +162,30 @@ const request = async (url, options = {}) => {
         }
     }
 
-    const fetchOptions = {
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+            headers['X-CSRF-Token'] = csrfToken;
+        }
+    }
+
+    const response = await fetch(url, {
         ...options,
-        headers
-    };
-    const res = await fetch(url, fetchOptions);
-    return res;
+        headers,
+        credentials: 'same-origin'
+    });
+
+    const isPublicProtectedRead = method === 'GET' && (String(url).includes('/api/jobs/') || String(url).includes('/api/mailboxes/'));
+    if (response.status === 401 && !isPublicProtectedRead) {
+        clearAdminSession();
+        updateAdminAuthUI();
+    }
+
+    return response;
 };
+
+window.apiFetch = request;
+window.escapeHtml = escapeHtml;
 
 // --- Cookie Helper ---
 const setCookie = (name, value, hours = 24) => {
@@ -76,7 +234,7 @@ const injectFAB = () => {
     if (document.querySelector('.fab')) return;
 
     const fab = document.createElement('a');
-    fab.href = 'create-job.html';
+    fab.href = '/admin/create-job.html';
     fab.className = 'fab ripple';
     fab.title = 'Create New Job';
     fab.innerHTML = `
@@ -129,6 +287,11 @@ const initDashboard = async () => {
 
     try {
         const res = await request(`${API_BASE}/jobs`);
+        if (res.status === 401) {
+            await ensureAdminAuth();
+            jobListEl.innerHTML = '';
+            return;
+        }
         const jobs = await res.json();
 
         const getStatusClasses = (status) => {
@@ -154,13 +317,13 @@ const initDashboard = async () => {
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors stagger-item ${job.status === 'running' ? 'pulse-running' : ''}" data-status="${job.status}">
 
                     <td class="px-6 py-4">
-                        <div class="font-medium text-slate-900 dark:text-white">${job.name}</div>
-                        <div class="text-sm text-slate-500 dark:text-slate-400">${new Date(job.created_at).toLocaleString()}</div>
+                        <div class="font-medium text-slate-900 dark:text-white">${escapeHtml(job.name)}</div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(new Date(job.created_at).toLocaleString())}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusClasses(job.status)}">
                             ${job.status === 'running' ? '<span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>' : ''}
-                            ${job.status}
+                            ${escapeHtml(job.status)}
                         </span>
                     </td>
                     <td class="px-6 py-4">
@@ -173,15 +336,15 @@ const initDashboard = async () => {
                     </td>
 
                     <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-slate-900 dark:text-white">${job.source}</div>
-                        <div class="text-sm text-slate-500 dark:text-slate-400">→ ${job.target}</div>
+                        <div class="text-sm font-medium text-slate-900 dark:text-white">${escapeHtml(job.source)}</div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400">→ ${escapeHtml(job.target)}</div>
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
                             <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
                                 View
                             </a>
-                            <button onclick="deleteSingleJob('${job.id}', '${job.name.replace(/'/g, "\\'")}')" 
+                            <button onclick="deleteSingleJob('${job.id}', '${escapeHtml(job.name).replace(/'/g, "\\'")}')" 
                                 class="inline-flex items-center justify-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                 title="Delete this job">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -207,7 +370,7 @@ const initDashboard = async () => {
 
     } catch (e) {
         console.error(e);
-        jobListEl.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">Error loading jobs: ${e.message}</td></tr>`;
+        jobListEl.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">Error loading jobs: ${escapeHtml(e.message)}</td></tr>`;
     }
 };
 
@@ -234,9 +397,14 @@ window.refreshDashboard = async () => {
 };
 
 window.deleteAllJobs = async () => {
+    if (!await ensureAdminAuth()) return;
     window.showConfirm("Are you sure you want to delete ALL jobs and logs? This action cannot be undone.", async () => {
         try {
             const res = await request(`${API_BASE}/jobs`, { method: 'DELETE' });
+            if (res.status === 401) {
+                await ensureAdminAuth();
+                throw new Error('Admin login required');
+            }
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.detail || "Failed to delete jobs");
@@ -254,9 +422,14 @@ window.deleteAllJobs = async () => {
 };
 
 window.deleteSingleJob = async (jobId, jobName) => {
+    if (!await ensureAdminAuth()) return;
     window.showConfirm(`Are you sure you want to delete "${jobName}"? This will permanently remove its logs.`, async () => {
         try {
             const res = await request(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' });
+            if (res.status === 401) {
+                await ensureAdminAuth();
+                throw new Error('Admin login required');
+            }
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.detail || "Failed to delete job");
@@ -387,6 +560,8 @@ const initCreateJob = () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        if (!await ensureAdminAuth()) return;
+
         const submitBtn = document.getElementById('submit-btn');
         const btnText = submitBtn.querySelector('.btn-text');
         const btnIcon = submitBtn.querySelector('.btn-icon');
@@ -472,6 +647,10 @@ const initCreateJob = () => {
                 body: JSON.stringify(jobPayload)
             });
 
+            if (res.status === 401) {
+                await ensureAdminAuth();
+                throw new Error('Admin login required');
+            }
             if (!res.ok) throw new Error('Failed to create job');
             const job = await res.json();
 
@@ -493,6 +672,10 @@ const initCreateJob = () => {
                         body: uploadData
                     });
 
+                    if (uploadRes.status === 401) {
+                        await ensureAdminAuth();
+                        throw new Error('Admin login required');
+                    }
                     if (!uploadRes.ok) {
                         const err = await uploadRes.json().catch(() => ({}));
                         throw new Error(err.detail || 'CSV Upload failed');
@@ -520,11 +703,19 @@ const initCreateJob = () => {
                     throw new Error("Please enter both passwords");
                 }
 
-                await request(`${API_BASE}/jobs/${job.id}/mailboxes`, {
+                const mailboxRes = await request(`${API_BASE}/jobs/${job.id}/mailboxes`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(singlePayload)
                 });
+                if (mailboxRes.status === 401) {
+                    await ensureAdminAuth();
+                    throw new Error('Admin login required');
+                }
+                if (!mailboxRes.ok) {
+                    const err = await mailboxRes.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Failed to add mailbox');
+                }
             }
 
             window.location.href = `job-detail.html?id=${job.id}`;
@@ -590,7 +781,7 @@ const initCreateJob = () => {
             // Update dropzone appearance
             dropZone.classList.add('has-file');
             if (dropzoneText) {
-                dropzoneText.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">${file.name}</span> <span class="text-slate-400 font-normal">(${(file.size / 1024).toFixed(1)} KB)</span>`;
+                dropzoneText.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">${escapeHtml(file.name)}</span> <span class="text-slate-400 font-normal">(${(file.size / 1024).toFixed(1)} KB)</span>`;
             }
             if (dropzoneIcon) {
                 dropzoneIcon.innerHTML = `
@@ -633,8 +824,8 @@ const initCreateJob = () => {
                         const hasPass = parts.length >= 3 && parts[1] !== '' && parts[3] !== '';
                         html += `
                             <tr>
-                                <td class="font-mono text-xs">${parts[0] || '-'}</td>
-                                <td class="font-mono text-xs">${parts[2] || '-'}</td>
+                                <td class="font-mono text-xs">${escapeHtml(parts[0] || '-')}</td>
+                                <td class="font-mono text-xs">${escapeHtml(parts[2] || '-')}</td>
                                 <td>
                                     <span class="password-badge ${hasPass ? 'password-present' : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'}">
                                         ${hasPass ? '✓ Present' : '✗ Missing'}
@@ -689,7 +880,7 @@ window.showToast = (message, type = 'info') => {
     toast.className = `min-w-[300px] p-4 rounded-xl shadow-sm border ${typeStyles[type] || typeStyles.info} animate-slide-in-right cursor-pointer flex items-center gap-3 relative overflow-hidden`;
     toast.innerHTML = `
         ${icons[type] || icons.info}
-        <span class="text-gray-800 text-sm font-medium">${message}</span>
+        <span class="text-gray-800 text-sm font-medium">${escapeHtml(message)}</span>
     `;
 
     // Click to dismiss
@@ -773,8 +964,8 @@ window.showPasswordModal = (jobId, isWrongPassword = false) => {
     modal.innerHTML = `
         <div class="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl border border-slate-200 dark:border-slate-800">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
@@ -788,7 +979,7 @@ window.showPasswordModal = (jobId, isWrongPassword = false) => {
                 class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4 font-mono transition-shadow h-12"
                 onkeypress="if(event.key==='Enter') submitJobPassword('${jobId}')">
             <div class="flex gap-3">
-                <button onclick="window.location.href='index.html'" 
+                <button onclick="window.location.href='/admin/'" 
                     class="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
                     Back
                 </button>
@@ -843,7 +1034,7 @@ const initJobDetail = async () => {
     const jobId = params.get('id');
 
     if (!jobId) {
-        window.location.href = 'index.html';
+        window.location.href = '/admin/';
         return;
     }
 
@@ -862,16 +1053,7 @@ const initJobDetail = async () => {
 
     const updateUI = async () => {
         try {
-            // Get saved password from sessionStorage
-            // Get saved password from sessionStorage
-            const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
-
-            let url = `${API_BASE}/jobs/${jobId}`;
-            if (savedPassword) {
-                url += `?password=${encodeURIComponent(savedPassword)}`;
-            }
-
-            const res = await request(url);
+            const res = await request(`${API_BASE}/jobs/${jobId}`);
 
             // Handle password required
             if (res.status === 401) {
@@ -914,7 +1096,7 @@ const initJobDetail = async () => {
             // Show/hide Cancel All button
             const cancelAllBtn = document.getElementById('cancel-all-btn');
             if (cancelAllBtn) {
-                if (job.status === 'running') {
+                if (job.status === 'running' && adminSessionActive) {
                     cancelAllBtn.classList.remove('hidden');
                     cancelAllBtn.classList.add('inline-flex');
                 } else {
@@ -962,17 +1144,18 @@ const initJobDetail = async () => {
 function renderMailboxes(mailboxes, getStatusBadge) {
     const tableBody = document.getElementById('mailbox-list');
     const emptyState = document.getElementById('mailbox-empty-state');
+    const isAdmin = adminSessionActive;
 
     if (mailboxes && mailboxes.length > 0) {
         emptyState?.classList.add('hidden');
         tableBody.innerHTML = mailboxes.map(mb => `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" data-user="${mb.user?.toLowerCase()}" data-target="${mb.target_user?.toLowerCase()}">
-                <td class="px-6 py-4 font-mono text-sm text-slate-900 dark:text-white">${mb.user}</td>
-                <td class="px-6 py-4 font-mono text-sm text-slate-900 dark:text-white">${mb.target_user}</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" data-user="${escapeHtml(mb.user?.toLowerCase() || '')}" data-target="${escapeHtml(mb.target_user?.toLowerCase() || '')}">
+                <td class="px-6 py-4 font-mono text-sm text-slate-900 dark:text-white">${escapeHtml(mb.user)}</td>
+                <td class="px-6 py-4 font-mono text-sm text-slate-900 dark:text-white">${escapeHtml(mb.target_user)}</td>
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadge(mb.status === 'success' ? 'completed' : mb.status)}">
                         ${mb.status === 'running' ? '<span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>' : ''}
-                        ${mb.status === 'warning' ? '⚠ Partial' : mb.status}
+                        ${mb.status === 'warning' ? '⚠ Partial' : escapeHtml(mb.status)}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
@@ -983,16 +1166,16 @@ function renderMailboxes(mailboxes, getStatusBadge) {
                             </div>
                             <span class="text-xs font-medium text-blue-600 min-w-[35px]">${mb.progress || 0}%</span>
                         </div>
-                        <div class="text-xs text-gray-500 mt-1 truncate" title="${mb.msg || ''}">${mb.msg || 'Starting...'}</div>
+                        <div class="text-xs text-gray-500 mt-1 truncate" title="${escapeHtml(mb.msg || '')}">${escapeHtml(mb.msg || 'Starting...')}</div>
                     ` : `
-                        <span class="truncate" title="${mb.msg || ''}">${mb.msg || '-'}</span>
+                        <span class="truncate" title="${escapeHtml(mb.msg || '')}">${escapeHtml(mb.msg || '-')}</span>
                     `}
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex justify-end items-center gap-2">
                         <button onclick="viewLogs(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">Log</button>
-                        ${mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition-colors border border-transparent">Stop</button>` : ''}
-                        ${mb.status === 'failed' || mb.status === 'warning' ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 dark:bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors border border-transparent">Retry</button>` : ''}
+                        ${isAdmin && mb.status === 'running' ? `<button onclick="stopSync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition-colors border border-transparent">Stop</button>` : ''}
+                        ${isAdmin && (mb.status === 'failed' || mb.status === 'warning') ? `<button onclick="retrySync(${mb.id})" class="px-2.5 py-1.5 text-xs font-medium bg-blue-600 dark:bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors border border-transparent">Retry</button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -1023,9 +1206,15 @@ window.cancelAllMailboxes = async () => {
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get('id');
 
+    if (!await ensureAdminAuth()) return;
+
     window.showConfirm('Are you sure you want to stop ALL running mailboxes?', async () => {
         try {
             const res = await request(`${API_BASE}/jobs/${jobId}/cancel`, { method: 'POST' });
+            if (res.status === 401) {
+                await ensureAdminAuth();
+                throw new Error('Admin login required');
+            }
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.detail || 'Failed to cancel');
@@ -1039,9 +1228,18 @@ window.cancelAllMailboxes = async () => {
 };
 
 window.stopSync = async (mailboxId) => {
+    if (!await ensureAdminAuth()) return;
     window.showConfirm('Are you sure you want to stop this sync?', async () => {
         try {
-            await request(`${API_BASE}/mailboxes/${mailboxId}/stop`, { method: 'POST' });
+            const res = await request(`${API_BASE}/mailboxes/${mailboxId}/stop`, { method: 'POST' });
+            if (res.status === 401) {
+                await ensureAdminAuth();
+                throw new Error('Admin login required');
+            }
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.detail || 'Failed to stop');
+            }
             window.showToast('Stop command sent', 'info');
         } catch (e) {
             window.showToast('Error: ' + e.message, 'error');
@@ -1051,9 +1249,14 @@ window.stopSync = async (mailboxId) => {
 
 
 window.retrySync = async (mailboxId) => {
+    if (!await ensureAdminAuth()) return;
     window.showConfirm('Retry this mailbox sync?', async () => {
         try {
             const res = await request(`${API_BASE}/mailboxes/${mailboxId}/retry`, { method: 'POST' });
+            if (res.status === 401) {
+                await ensureAdminAuth();
+                throw new Error('Admin login required');
+            }
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.detail || 'Failed to retry');
@@ -1091,17 +1294,7 @@ window.viewLogs = async (mailboxId) => {
         const fetchLogs = async () => {
 
             try {
-                // Get password from URL params for this job
-                const params = new URLSearchParams(window.location.search);
-                const jobId = params.get('id');
-                const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
-
-                let url = `${API_BASE}/mailboxes/${mailboxId}/logs`;
-                if (savedPassword) {
-                    url += `?password=${encodeURIComponent(savedPassword)}`;
-                }
-
-                const res = await request(url);
+                const res = await request(`${API_BASE}/mailboxes/${mailboxId}/logs`);
                 if (!res.ok) throw new Error('Failed to fetch logs');
                 const data = await res.json();
 
@@ -1152,16 +1345,7 @@ window.downloadAllLogs = () => {
     }
 
     // Secure download handling
-    let downloadUrl = `${API_BASE}/jobs/${jobId}/logs/zip`;
-    const savedPassword = sessionStorage.getItem(`job_password_${jobId}`);
-
-    // Create a temporary link to trigger download
-    // If password exists, add it to query param (backend also checks cookie)
-    if (savedPassword) {
-        downloadUrl += `?password=${encodeURIComponent(savedPassword)}`;
-    }
-
-    window.location.href = downloadUrl;
+    window.location.href = `${API_BASE}/jobs/${jobId}/logs/zip`;
     window.showToast('Downloading logs archive...', 'success');
 };
 
@@ -1232,8 +1416,8 @@ window.toggleTheme = toggleTheme;
 // Command Palette (Ctrl+K)
 // ============================================
 const commandPaletteCommands = [
-    { id: 'new-job', title: 'Create New Job', subtitle: 'Create a new migration job', icon: '➕', action: () => window.location.href = 'create-job.html', shortcut: ['⌘', 'N'] },
-    { id: 'dashboard', title: 'Dashboard', subtitle: 'View jobs overview', icon: '📊', action: () => window.location.href = 'index.html' },
+    { id: 'new-job', title: 'Create New Job', subtitle: 'Create a new migration job', icon: '➕', action: () => window.location.href = '/admin/create-job.html', shortcut: ['⌘', 'N'] },
+    { id: 'dashboard', title: 'Dashboard', subtitle: 'View jobs overview', icon: '📊', action: () => window.location.href = '/admin/' },
     { id: 'guide', title: 'User Guide', subtitle: 'View detailed guide', icon: '📖', action: () => window.location.href = 'guide.html' },
     { id: 'refresh', title: 'Refresh Page', subtitle: 'Refresh current data', icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
     { id: 'toggle-theme', title: 'Toggle Theme', subtitle: 'Light/Dark mode', icon: '🌓', action: () => toggleTheme() },
@@ -1388,7 +1572,7 @@ const initKeyboardShortcuts = () => {
         // New Job: Ctrl/Cmd + N
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
             e.preventDefault();
-            window.location.href = 'create-job.html';
+            window.location.href = '/admin/create-job.html';
             return;
         }
 
@@ -1511,7 +1695,7 @@ const showToastWithAction = (message, type = 'info', action = null, duration = 5
     toast.innerHTML = `
         <div class="flex items-center gap-3">
             <span class="text-lg">${icons[type]}</span>
-            <span class="flex-1 font-medium">${message}</span>
+            <span class="flex-1 font-medium">${escapeHtml(message)}</span>
             ${action ? `<button onclick="${action.callback}" class="px-3 py-1 text-sm font-medium bg-white/50 rounded-lg hover:bg-white/80 transition-colors">${action.text}</button>` : ''}
             <button onclick="this.parentElement.parentElement.remove()" class="text-lg opacity-50 hover:opacity-100">×</button>
         </div>
@@ -1531,9 +1715,43 @@ window.showToastWithAction = showToastWithAction;
 // ============================================
 // Initialization
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
+window.fetchJobs = initDashboard;
+
+document.addEventListener('DOMContentLoaded', async () => {
     // Initialize theme first
     initTheme();
+    updateAdminAuthUI();
+
+    const loginForm = document.getElementById('admin-login-form');
+    if (loginForm && !loginForm.dataset.bound) {
+        loginForm.dataset.bound = 'true';
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('admin-username')?.value.trim();
+            const password = document.getElementById('admin-password')?.value || '';
+            const submitBtn = document.getElementById('admin-login-submit');
+            if (!username || !password) {
+                showAdminLoginError('Please enter both username and password.');
+                return;
+            }
+
+            showAdminLoginError('');
+            if (submitBtn) submitBtn.disabled = true;
+            try {
+                await loginAdmin(username, password);
+                const path = window.location.pathname;
+                if (path.includes('create-job.html')) {
+                    window.location.reload();
+                } else if (path.includes('check-credentials.html') || path.includes('/admin') || path === '/') {
+                    window.location.reload();
+                }
+            } catch (error) {
+                showAdminLoginError(error.message);
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
 
     // Initialize keyboard shortcuts
     initKeyboardShortcuts();
@@ -1548,14 +1766,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize page-specific logic
     const path = window.location.pathname;
+    const adminPage = path === '/' || path.includes('/admin') || path.includes('index.html') || path.includes('create-job.html') || path.includes('check-credentials.html');
 
     // Add page enter animation
     document.body.classList.add('page-enter');
+
+    if (adminPage) {
+        const authenticated = await ensureAdminAuth({ showModal: true });
+        if (!authenticated) return;
+    }
 
     if (path.includes('create-job.html')) {
         initCreateJob();
     } else if (path.includes('job-detail.html')) {
         initJobDetail();
+    } else if (path.includes('check-credentials.html')) {
+        // Inline page script handles the rest.
     } else if (!path.includes('guide.html')) {
         initDashboard();
         injectFAB();

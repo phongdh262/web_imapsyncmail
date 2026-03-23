@@ -114,6 +114,13 @@ class User(Base):
     username = Column(String(100), unique=True, index=True)
     hashed_password = Column(String(255))
 
+class RateLimitEvent(Base):
+    __tablename__ = "rate_limit_events"
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(255), index=True, nullable=False)
+    scope = Column(String(100), index=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
 def init_db():
     Base.metadata.create_all(bind=engine)
 

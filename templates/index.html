@@ -1,6 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="page-shell mb-8">
+    <section class="page-hero">
+        <div class="page-hero-grid">
+            <div>
+                <span class="page-kicker">Admin Console</span>
+                <h1 class="page-title mt-4">Operations dashboard for controlled IMAP migrations.</h1>
+                <p class="page-subtitle mt-4">Track active jobs, verify queue health, and jump into protected job sessions without exposing the underlying migration controls to the public viewer.</p>
+                <div class="hero-inline-grid">
+                    <div class="signal-item">
+                        <span class="signal-dot"></span>
+                        <div>
+                            <span class="signal-title">Trust-first controls</span>
+                            <span class="signal-copy">Admin actions stay separated from the shareable job viewer.</span>
+                        </div>
+                    </div>
+                    <div class="signal-item">
+                        <span class="signal-dot"></span>
+                        <div>
+                            <span class="signal-title">Live visibility</span>
+                            <span class="signal-copy">Stats, status chips, and mailbox progress stay readable during long-running moves.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-metrics">
+                <div class="hero-metric-card">
+                    <span class="hero-metric-label">Focus</span>
+                    <span class="hero-metric-value">High-confidence migration operations with low visual noise.</span>
+                </div>
+                <div class="hero-metric-card">
+                    <span class="hero-metric-label">Recommended flow</span>
+                    <span class="hero-metric-value">Check credentials, create job, monitor progress, export report.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 stagger-item">
     <!-- Total Jobs Stat -->
     <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
@@ -40,7 +77,7 @@
     <!-- Completed Mailboxes -->
     <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
         <div class="flex items-center justify-between mb-4 relative z-10">
-            <div class="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center text-violet-600 dark:text-violet-400 group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
@@ -143,7 +180,7 @@
             </div>
             <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">No jobs found</h3>
             <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">Start email migration by creating a new job with a CSV file or single sync.</p>
-            <a href="create-job.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors shadow-sm font-medium">
+            <a href="/admin/create-job.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors shadow-sm font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>

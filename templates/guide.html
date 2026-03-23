@@ -71,15 +71,50 @@
     <!-- Main Content -->
     <main class="flex-1 min-w-0 prose prose-slate max-w-none">
         <!-- Hero Section -->
-        <div class="mb-12 animate-slide-up">
-            <h1
-                class="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white leading-tight">
-                Tài Liệu Hướng Dẫn
-            </h1>
-            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
-                Chào mừng đến với IMAP Sync Pro. Hướng dẫn toàn diện để giúp bạn di chuyển email an toàn, bảo
-                mật và hiệu quả giữa các nền tảng.
-            </p>
+        <div class="mb-12 animate-slide-up page-hero">
+            <div class="page-hero-grid">
+                <div>
+                    <span class="page-kicker">Public Documentation</span>
+                    <h1 class="page-title mt-4">Tài liệu vận hành rõ ràng cho các phiên di chuyển email.</h1>
+                    <p class="page-subtitle mt-4">
+                        Hướng dẫn này ưu tiên khả năng đọc nhanh, nghiệm thu dễ, và xử lý sự cố thực tế cho các job migration đang chạy trên hệ thống.
+                    </p>
+                </div>
+                <div class="hero-metrics">
+                    <div class="hero-metric-card">
+                        <span class="hero-metric-label">Tập trung</span>
+                        <span class="hero-metric-value">Checklist thao tác, cấu hình IMAP, và xử lý lỗi phổ biến.</span>
+                    </div>
+                    <div class="hero-metric-card">
+                        <span class="hero-metric-label">Đối tượng</span>
+                        <span class="hero-metric-value">Admin triển khai, kỹ thuật viên vận hành, và khách hàng cần theo dõi kết quả.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-inline-grid mb-12">
+            <div class="signal-item">
+                <span class="signal-dot"></span>
+                <div>
+                    <span class="signal-title">1. Kiểm tra credential</span>
+                    <span class="signal-copy">Xác nhận host, app password và khả năng đăng nhập trước khi sync hàng loạt.</span>
+                </div>
+            </div>
+            <div class="signal-item">
+                <span class="signal-dot"></span>
+                <div>
+                    <span class="signal-title">2. Tạo job có password riêng</span>
+                    <span class="signal-copy">Giữ dashboard admin tách biệt khỏi link xem tiến độ chia sẻ cho khách.</span>
+                </div>
+            </div>
+            <div class="signal-item">
+                <span class="signal-dot"></span>
+                <div>
+                    <span class="signal-title">3. Theo dõi và nghiệm thu</span>
+                    <span class="signal-copy">Dùng job detail để xem log, xác nhận trạng thái và tải report cuối cùng.</span>
+                </div>
+            </div>
         </div>
 
         <!-- 1. Quick Start -->
@@ -248,8 +283,8 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
 
                 <div>
                     <h3 class="text-xl font-semibold mb-3">4.3 Nghiệm thu và trả kết quả (Export Report)</h3>
-                    <div class="bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 p-4 rounded-xl">
-                        <p class="m-0 text-sm">Sau khi tiến trình 100%, bạn có thể nhấn nút <strong class="text-indigo-700 dark:text-indigo-400">Export Report</strong> ở góc trên trang chi tiết (Job Detail).</p>
+                    <div class="bg-blue-50/60 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-xl">
+                        <p class="m-0 text-sm">Sau khi tiến trình 100%, bạn có thể nhấn nút <strong class="text-blue-700 dark:text-blue-400">Export Report</strong> ở góc trên trang chi tiết (Job Detail).</p>
                         <p class="m-0 text-sm mt-2">Hệ thống sẽ tải về một file CSV báo cáo số lượng email chuyển thành công, thất bại và tổng dung lượng dữ liệu. Đây là file dùng để gửi khách hàng nghiệm thu.</p>
                     </div>
                 </div>
@@ -350,7 +385,7 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700">
                         <h4 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                             Bảo mật Job Password (JWT)
                         </h4>
                         <p class="text-sm text-slate-600 dark:text-slate-400 m-0">
@@ -445,7 +480,7 @@ user_nguon2@domain.com,pass_nguon2,user_dich2@newdomain.com,pass_dich2</pre>
                     <summary
                         class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors">
                         <span class="flex items-center gap-3">
-                            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                             Lỗi "Quota exceeded" (Đầy bộ nhớ)
                         </span>
                         <svg class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"

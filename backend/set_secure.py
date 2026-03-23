@@ -1,12 +1,16 @@
 from database import SessionLocal, User, init_db
 from auth import verify_password, get_password_hash
+import os
 
 # Ensure tables exist (important for new DB)
 init_db()
 
 db = SessionLocal()
-username = "phongdh"
-secure_pass = r"%1yedJck}KC]>%:K{e)."
+username = os.getenv("ADMIN_USERNAME", "phongdh")
+secure_pass = os.getenv("ADMIN_PASSWORD")
+
+if not secure_pass:
+    raise RuntimeError("ADMIN_PASSWORD environment variable is required.")
 
 print(f"--- SETTING SECURE PASSWORD FOR: {username} ---")
 

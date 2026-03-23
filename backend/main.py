@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, UploadFile, File, Request, Response, Query
+from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, UploadFile, File, Request, Response, Query, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
@@ -10,16 +10,21 @@ import io
 import os
 import sys
 import logging
+from datetime import datetime, timedelta
 from urllib.parse import quote, unquote
 
 logger = logging.getLogger(__name__)
+_cookie_secure = os.getenv("COOKIE_SECURE")
+if _cookie_secure is None:
+    COOKIE_SECURE = os.getenv("APP_ENV", "development").lower() not in {"development", "dev", "test"}
+else:
+    COOKIE_SECURE = _cookie_secure.strip().lower() in {"1", "true", "yes", "on"}
 
 # Add current directory to sys.path to ensure modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from database import SessionLocal, engine, Job, Mailbox, User, get_db, init_db
-from auth import Token, get_current_user, create_access_token, verify_password, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
-from datetime import timedelta
+from auth import Token, get_current_user, create_access_token, verify_password, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES, create_csrf_token, SESSION_COOKIE_NAME, CSRF_COOKIE_NAME, verify_csrf
 from pydantic import BaseModel
 from worker import run_imapsync, cleanup_stale_passfiles
 
@@ -38,6 +43,8 @@ except Exception as e:
     except:
         pass
 
+from database import RateLimitEvent
+
 # Ensure logs directory exists
 if not os.path.exists("logs"):
     os.makedirs("logs")
@@ -51,19 +58,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Read allowed origins from ENV; default to same-origin only
 _cors_origins = os.getenv("CORS_ORIGINS", "").strip()
-allowed_origins = [o.strip() for o in _cors_origins.split(",") if o.strip()] if _cors_origins else ["*"]
+allowed_origins = [o.strip() for o in _cors_origins.split(",") if o.strip()] if _cors_origins else []
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if allowed_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials="*" not in allowed_origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # --- Health Check ---
 @app.get("/api/health")
-def health_check():
+def health_check(current_user: User = Depends(get_current_user)):
     """Diagnostic endpoint for cPanel deployment"""
     import sys
     import shutil
@@ -93,7 +101,8 @@ def health_check():
 
 # --- Auth Routes ---
 @app.post("/api/login", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login_for_access_token(response: Response, request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    _check_rate_limit(db, request.client.host if request.client else "unknown", "login", max_requests=10, window_seconds=900)
     user = db.query(User).filter(User.username == form_data.username).first()
     
     # Auto-create admin user if not exists (For simple setup)
@@ -117,11 +126,40 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    csrf_token = create_csrf_token()
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username, "csrf": csrf_token}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=access_token,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        httponly=True,
+        secure=bool(COOKIE_SECURE),
+        samesite="strict",
+        path="/"
+    )
+    response.set_cookie(
+        key=CSRF_COOKIE_NAME,
+        value=csrf_token,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        httponly=False,
+        secure=bool(COOKIE_SECURE),
+        samesite="strict",
+        path="/"
+    )
+    return {"access_token": access_token, "token_type": "bearer", "username": user.username}
+
+@app.post("/api/logout")
+async def logout(response: Response):
+    response.delete_cookie(SESSION_COOKIE_NAME, path="/")
+    response.delete_cookie(CSRF_COOKIE_NAME, path="/")
+    return {"ok": True}
+
+@app.get("/api/me")
+async def get_me(current_user: User = Depends(get_current_user)):
+    return {"username": current_user.username}
 
 # Pydantic Schemas
 class JobCreate(BaseModel):
@@ -159,7 +197,7 @@ class MailboxCreate(BaseModel):
 
 # API Routes
 @app.post("/api/jobs", response_model=JobResponse)
-async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, response: Response, db: Session = Depends(get_db)):
+async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, response: Response, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     try:
         job_id = str(uuid.uuid4())
     
@@ -177,7 +215,8 @@ async def create_job(job_data: JobCreate, background_tasks: BackgroundTasks, res
                 value=quote(job_data.password, safe=''), 
                 max_age=3600*24, 
                 httponly=True,
-                samesite="lax"
+                samesite="lax",
+                secure=bool(COOKIE_SECURE)
             )
         
         db_job = Job(
@@ -213,7 +252,7 @@ max_workers = int(os.getenv("MAX_WORKERS", 7))
 executor = ThreadPoolExecutor(max_workers=max_workers) 
 
 @app.post("/api/jobs/{job_id}/mailboxes")
-async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Session = Depends(get_db)):
+async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -239,7 +278,7 @@ async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Sessi
     return {"message": "Mailbox added and started", "mailbox_id": mb.id}
 
 @app.post("/api/upload/{job_id}")
-async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -278,7 +317,7 @@ async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: Uploa
     return {"message": f"Started {count} mailboxes"}
 
 @app.delete("/api/jobs")
-def delete_all_jobs(db: Session = Depends(get_db)):
+def delete_all_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     # Check if any jobs are currently running
     active_jobs = db.query(Job).filter(Job.status == "running").count()
     if active_jobs > 0:
@@ -312,7 +351,7 @@ def delete_all_jobs(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/jobs/{job_id}")
-def delete_single_job(job_id: str, db: Session = Depends(get_db)):
+def delete_single_job(job_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -342,7 +381,7 @@ def delete_single_job(job_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/jobs", response_model=List[JobResponse])
-def list_jobs(db: Session = Depends(get_db)):
+def list_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         jobs = db.query(Job).order_by(Job.created_at.desc()).all()
         return [format_job_response(j) for j in jobs]
@@ -549,14 +588,15 @@ def verify_job_password(job_id: str, data: PasswordVerify, response: Response, d
             value=quote(data.password, safe=''), 
             max_age=3600*24, # 1 day
             httponly=True,
-            samesite="lax"
+            samesite="lax",
+            secure=bool(COOKIE_SECURE)
         )
         return {"valid": True, "password_required": True}
     else:
         raise HTTPException(status_code=401, detail="Incorrect password")
 
 @app.post("/api/mailboxes/{mailbox_id}/stop")
-def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):
+def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     from worker import kill_sync
     # Kill the process
     success = kill_sync(mailbox_id)
@@ -575,7 +615,7 @@ def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):
         return {"message": "Process not found or already stopped"}
 
 @app.post("/api/mailboxes/{mailbox_id}/retry")
-def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):
+def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
     if not mb:
         raise HTTPException(status_code=404, detail="Mailbox not found")
@@ -606,7 +646,7 @@ def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db)):
     return {"message": "Mailbox retry started", "mailbox_id": mb.id}
 
 @app.post("/api/jobs/{job_id}/cancel")
-def cancel_job(job_id: str, db: Session = Depends(get_db)):
+def cancel_job(job_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     """Cancel all running mailboxes in a job"""
     from worker import kill_sync
     
@@ -639,21 +679,32 @@ def cancel_job(job_id: str, db: Session = Depends(get_db)):
 # --- Check Credentials API (Public, Rate-Limited) ---
 from check_credentials import check_imap_login, check_bulk, detect_provider, PROVIDER_MAP
 import time as _time
-from collections import defaultdict as _defaultdict
 
-# Simple in-memory rate limiter
-_rate_limit_store = _defaultdict(list)
-_RATE_LIMIT_MAX = 10  # max requests
-_RATE_LIMIT_WINDOW = 60  # per 60 seconds
+def _check_rate_limit(db: Session, client_ip: str, scope: str, max_requests: int, window_seconds: int):
+    now = datetime.utcnow()
+    cutoff = now - timedelta(seconds=window_seconds)
+    key = client_ip or "unknown"
 
-def _check_rate_limit(client_ip: str):
-    now = _time.time()
-    window_start = now - _RATE_LIMIT_WINDOW
-    # Clean old entries
-    _rate_limit_store[client_ip] = [t for t in _rate_limit_store[client_ip] if t > window_start]
-    if len(_rate_limit_store[client_ip]) >= _RATE_LIMIT_MAX:
-        raise HTTPException(status_code=429, detail=f"Rate limit exceeded. Max {_RATE_LIMIT_MAX} requests per {_RATE_LIMIT_WINDOW}s.")
-    _rate_limit_store[client_ip].append(now)
+    db.query(RateLimitEvent).filter(
+        RateLimitEvent.scope == scope,
+        RateLimitEvent.created_at < cutoff
+    ).delete(synchronize_session=False)
+    db.commit()
+
+    current_count = db.query(RateLimitEvent).filter(
+        RateLimitEvent.key == key,
+        RateLimitEvent.scope == scope,
+        RateLimitEvent.created_at >= cutoff
+    ).count()
+
+    if current_count >= max_requests:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded for {scope}. Max {max_requests} requests per {window_seconds}s."
+        )
+
+    db.add(RateLimitEvent(key=key, scope=scope, created_at=now))
+    db.commit()
 
 class CredentialCheck(BaseModel):
     email: str
@@ -662,9 +713,9 @@ class CredentialCheck(BaseModel):
     port: int = 993
 
 @app.post("/api/check-credentials")
-async def check_single_credential(data: CredentialCheck, request: Request):
+async def check_single_credential(data: CredentialCheck, request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     """Check a single email credential via IMAP login."""
-    _check_rate_limit(request.client.host)
+    _check_rate_limit(db, request.client.host if request.client else "unknown", "check_credentials_single", max_requests=20, window_seconds=300)
     result = check_imap_login(
         email=data.email,
         password=data.password,
@@ -677,11 +728,14 @@ async def check_single_credential(data: CredentialCheck, request: Request):
 async def check_bulk_credentials(
     request: Request,
     file: UploadFile = File(...),
-    host: str = Query(None),
-    port: int = Query(993)
+    host: Optional[str] = Form(None),
+    port: int = Form(993),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_csrf),
 ):
     """Check multiple credentials from a CSV file (format: email,password per line)."""
-    _check_rate_limit(request.client.host)
+    _check_rate_limit(db, request.client.host if request.client else "unknown", "check_credentials_bulk", max_requests=5, window_seconds=300)
     content = await file.read()
     csv_text = content.decode('utf-8')
 
@@ -713,7 +767,7 @@ async def check_bulk_credentials(
     }
 
 @app.get("/api/providers")
-def list_providers():
+def list_providers(current_user: User = Depends(get_current_user)):
     """List supported email providers."""
     seen = {}
     for domain, info in PROVIDER_MAP.items():
@@ -724,7 +778,7 @@ def list_providers():
     return list(seen.values())
 
 @app.get("/api/stats")
-def get_dashboard_stats(db: Session = Depends(get_db)):
+def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     from sqlalchemy import func
     total_jobs = db.query(Job).count()
     active_jobs = db.query(Job).filter(Job.status == "running").count()
@@ -784,7 +838,7 @@ def format_job_response(job: Job):
 # Use absolute path relative to this file to ensure it works on cPanel
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 # Mount Static Assets
 # Note: StaticFiles needs 'aiofiles' installed.
@@ -802,27 +856,43 @@ templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 # Serve HTML Files via Jinja2Templates
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return RedirectResponse(url="/admin/", status_code=302)
 
 @app.get("/index.html", response_class=HTMLResponse)
 async def read_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return RedirectResponse(url="/admin/", status_code=302)
+
+@app.get("/admin/", response_class=HTMLResponse)
+async def read_admin_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "admin_mode": True})
+
+@app.get("/admin/index.html", response_class=HTMLResponse)
+async def read_admin_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "admin_mode": True})
 
 @app.get("/create-job.html", response_class=HTMLResponse)
 async def read_create_job(request: Request):
-    return templates.TemplateResponse("create-job.html", {"request": request})
+    return RedirectResponse(url="/admin/create-job.html", status_code=302)
+
+@app.get("/admin/create-job.html", response_class=HTMLResponse)
+async def read_admin_create_job(request: Request):
+    return templates.TemplateResponse("create-job.html", {"request": request, "admin_mode": True})
 
 @app.get("/job-detail.html", response_class=HTMLResponse)
 async def read_job_detail(request: Request):
-    return templates.TemplateResponse("job-detail.html", {"request": request})
+    return templates.TemplateResponse("job-detail.html", {"request": request, "admin_mode": False})
 
 @app.get("/guide.html", response_class=HTMLResponse)
 async def read_guide(request: Request):
-    return templates.TemplateResponse("guide.html", {"request": request})
+    return templates.TemplateResponse("guide.html", {"request": request, "admin_mode": False})
 
 @app.get("/check-credentials.html", response_class=HTMLResponse)
 async def read_check_credentials(request: Request):
-    return templates.TemplateResponse("check-credentials.html", {"request": request})
+    return RedirectResponse(url="/admin/check-credentials.html", status_code=302)
+
+@app.get("/admin/check-credentials.html", response_class=HTMLResponse)
+async def read_admin_check_credentials(request: Request):
+    return templates.TemplateResponse("check-credentials.html", {"request": request, "admin_mode": True})
 
 if __name__ == "__main__":
     import uvicorn
