@@ -101,6 +101,17 @@ body {
     font-family: 'Manrope', sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
     letter-spacing: -0.01em;
+    -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+    background: rgba(15, 95, 195, 0.16);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] ::selection {
+    background: rgba(64, 156, 255, 0.22);
+    color: #f8fafc;
 }
 
 body::before {

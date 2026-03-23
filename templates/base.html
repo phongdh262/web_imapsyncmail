@@ -116,6 +116,31 @@
 
     <script src="/js/app.js?v=9.0"></script>
     <script>
+        window.showAdminLoginModal = window.showAdminLoginModal || function () {
+            const modal = document.getElementById('admin-login-modal');
+            const usernameInput = document.getElementById('admin-username');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (usernameInput) {
+                setTimeout(() => usernameInput.focus(), 0);
+            }
+        };
+
+        window.closeAdminLoginModal = window.closeAdminLoginModal || function () {
+            const modal = document.getElementById('admin-login-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-admin-login-trigger]');
+            if (!trigger) return;
+            event.preventDefault();
+            window.showAdminLoginModal();
+        });
+
         // Init theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
