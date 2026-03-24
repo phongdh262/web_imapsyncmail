@@ -380,6 +380,22 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 guide: 'Hướng dẫn',
                 newJob: 'Job mới'
             },
+            adminGate: {
+                kicker: 'Yêu cầu quyền admin',
+                login: 'Đăng nhập admin',
+                guide: 'Mở hướng dẫn công khai',
+                reviewFlow: 'Xem lại quy trình trước',
+                reviewChecks: 'Đọc hướng dẫn kiểm tra',
+                dashboardTitle: 'Đăng nhập để mở dashboard vận hành.',
+                dashboardBody: 'Job Password chỉ bảo vệ viewer của từng job. Dashboard, thống kê hàng đợi và các thao tác quản trị vẫn nằm sau phiên admin.',
+                dashboardHint: 'Sau khi xác thực, bạn có thể xem sức khỏe job, xóa lịch sử và mở các phiên migration đã được bảo vệ từ một console.',
+                createTitle: 'Đăng nhập để tạo job migration.',
+                createBody: 'Job Password chỉ có tác dụng sau khi job đã được tạo. Việc tạo job, tải CSV và nạp credential vẫn thuộc khu vực admin.',
+                createHint: 'Sau khi đăng nhập, bạn có thể cấu hình server nguồn và đích, tải batch CSV hoặc chuyển sang chế độ mailbox đơn lẻ.',
+                checkTitle: 'Đăng nhập để chạy kiểm tra credential.',
+                checkBody: 'Công cụ này thao tác với credential thật và cấu hình server override, nên nó dùng cùng lớp bảo vệ admin như tạo job và quản lý queue.',
+                checkHint: 'Nếu chỉ cần quy trình thao tác, hãy xem phần hướng dẫn kiểm tra credential thay vì mở tool admin.'
+            },
             modal: {
                 confirm: {
                     title: 'Xác nhận',

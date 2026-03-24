@@ -88,6 +88,21 @@ const clearAdminSession = () => {
     adminSessionActive = false;
 };
 
+const updateAdminPageAccess = (authenticated = false) => {
+    const isAdminMode = document.body?.dataset?.adminMode === 'true';
+    if (!isAdminMode) return;
+
+    document.querySelectorAll('[data-admin-protected]').forEach((element) => {
+        element.classList.toggle('hidden', !authenticated);
+        element.setAttribute('aria-hidden', authenticated ? 'false' : 'true');
+    });
+
+    document.querySelectorAll('[data-admin-gate]').forEach((element) => {
+        element.classList.toggle('hidden', authenticated);
+        element.setAttribute('aria-hidden', authenticated ? 'true' : 'false');
+    });
+};
+
 const updateAdminAuthUI = () => {
     const loginBtn = document.getElementById('admin-login-btn');
     const logoutBtn = document.getElementById('admin-logout-btn');
@@ -112,6 +127,8 @@ const updateAdminAuthUI = () => {
         logoutBtn?.classList.add('hidden');
         statusEl?.classList.add('hidden');
     }
+
+    updateAdminPageAccess(adminSessionActive);
 };
 
 const isPublicPage = () => PUBLIC_PATHS.some((segment) => window.location.pathname.includes(segment));
@@ -148,9 +165,6 @@ window.logoutAdmin = () => {
     fetch(`${API_BASE}/logout`, { method: 'POST' }).catch(() => null).finally(() => {
         clearAdminSession();
         updateAdminAuthUI();
-        if (!isPublicPage()) {
-            window.showAdminLoginModal();
-        }
     });
 };
 
@@ -343,7 +357,7 @@ const initDashboard = async () => {
     try {
         const res = await request(`${API_BASE}/jobs`);
         if (res.status === 401 || res.status === 403) {
-            await ensureAdminAuth();
+            await ensureAdminAuth({ showModal: false, forceCheck: true });
             jobListEl.innerHTML = '';
             return;
         }
@@ -1855,7 +1869,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.classList.add('page-enter');
 
     if (adminPage) {
-        const authenticated = await ensureAdminAuth({ showModal: true });
+        const authenticated = await ensureAdminAuth({ showModal: false });
         if (!authenticated) return;
     }
 
