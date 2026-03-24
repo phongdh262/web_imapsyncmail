@@ -4,6 +4,7 @@ import os
 import sys
 import stat
 import glob
+import shutil
 
 # Add current directory to sys.path to ensure modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -15,6 +16,160 @@ from database import SessionLocal, Mailbox, engine, Job
 
 # Global registry for running processes {mailbox_id: process_object}
 active_processes = {}
+
+IMAPSYNC_BINARY = os.getenv("IMAPSYNC_BINARY") or shutil.which("imapsync") or "imapsync"
+IMAPSYNC_TIMEOUT = max(60, int(os.getenv("IMAPSYNC_TIMEOUT", "180")))
+IMAPSYNC_RECONNECT_RETRY = max(1, int(os.getenv("IMAPSYNC_RECONNECT_RETRY", "6")))
+IMAPSYNC_SPLIT = max(50, int(os.getenv("IMAPSYNC_SPLIT", "200")))
+IMAPSYNC_ERRORS_MAX = max(50, int(os.getenv("IMAPSYNC_ERRORS_MAX", "500")))
+IMAPSYNC_MESSAGE_RETRIES = max(1, int(os.getenv("IMAPSYNC_MESSAGE_RETRIES", "5")))
+IMAPSYNC_BUFFER_SIZE = max(0, int(os.getenv("IMAPSYNC_BUFFER_SIZE", "8192000")))
+
+
+def _host_matches(hostname: str, *needles: str) -> bool:
+    host = (hostname or "").lower()
+    return any(needle in host for needle in needles)
+
+
+def _detect_provider(hostname: str) -> str:
+    host = (hostname or "").lower()
+    if any(token in host for token in ('gmail.com', 'googlemail.com')):
+        return 'gmail'
+    if any(token in host for token in ('office365.com', 'outlook.com', 'hotmail.com', 'live.com', 'microsoftonline.com')):
+        return 'office365'
+    if 'yandex' in host:
+        return 'yandex'
+    return 'generic'
+
+
+def _provider_tuning(source_host: str, target_host: str) -> dict:
+    profiles = {
+        'gmail': {
+            'split': 120,
+            'timeout': 240,
+            'reconnect_retry': 8,
+            'errors_max': 400,
+            'message_retries': 5,
+            'buffer_size': 4 * 1024 * 1024,
+        },
+        'office365': {
+            'split': 80,
+            'timeout': 300,
+            'reconnect_retry': 8,
+            'errors_max': 300,
+            'message_retries': 5,
+            'buffer_size': 4 * 1024 * 1024,
+        },
+        'yandex': {
+            'split': 150,
+            'timeout': 210,
+            'reconnect_retry': 6,
+            'errors_max': 400,
+            'message_retries': 5,
+            'buffer_size': 6 * 1024 * 1024,
+        },
+        'generic': {
+            'split': IMAPSYNC_SPLIT,
+            'timeout': IMAPSYNC_TIMEOUT,
+            'reconnect_retry': IMAPSYNC_RECONNECT_RETRY,
+            'errors_max': IMAPSYNC_ERRORS_MAX,
+            'message_retries': IMAPSYNC_MESSAGE_RETRIES,
+            'buffer_size': IMAPSYNC_BUFFER_SIZE,
+        },
+    }
+
+    source_profile = profiles[_detect_provider(source_host)]
+    target_profile = profiles[_detect_provider(target_host)]
+
+    return {
+        'split': min(source_profile['split'], target_profile['split']),
+        'timeout': max(source_profile['timeout'], target_profile['timeout']),
+        'reconnect_retry': max(source_profile['reconnect_retry'], target_profile['reconnect_retry']),
+        'errors_max': min(source_profile['errors_max'], target_profile['errors_max']),
+        'message_retries': max(source_profile['message_retries'], target_profile['message_retries']),
+        'buffer_size': min(source_profile['buffer_size'], target_profile['buffer_size']),
+        'source_provider': _detect_provider(source_host),
+        'target_provider': _detect_provider(target_host),
+    }
+
+
+def build_imapsync_command(job, mailbox, pass1_path: str, pass2_path: str, options: dict):
+    tuning = _provider_tuning(job.source_host, job.target_host)
+
+    cmd = [
+        IMAPSYNC_BINARY,
+        '--host1', job.source_host,
+        '--port1', str(job.source_port),
+        '--user1', mailbox.source_user,
+        '--passfile1', pass1_path,
+        '--host2', job.target_host,
+        '--port2', str(job.target_port),
+        '--user2', mailbox.target_user,
+        '--passfile2', pass2_path,
+        '--automap',
+        '--useuid',
+        '--skipcrossduplicates',
+        '--useheader', 'Message-Id',
+        '--nofoldersizes',
+        '--nofoldersizesatend',
+        '--fastio1',
+        '--fastio2',
+        '--buffersize', str(tuning['buffer_size']),
+        '--errorsmax', str(tuning['errors_max']),
+        '--reconnectretry1', str(tuning['reconnect_retry']),
+        '--reconnectretry2', str(tuning['reconnect_retry']),
+        '--timeout1', str(tuning['timeout']),
+        '--timeout2', str(tuning['timeout']),
+        '--split1', str(tuning['split']),
+        '--split2', str(tuning['split']),
+        '--allowsizemismatch',
+        '--maxretries', str(tuning['message_retries']),
+    ]
+
+    if job.source_security == "SSL/TLS":
+        cmd.append('--ssl1')
+    elif job.source_security == "STARTTLS":
+        cmd.append('--tls1')
+
+    if job.target_security == "SSL/TLS":
+        cmd.append('--ssl2')
+    elif job.target_security == "STARTTLS":
+        cmd.append('--tls2')
+
+    if _host_matches(job.source_host, 'gmail.com', 'googlemail.com'):
+        cmd.append('--gmail1')
+    elif _host_matches(job.source_host, 'office365.com', 'outlook.com', 'hotmail.com'):
+        cmd.append('--office3651')
+    elif _host_matches(job.source_host, 'exchange'):
+        cmd.append('--exchange1')
+    elif _host_matches(job.source_host, 'zoho.com'):
+        cmd.append('--zoho1')
+
+    if _host_matches(job.target_host, 'gmail.com', 'googlemail.com'):
+        cmd.append('--gmail2')
+    elif _host_matches(job.target_host, 'office365.com', 'outlook.com', 'hotmail.com'):
+        cmd.append('--office3652')
+    elif _host_matches(job.target_host, 'exchange'):
+        cmd.append('--exchange2')
+    elif _host_matches(job.target_host, 'zoho.com'):
+        cmd.append('--zoho2')
+
+    if options.get('sync_internal_dates'):
+        cmd.append('--syncinternaldates')
+
+    if options.get('skip_trash'):
+        cmd.extend([
+            '--exclude', 'Trash',
+            '--exclude', 'Bin',
+            '--exclude', 'Deleted Items',
+            '--exclude', 'Deleted Messages',
+            '--exclude', '[Gmail]/Trash',
+        ])
+
+    if options.get('dry_run'):
+        cmd.append('--dry')
+
+    return cmd, tuning
 
 
 def secure_delete_file(filepath):
@@ -131,82 +286,7 @@ def run_imapsync(mailbox_id: int):
             except:
                 pass
 
-        # Build Command
-        cmd = [
-            'imapsync',
-            '--host1', job.source_host,
-            '--port1', str(job.source_port),
-            '--user1', mailbox.source_user,
-            '--passfile1', pass1_path,
-            '--host2', job.target_host,
-            '--port2', str(job.target_port),
-            '--user2', mailbox.target_user,
-            '--passfile2', pass2_path,
-            '--automap',
-            '--nofoldersizes',
-            # --- Resilience: prevent ERR_APPEND / ERR_FETCH ---
-            '--errorsmax', '2000',          # Extreme tolerance for corrupted/UNAVAILABLE emails
-            '--reconnectretry1', '10',      # Auto-reconnect source up to 10 times
-            '--reconnectretry2', '10',      # Auto-reconnect target up to 10 times
-            '--timeout1', '180',            # Extended source timeout to 180s (3 minutes)
-            '--timeout2', '180',            # Extended target timeout to 180s
-            '--split1', '50',               # Process in very small chunks of 50 msgs
-            '--split2', '50',               # Process in very small chunks of 50 msgs
-            '--skipcrossduplicates',        # Faster duplicate check
-            '--useheader', 'Message-Id',    # Fast header parsing for large folders
-            '--fastio1',                    # Use fast I/O on source
-            '--fastio2',                    # Use fast I/O on target
-            '--allowsizemismatch',          # Handle CRLF/LF encoding size differences between environments
-            '--maxretries', '7',            # Per-message retry up to 7 times (default 3)
-        ]
-        
-        # Security Flags
-        if job.source_security == "SSL/TLS":
-            cmd.append('--ssl1')
-        elif job.source_security == "STARTTLS":
-            cmd.append('--tls1')
-            
-        if job.target_security == "SSL/TLS":
-            cmd.append('--ssl2')
-        elif job.target_security == "STARTTLS":
-            cmd.append('--tls2')
-
-        # Provider-specific Flags (Source)
-        source_host_lower = job.source_host.lower()
-        if 'gmail.com' in source_host_lower or 'googlemail.com' in source_host_lower:
-            cmd.append('--gmail1')
-        elif 'office365.com' in source_host_lower or 'outlook.com' in source_host_lower or 'hotmail.com' in source_host_lower:
-            cmd.append('--office3651')
-        elif 'exchange' in source_host_lower:
-            cmd.append('--exchange1')
-        elif 'yahoo.com' in source_host_lower:
-            cmd.append('--yahoo1')
-        elif 'zoho.com' in source_host_lower:
-            cmd.append('--zoho1')
-
-        # Provider-specific Flags (Target)
-        target_host_lower = job.target_host.lower()
-        if 'gmail.com' in target_host_lower or 'googlemail.com' in target_host_lower:
-            cmd.append('--gmail2')
-        elif 'office365.com' in target_host_lower or 'outlook.com' in target_host_lower or 'hotmail.com' in target_host_lower:
-            cmd.append('--office3652')
-        elif 'exchange' in target_host_lower:
-            cmd.append('--exchange2')
-        elif 'yahoo.com' in target_host_lower:
-            cmd.append('--yahoo2')
-        elif 'zoho.com' in target_host_lower:
-            cmd.append('--zoho2')
-            
-        # Feature Flags
-        if options.get('sync_internal_dates'):
-            cmd.append('--syncinternaldates')
-        
-        if options.get('skip_trash'):
-             # Common trash folder names, can be expanded
-            cmd.extend(['--exclude', 'Trash', '--exclude', 'Bin', '--exclude', 'Deleted Items'])
-            
-        if options.get('dry_run'):
-            cmd.append('--dry')
+        cmd, tuning = build_imapsync_command(job, mailbox, pass1_path, pass2_path, options)
 
         # --- Auto-Retry Configuration ---
         MAX_RETRIES = 3
@@ -235,13 +315,29 @@ def run_imapsync(mailbox_id: int):
                     log_file.write(f"  AUTO-RETRY {attempt}/{MAX_RETRIES} — Previous exit code: {final_returncode}\n")
                     log_file.write(f"  imapsync will skip already-synced messages automatically\n")
                     log_file.write(f"{'='*60}\n\n")
+                log_file.write(f"[WORKER] Using imapsync binary: {IMAPSYNC_BINARY}\n")
+                log_file.write(
+                    "[WORKER] Provider tuning: "
+                    f"source={tuning['source_provider']} "
+                    f"target={tuning['target_provider']} "
+                    f"split={tuning['split']} "
+                    f"timeout={tuning['timeout']} "
+                    f"reconnect_retry={tuning['reconnect_retry']} "
+                    f"errors_max={tuning['errors_max']} "
+                    f"buffer_size={tuning['buffer_size']}\n"
+                )
+                log_file.write(f"[WORKER] Command: {' '.join(cmd)}\n\n")
 
+                process_env = os.environ.copy()
+                process_env["LC_ALL"] = "C"
+                process_env["LANG"] = "C"
                 process = subprocess.Popen(
                     cmd,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                     text=True,
-                    bufsize=1
+                    bufsize=1,
+                    env=process_env
                 )
                 
                 # Register process
@@ -444,4 +540,3 @@ def run_imapsync(mailbox_id: int):
 
         db.commit()
         db.close()
-

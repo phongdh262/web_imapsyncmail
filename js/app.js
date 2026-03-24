@@ -59,7 +59,7 @@ const formatErrorMessage = (message = '') => `${tr('runtime.common.errorPrefix',
 const getPresetProviderLabel = (provider) => ({
     gmail: 'Gmail',
     office365: 'Office 365',
-    yahoo: 'Yahoo',
+    yandex: 'Yandex',
     outlook: 'Outlook',
     h01: 'H01',
     h02: 'H02'
@@ -1902,7 +1902,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 const serverPresets = {
     gmail: { host: 'imap.gmail.com', port: 993, security: 'SSL/TLS' },
     office365: { host: 'outlook.office365.com', port: 993, security: 'SSL/TLS' },
-    yahoo: { host: 'imap.mail.yahoo.com', port: 993, security: 'SSL/TLS' },
+    yandex: { host: 'imap.yandex.com', port: 993, security: 'SSL/TLS' },
     outlook: { host: 'imap-mail.outlook.com', port: 993, security: 'SSL/TLS' },
     h01: { host: 'h01.azdigimail.com', port: 993, security: 'SSL/TLS' },
     h02: { host: 'h02.azdigimail.com', port: 993, security: 'SSL/TLS' }
