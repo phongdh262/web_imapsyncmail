@@ -817,7 +817,7 @@ textarea::placeholder {
 }
 
 .app-shell {
-    width: min(100%, 1024px);
+    width: min(100%, 1280px);
     margin-inline: auto;
     padding-inline: 1rem;
 }
