@@ -6,25 +6,10 @@
 
 {% block content %}
 <main class="page-shell">
-    <section class="page-hero">
-        <div class="page-hero-grid">
-            <div>
-                <span data-i18n="createJob.hero.kicker" class="page-kicker">Admin Workflow</span>
-                <h1 data-i18n="createJob.hero.title" class="page-title mt-4">Create a controlled migration run.</h1>
-                <p data-i18n="createJob.hero.subtitle" class="page-subtitle mt-4">Define source and destination servers, attach credential input, and lock the resulting job behind its own viewer password before execution starts.</p>
-            </div>
-            <div class="hero-metrics">
-                <div class="hero-metric-card">
-                    <span data-i18n="createJob.hero.bestForLabel" class="hero-metric-label">Best for</span>
-                    <span data-i18n="createJob.hero.bestForValue" class="hero-metric-value">Bulk moves, staged cutovers, and one-off mailbox recovery runs.</span>
-                </div>
-                <div class="hero-metric-card">
-                    <span data-i18n="createJob.hero.securityLabel" class="hero-metric-label">Security note</span>
-                    <span data-i18n="createJob.hero.securityValue" class="hero-metric-value">Job Password protects the shareable job viewer separately from admin access.</span>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="mb-6 pt-4">
+        <h1 data-i18n="createJob.title" class="text-2xl font-bold text-slate-900 dark:text-white">Create Migration Job</h1>
+        <p data-i18n="createJob.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure source and target servers for a new migration operation.</p>
+    </div>
 
     <section data-admin-gate class="admin-gate hidden">
         <div class="admin-gate-card">

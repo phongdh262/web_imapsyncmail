@@ -10,27 +10,8 @@
 
 {% block content %}
 <main class="page-shell">
-    <section class="page-hero">
-        <div class="page-hero-grid">
-            <div>
-                <span data-i18n="jobDetail.hero.kicker" class="page-kicker">Protected Viewer</span>
-                <h2 data-i18n="jobDetail.hero.title" class="page-title mt-4">Live job playback without exposing admin controls.</h2>
-                <p data-i18n="jobDetail.hero.subtitle" class="page-subtitle mt-4">This public-facing page is meant for secure progress viewing, report download, and operational transparency after the correct job password is supplied.</p>
-            </div>
-            <div class="hero-metrics">
-                <div class="hero-metric-card">
-                    <span data-i18n="jobDetail.hero.scopeLabel" class="hero-metric-label">Viewer scope</span>
-                    <span data-i18n="jobDetail.hero.scopeValue" class="hero-metric-value">Progress tracking, mailbox logs, and export actions for one migration job.</span>
-                </div>
-                <div class="hero-metric-card">
-                    <span data-i18n="jobDetail.hero.adminLabel" class="hero-metric-label">Admin actions</span>
-                    <span data-i18n="jobDetail.hero.adminValue" class="hero-metric-value">Stop and retry controls only appear when an authenticated admin session is present.</span>
-                </div>
-            </div>
-        </div>
-    </section>
     <!-- Header Info -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pt-4">
         <div>
             <h1 id="job-name" class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Loading...</h1>
             <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">

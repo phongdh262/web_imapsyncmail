@@ -3,42 +3,9 @@
 {% block page_id %}dashboard{% endblock %}
 
 {% block content %}
-<div class="page-shell mb-8">
-    <section class="page-hero">
-        <div class="page-hero-grid">
-            <div>
-                <span data-i18n="dashboard.hero.kicker" class="page-kicker">Admin Console</span>
-                <h1 data-i18n="dashboard.hero.title" class="page-title mt-4">Operations dashboard for controlled IMAP migrations.</h1>
-                <p data-i18n="dashboard.hero.subtitle" class="page-subtitle mt-4">Track active jobs, verify queue health, and jump into protected job sessions without exposing the underlying migration controls to the public viewer.</p>
-                <div class="hero-inline-grid">
-                    <div class="signal-item">
-                        <span class="signal-dot"></span>
-                        <div>
-                            <span data-i18n="dashboard.hero.signalTrustTitle" class="signal-title">Trust-first controls</span>
-                            <span data-i18n="dashboard.hero.signalTrustCopy" class="signal-copy">Admin actions stay separated from the shareable job viewer.</span>
-                        </div>
-                    </div>
-                    <div class="signal-item">
-                        <span class="signal-dot"></span>
-                        <div>
-                            <span data-i18n="dashboard.hero.signalLiveTitle" class="signal-title">Live visibility</span>
-                            <span data-i18n="dashboard.hero.signalLiveCopy" class="signal-copy">Stats, status chips, and mailbox progress stay readable during long-running moves.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-metrics">
-                <div class="hero-metric-card">
-                    <span data-i18n="dashboard.hero.focusLabel" class="hero-metric-label">Focus</span>
-                    <span data-i18n="dashboard.hero.focusValue" class="hero-metric-value">High-confidence migration operations with low visual noise.</span>
-                </div>
-                <div class="hero-metric-card">
-                    <span data-i18n="dashboard.hero.flowLabel" class="hero-metric-label">Recommended flow</span>
-                    <span data-i18n="dashboard.hero.flowValue" class="hero-metric-value">Check credentials, create job, monitor progress, export report.</span>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="mb-8 pt-4">
+    <h1 data-i18n="dashboard.title" class="text-2xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
+    <p data-i18n="dashboard.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of active migration jobs and statistics.</p>
 </div>
 <section data-admin-gate class="admin-gate hidden">
     <div class="admin-gate-card">
