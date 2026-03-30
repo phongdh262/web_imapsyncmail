@@ -1,5 +1,5 @@
 /* IMAP Sync Pro - Custom Styles v7.5 (Trust-first Operations UI) */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 /* ============================================
    CSS Custom Properties (Light/Dark Theme)
@@ -98,7 +98,7 @@
 body {
     background: var(--bg-primary);
     color: var(--text-primary);
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Be Vietnam Pro', sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
     letter-spacing: -0.01em;
     -webkit-tap-highlight-color: transparent;
