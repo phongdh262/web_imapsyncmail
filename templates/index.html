@@ -3,7 +3,7 @@
 {% block page_id %}dashboard{% endblock %}
 
 {% block content %}
-<div class="mb-8 pt-4">
+<div class="mb-8 pt-4 page-intro">
     <h1 data-i18n="dashboard.title" class="text-2xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
     <p data-i18n="dashboard.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of active migration jobs and statistics.</p>
 </div>
@@ -26,7 +26,7 @@
 </section>
 <div data-admin-protected class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 stagger-item">
     <!-- Total Jobs Stat -->
-    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group tech-stat-card tech-stat-card-neutral">
         <div class="flex items-center justify-between mb-4 relative z-10">
             <div class="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Active Stat -->
-    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-emerald-200 dark:border-emerald-900/50 shadow-sm relative overflow-hidden group">
+    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-emerald-200 dark:border-emerald-900/50 shadow-sm relative overflow-hidden group tech-stat-card tech-stat-card-active">
         <div class="flex items-center justify-between mb-4 relative z-10">
             <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -61,7 +61,7 @@
     </div>
 
     <!-- Completed Mailboxes -->
-    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group tech-stat-card tech-stat-card-sync">
         <div class="flex items-center justify-between mb-4 relative z-10">
             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,7 +77,7 @@
     </div>
     
     <!-- Data Transferred -->
-    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group tech-stat-card tech-stat-card-data">
         <div class="flex items-center justify-between mb-4 relative z-10">
             <div class="w-10 h-10 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-200 dark:group-hover:bg-cyan-900/50 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,7 +98,7 @@
 </div>
 
 <!-- Main Table Section -->
-<div data-admin-protected class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden stagger-item">
+<div data-admin-protected class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden stagger-item tech-main-panel">
     <div class="p-6 border-b border-slate-200 dark:border-slate-800">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 data-i18n="dashboard.jobsList.title" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Jobs List</h2>
@@ -144,7 +144,7 @@
     
     <div class="overflow-x-auto" id="jobs-table">
         <table class="w-full">
-            <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+            <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 jobs-table-head">
                 <tr>
                     <th data-i18n="dashboard.jobsList.table.jobName" scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Job Name</th>
                     <th data-i18n="dashboard.jobsList.table.status" scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
@@ -153,7 +153,7 @@
                     <th data-i18n="dashboard.jobsList.table.actions" scope="col" class="px-6 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody id="jobs-table-body" class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/50">
+            <tbody id="jobs-table-body" class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/50 jobs-table-body">
                 <!-- Jobs will be populated here -->
             </tbody>
         </table>

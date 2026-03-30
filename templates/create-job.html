@@ -6,7 +6,7 @@
 
 {% block content %}
 <main class="page-shell">
-    <div class="mb-6 pt-4">
+    <div class="mb-6 pt-4 page-intro">
         <h1 data-i18n="createJob.title" class="text-2xl font-bold text-slate-900 dark:text-white">Create Migration Job</h1>
         <p data-i18n="createJob.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure source and target servers for a new migration operation.</p>
     </div>
@@ -34,7 +34,7 @@
         <div class="server-config-grid mb-8">
             <!-- Source Server -->
             <div id="source-server-card"
-                class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+                class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 tech-panel">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div
@@ -106,7 +106,7 @@
 
             <!-- Target Server -->
             <div id="target-server-card"
-                class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+                class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 tech-panel">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
@@ -161,7 +161,7 @@
 
         <!-- Migration Type Tabs -->
         <div class="flex justify-center mb-8">
-            <div class="tabs inline-flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl">
+            <div class="tabs inline-flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl tech-tabs">
                 <button type="button"
                     class="tab-btn px-6 py-3 rounded-xl font-medium text-sm transition-all active text-slate-900 dark:text-white"
                     data-tab="bulk">
@@ -176,7 +176,7 @@
         </div>
 
         <!-- Migration Options -->
-        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 mb-8 overflow-hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 mb-8 overflow-hidden tech-panel">
             <div class="p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
