@@ -13,28 +13,21 @@
 
     <section data-admin-gate class="admin-gate hidden">
         <div class="admin-gate-card">
-            <div class="admin-gate-copy">
-                <span data-i18n="adminGate.kicker" class="admin-gate-kicker">Admin access required</span>
-                <h2 data-i18n="adminGate.createTitle" class="admin-gate-title">Sign in to create a migration job.</h2>
-                <p data-i18n="adminGate.createBody" class="admin-gate-body">Job Password only protects the viewer link after a job exists. Creating jobs, uploading CSV files, and pushing live credentials stays in the admin console.</p>
-                <p data-i18n="adminGate.createHint" class="admin-gate-hint">After login you can choose source and target servers, upload CSV batches, or switch to single-mailbox mode.</p>
-            </div>
-            <div class="admin-gate-actions">
-                <button type="button" data-admin-login-trigger onclick="window.showAdminLoginModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-colors shadow-sm text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                    <span data-i18n="adminGate.login">Admin Login</span>
-                </button>
-                <a href="/guide.html#bulk-migration" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                    <span data-i18n="adminGate.reviewFlow">Review the workflow first</span>
-                </a>
-            </div>
+        <div class="admin-gate-copy">
+            <span data-i18n="adminGate.kicker" class="admin-gate-kicker">Admin access required</span>
+            <h2 data-i18n="adminGate.createTitle" class="admin-gate-title">Sign in to create a migration job.</h2>
+            <p data-i18n="adminGate.createBody" class="admin-gate-body">Job Password only protects the viewer link after a job exists. Creating jobs, uploading CSV files, and pushing live credentials stays in the admin console.</p>
         </div>
-    </section>
+        <div class="admin-gate-actions">
+            <button type="button" data-admin-login-trigger onclick="window.showAdminLoginModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-colors shadow-sm text-sm font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+                <span data-i18n="adminGate.login">Admin Login</span>
+            </button>
+        </div>
+    </div>
+</section>
 
     <form id="create-job-form" data-admin-protected novalidate>
         <!-- Server Configuration Grid with Flow Indicator -->
@@ -66,15 +59,6 @@
                     </button>
                     <button type="button" class="preset-btn" onclick="applyPreset('source', 'yandex')" title="Yandex Mail">
                         <span class="text-sm">📮</span> Yandex
-                    </button>
-                    <button type="button" class="preset-btn" onclick="applyPreset('source', 'outlook')" title="Outlook">
-                        <span class="text-sm">◻</span> Outlook
-                    </button>
-                    <button type="button" class="preset-btn" onclick="applyPreset('source', 'h01')" title="H01 Azdigi">
-                        <span class="text-sm">🚀</span> H01
-                    </button>
-                    <button type="button" class="preset-btn" onclick="applyPreset('source', 'h02')" title="H02 Azdigi">
-                        <span class="text-sm">🚀</span> H02
                     </button>
                 </div>
                 <div class="space-y-4">
@@ -143,15 +127,6 @@
                     </button>
                     <button type="button" class="preset-btn" onclick="applyPreset('target', 'yandex')" title="Yandex Mail">
                         <span class="text-sm">📮</span> Yandex
-                    </button>
-                    <button type="button" class="preset-btn" onclick="applyPreset('target', 'outlook')" title="Outlook">
-                        <span class="text-sm">◻</span> Outlook
-                    </button>
-                    <button type="button" class="preset-btn" onclick="applyPreset('target', 'h01')" title="H01 Azdigi">
-                        <span class="text-sm">🚀</span> H01
-                    </button>
-                    <button type="button" class="preset-btn" onclick="applyPreset('target', 'h02')" title="H02 Azdigi">
-                        <span class="text-sm">🚀</span> H02
                     </button>
                 </div>
                 <div class="space-y-4">
