@@ -72,6 +72,42 @@ const escapeHtml = (value) => String(value ?? '')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
+const normalizeJobsPayload = (payload) => {
+    if (Array.isArray(payload)) {
+        return payload;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+        return null;
+    }
+
+    if (Array.isArray(payload.jobs)) {
+        return payload.jobs;
+    }
+
+    if (Array.isArray(payload.data)) {
+        return payload.data;
+    }
+
+    if (Array.isArray(payload.items)) {
+        return payload.items;
+    }
+
+    if (payload.jobs && typeof payload.jobs === 'object') {
+        const fromObject = Object.values(payload.jobs);
+        if (fromObject.every((job) => job && typeof job === 'object')) {
+            return fromObject;
+        }
+    }
+
+    const values = Object.values(payload);
+    if (values.length > 0 && values.every((job) => job && typeof job === 'object' && ('id' in job || 'status' in job))) {
+        return values;
+    }
+
+    return null;
+};
+
 const getCookieValue = (name) => {
     const cookies = document.cookie ? document.cookie.split('; ') : [];
     const match = cookies.find((cookie) => cookie.startsWith(`${name}=`));
@@ -366,15 +402,13 @@ const initDashboard = async () => {
             throw new Error(payload.detail || payload.message || `${tr('runtime.dashboard.loadJobsFailed', {}, 'Failed to load jobs')} (${res.status})`);
         }
 
-        const jobs = Array.isArray(payload)
-            ? payload
-            : Array.isArray(payload.jobs)
-                ? payload.jobs
-                : null;
+        const jobs = normalizeJobsPayload(payload);
 
         if (!jobs) {
             throw new Error(payload.detail || tr('runtime.dashboard.unexpectedJobsResponse', {}, 'Unexpected jobs response from server'));
         }
+
+        allJobs = jobs;
 
         const getStatusClasses = (status) => {
             const statusMap = {
@@ -423,7 +457,7 @@ const initDashboard = async () => {
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
+                            <a href="/job-detail.html?id=${job.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
                                 ${escapeHtml(tr('runtime.actions.view', {}, 'View'))}
                             </a>
                             <button onclick="deleteSingleJob('${job.id}', '${escapeHtml(job.name).replace(/'/g, "\\'")}')" 
@@ -807,7 +841,7 @@ const initCreateJob = () => {
                 }
             }
 
-            window.location.href = `job-detail.html?id=${job.id}`;
+            window.location.href = `/job-detail.html?id=${job.id}`;
 
         } catch (error) {
             window.showToast(formatErrorMessage(error.message), 'error');
@@ -1515,7 +1549,7 @@ window.toggleTheme = toggleTheme;
 const getCommandPaletteCommands = () => ([
     { id: 'new-job', title: tr('runtime.commandPalette.newJobTitle', {}, 'Create New Job'), subtitle: tr('runtime.commandPalette.newJobSubtitle', {}, 'Create a new migration job'), icon: '➕', action: () => window.location.href = '/admin/create-job.html', shortcut: ['⌘', 'N'] },
     { id: 'dashboard', title: tr('runtime.commandPalette.dashboardTitle', {}, 'Dashboard'), subtitle: tr('runtime.commandPalette.dashboardSubtitle', {}, 'View jobs overview'), icon: '📊', action: () => window.location.href = '/admin/' },
-    { id: 'guide', title: tr('runtime.commandPalette.guideTitle', {}, 'User Guide'), subtitle: tr('runtime.commandPalette.guideSubtitle', {}, 'View detailed guide'), icon: '📖', action: () => window.location.href = 'guide.html' },
+    { id: 'guide', title: tr('runtime.commandPalette.guideTitle', {}, 'User Guide'), subtitle: tr('runtime.commandPalette.guideSubtitle', {}, 'View detailed guide'), icon: '📖', action: () => window.location.href = '/guide.html' },
     { id: 'refresh', title: tr('runtime.commandPalette.refreshTitle', {}, 'Refresh Page'), subtitle: tr('runtime.commandPalette.refreshSubtitle', {}, 'Refresh current data'), icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
     { id: 'toggle-theme', title: tr('runtime.commandPalette.themeTitle', {}, 'Toggle Theme'), subtitle: tr('runtime.commandPalette.themeSubtitle', {}, 'Light/Dark mode'), icon: '🌓', action: () => toggleTheme() },
 ]);
@@ -1683,7 +1717,7 @@ const initKeyboardShortcuts = () => {
         // Guide: G
         if (e.key === 'g' || e.key === 'G') {
             e.preventDefault();
-            window.location.href = 'guide.html';
+            window.location.href = '/guide.html';
             return;
         }
 

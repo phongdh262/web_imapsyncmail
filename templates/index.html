@@ -3,28 +3,29 @@
 {% block page_id %}dashboard{% endblock %}
 
 {% block content %}
-<div class="mb-8 pt-4 page-intro">
-    <h1 data-i18n="dashboard.title" class="text-2xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
-    <p data-i18n="dashboard.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of active migration jobs and statistics.</p>
-</div>
-<section data-admin-gate class="admin-gate hidden">
-    <div class="admin-gate-card">
-        <div class="admin-gate-copy">
-            <span data-i18n="adminGate.kicker" class="admin-gate-kicker">Admin access required</span>
-            <h2 data-i18n="adminGate.dashboardTitle" class="admin-gate-title">Sign in to unlock the operations dashboard.</h2>
-            <p data-i18n="adminGate.dashboardBody" class="admin-gate-body">Job Password protects each shareable viewer, but the dashboard, queue statistics, and job management controls stay behind the admin session.</p>
-        </div>
-        <div class="admin-gate-actions">
-            <button type="button" data-admin-login-trigger onclick="window.showAdminLoginModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-colors shadow-sm text-sm font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-                <span data-i18n="adminGate.login">Admin Login</span>
-            </button>
-        </div>
+<main class="page-shell">
+    <div class="page-intro">
+        <h1 data-i18n="dashboard.title" class="text-2xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
+        <p data-i18n="dashboard.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Overview of active migration jobs and statistics.</p>
     </div>
-</section>
-<div data-admin-protected class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 stagger-item">
+    <section data-admin-gate class="admin-gate hidden">
+        <div class="admin-gate-card">
+            <div class="admin-gate-copy">
+                <span data-i18n="adminGate.kicker" class="admin-gate-kicker">Admin access required</span>
+                <h2 data-i18n="adminGate.dashboardTitle" class="admin-gate-title">Sign in to unlock the operations dashboard.</h2>
+                <p data-i18n="adminGate.dashboardBody" class="admin-gate-body">Job Password protects each shareable viewer, but the dashboard, queue statistics, and job management controls stay behind the admin session.</p>
+            </div>
+            <div class="admin-gate-actions">
+                <button type="button" data-admin-login-trigger onclick="window.showAdminLoginModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-colors shadow-sm text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                    <span data-i18n="adminGate.login">Admin Login</span>
+                </button>
+            </div>
+        </div>
+    </section>
+    <div data-admin-protected class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-item">
     <!-- Total Jobs Stat -->
     <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group tech-stat-card tech-stat-card-neutral">
         <div class="flex items-center justify-between mb-4 relative z-10">
@@ -95,7 +96,7 @@
             <p data-i18n="dashboard.stats.dataTransferred" class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data Transferred</p>
         </div>
     </div>
-</div>
+    </div>
 
 <!-- Main Table Section -->
 <div data-admin-protected class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden stagger-item tech-main-panel">
@@ -174,5 +175,6 @@
             </a>
         </div>
     </div>
-</div>
+    </div>
+</main>
 {% endblock %}

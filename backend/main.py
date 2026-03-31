@@ -12,6 +12,7 @@ import sys
 import logging
 from datetime import datetime, timedelta
 from urllib.parse import quote, unquote
+import secrets
 
 logger = logging.getLogger(__name__)
 _cookie_secure = os.getenv("COOKIE_SECURE")
@@ -135,23 +136,40 @@ def health_check(current_user: User = Depends(get_current_user)):
 @app.post("/api/login", response_model=Token)
 async def login_for_access_token(response: Response, request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     _check_rate_limit(db, request.client.host if request.client else "unknown", "login", max_requests=10, window_seconds=900)
+    admin_username = os.getenv("ADMIN_USERNAME", "phongdh").strip() or "phongdh"
+    admin_password = os.getenv("ADMIN_PASSWORD")
     user = db.query(User).filter(User.username == form_data.username).first()
     
     # Auto-create admin user if not exists (For simple setup)
     # Password should be set via environment variable
-    if not user and form_data.username == "phongdh":
-        admin_password = os.getenv("ADMIN_PASSWORD")
+    if not user and form_data.username == admin_username:
         if not admin_password:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="ADMIN_PASSWORD environment variable not set. Cannot auto-create admin."
             )
-        user = User(username="phongdh", hashed_password=get_password_hash(admin_password))
+        user = User(username=admin_username, hashed_password=get_password_hash(admin_password))
         db.add(user)
         db.commit()
         db.refresh(user)
-        
-    if not user or not verify_password(form_data.password, user.hashed_password):
+
+    password_ok = bool(user) and verify_password(form_data.password, user.hashed_password)
+
+    # Fallback: if admin password was rotated in environment but DB hash is stale,
+    # accept env password once and synchronize hash immediately.
+    if (
+        not password_ok
+        and user
+        and form_data.username == admin_username
+        and admin_password
+        and secrets.compare_digest(form_data.password, admin_password)
+    ):
+        user.hashed_password = get_password_hash(admin_password)
+        db.commit()
+        db.refresh(user)
+        password_ok = True
+
+    if not user or not password_ok:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
