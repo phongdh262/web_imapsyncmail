@@ -42,7 +42,7 @@
     --space-5: 1.25rem;
     --space-6: 1.5rem;
     --space-7: 2rem;
-    --app-max-width: 1040px;
+    --app-max-width: 1120px;
     --app-max-width-guide: 1100px;
 
     --log-bg: #1e293b;
@@ -963,7 +963,7 @@ body[data-page="guide"] .app-shell {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: var(--space-2);
     min-width: 0;
     flex: 1 1 560px;
@@ -1356,7 +1356,7 @@ body[data-page="guide"] .app-shell {
     }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .app-header {
         top: 0.45rem;
     }
@@ -1368,20 +1368,11 @@ body[data-page="guide"] .app-shell {
     .app-header-grid {
         width: 100%;
         justify-content: flex-start;
+        flex-wrap: wrap;
     }
 
     .app-header-group-primary {
         margin-left: 0;
-    }
-}
-
-@media (min-width: 1024px) {
-    .app-header-inner {
-        flex-wrap: nowrap;
-    }
-
-    .app-header-grid {
-        flex-wrap: nowrap;
     }
 }
 
