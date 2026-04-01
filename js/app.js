@@ -585,6 +585,23 @@ const initUsersManagement = () => {
 
     if (!tableBody) return;
 
+    const setCreateFeedback = (message = '', type = 'info') => {
+        const feedbackEl = document.getElementById('user-create-feedback');
+        if (!feedbackEl) return;
+        if (!message) {
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'hidden text-sm font-medium';
+            return;
+        }
+        const colorClass = type === 'error'
+            ? 'text-red-600 dark:text-red-400'
+            : type === 'success'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-slate-500 dark:text-slate-400';
+        feedbackEl.textContent = message;
+        feedbackEl.className = `text-sm font-medium ${colorClass}`;
+    };
+
     const toggleRootOnlyAccess = (allowed) => {
         document.querySelectorAll('[data-users-root-only]').forEach((element) => {
             element.classList.toggle('hidden', !allowed);
@@ -699,12 +716,16 @@ const initUsersManagement = () => {
 
         if (!canCurrentAdminManageUsers()) {
             window.showToast(tr('runtime.users.rootOnly', {}, 'Only root admin can manage users'), 'error');
+            setCreateFeedback(tr('runtime.users.rootOnly', {}, 'Only root admin can manage users'), 'error');
             return;
         }
 
         const usernameInput = document.getElementById('new-user-username');
         const passwordInput = document.getElementById('new-user-password');
         const confirmInput = document.getElementById('new-user-password-confirm');
+        const submitBtn = createForm.querySelector('button[type="submit"]');
+        const submitLabel = submitBtn?.querySelector('span');
+        const defaultSubmitLabel = tr('users.create.submit', {}, 'Create User');
 
         const username = (usernameInput?.value || '').trim();
         const password = passwordInput?.value || '';
@@ -712,13 +733,19 @@ const initUsersManagement = () => {
 
         if (!username || !password || !confirmPassword) {
             window.showToast(tr('runtime.users.fillAllFields', {}, 'Please complete all fields'), 'warning');
+            setCreateFeedback(tr('runtime.users.fillAllFields', {}, 'Please complete all fields'), 'error');
             return;
         }
 
         if (password !== confirmPassword) {
             window.showToast(tr('runtime.users.passwordMismatch', {}, 'Password confirmation does not match'), 'error');
+            setCreateFeedback(tr('runtime.users.passwordMismatch', {}, 'Password confirmation does not match'), 'error');
             return;
         }
+
+        setCreateFeedback(tr('runtime.users.createInProgress', {}, 'Creating user, please wait...'), 'info');
+        if (submitBtn) submitBtn.disabled = true;
+        if (submitLabel) submitLabel.textContent = tr('users.create.creating', {}, 'Creating...');
 
         try {
             const res = await request(`${API_BASE}/admin/users`, {
@@ -737,9 +764,17 @@ const initUsersManagement = () => {
                 tr('runtime.users.userCreated', { username: payload.username || username }, `Created user: ${payload.username || username}`),
                 'success'
             );
+            setCreateFeedback(
+                tr('runtime.users.userCreated', { username: payload.username || username }, `Created user: ${payload.username || username}`),
+                'success'
+            );
             await loadUsers();
         } catch (error) {
             window.showToast(formatErrorMessage(error.message), 'error');
+            setCreateFeedback(localizeErrorMessage(error.message), 'error');
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+            if (submitLabel) submitLabel.textContent = defaultSubmitLabel;
         }
     });
 

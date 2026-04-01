@@ -82,8 +82,7 @@ except Exception as e:
     # Log to file for cPanel visibility
     try:
         with open("startup_error.log", "a") as f:
-            import datetime
-            f.write(f"[{datetime.datetime.now()}] {error_msg}\n")
+            f.write(f"[{datetime.utcnow()}] {error_msg}\n")
     except:
         pass
 

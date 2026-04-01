@@ -606,7 +606,8 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 create: {
                     title: 'Tạo user mới',
                     subtitle: 'Tạo thêm tài khoản để truy cập dashboard vận hành.',
-                    submit: 'Tạo user'
+                    submit: 'Tạo user',
+                    creating: 'Đang tạo...'
                 },
                 fields: {
                     username: 'Tên đăng nhập',
@@ -878,6 +879,7 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                     userNotFound: 'Không tìm thấy user',
                     fillAllFields: 'Vui lòng nhập đầy đủ thông tin',
                     passwordMismatch: 'Mật khẩu xác nhận không khớp',
+                    createInProgress: 'Đang tạo user, vui lòng chờ...',
                     createFailed: 'Không thể tạo user',
                     userCreated: 'Đã tạo user: {username}',
                     promptNewPassword: 'Nhập mật khẩu mới cho {username}:',
