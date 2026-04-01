@@ -7,6 +7,7 @@
 
 const API_BASE = '/api';
 const ADMIN_USERNAME_KEY = 'admin_username';
+const ADMIN_CAN_MANAGE_USERS_KEY = 'admin_can_manage_users';
 const PUBLIC_PATHS = ['guide.html', 'job-detail.html'];
 let adminSessionActive = false;
 
@@ -45,7 +46,14 @@ const localizeErrorMessage = (message = '') => {
         'Job ID not found': 'runtime.jobDetail.jobIdNotFound',
         'Unexpected jobs response from server': 'runtime.dashboard.unexpectedJobsResponse',
         'Failed to load jobs': 'runtime.dashboard.loadJobsFailed',
-        'Bulk check failed on server': 'runtime.check.bulkCheckFailed'
+        'Bulk check failed on server': 'runtime.check.bulkCheckFailed',
+        'Only root admin can manage users': 'runtime.users.rootOnly',
+        'Username already exists': 'runtime.users.usernameExists',
+        'Password must be at least 8 characters': 'runtime.users.passwordTooShort',
+        'Username must be 3-32 characters and may only include letters, numbers, dot, underscore, and hyphen': 'runtime.users.invalidUsername',
+        'Cannot delete root admin account': 'runtime.users.cannotDeleteRoot',
+        'Cannot delete your own account': 'runtime.users.cannotDeleteSelf',
+        'User not found': 'runtime.users.userNotFound'
     };
 
     if (mappings[message]) {
@@ -115,12 +123,16 @@ const getCookieValue = (name) => {
 };
 
 const getCsrfToken = () => getCookieValue('csrf_token');
-const setAdminSession = (username) => {
+const canCurrentAdminManageUsers = () => localStorage.getItem(ADMIN_CAN_MANAGE_USERS_KEY) === 'true';
+
+const setAdminSession = (username, canManageUsers = false) => {
     localStorage.setItem(ADMIN_USERNAME_KEY, username || 'Admin');
+    localStorage.setItem(ADMIN_CAN_MANAGE_USERS_KEY, canManageUsers ? 'true' : 'false');
     adminSessionActive = true;
 };
 const clearAdminSession = () => {
     localStorage.removeItem(ADMIN_USERNAME_KEY);
+    localStorage.removeItem(ADMIN_CAN_MANAGE_USERS_KEY);
     adminSessionActive = false;
 };
 
@@ -142,13 +154,16 @@ const updateAdminPageAccess = (authenticated = false) => {
 const updateAdminAuthUI = () => {
     const loginBtn = document.getElementById('admin-login-btn');
     const logoutBtn = document.getElementById('admin-logout-btn');
+    const manageUsersBtn = document.getElementById('manage-users-btn');
     const statusEl = document.getElementById('admin-auth-status');
     const username = localStorage.getItem(ADMIN_USERNAME_KEY) || 'Admin';
+    const canManageUsers = canCurrentAdminManageUsers();
     const isAdminMode = document.body?.dataset?.adminMode === 'true';
 
     if (!isAdminMode) {
         loginBtn?.classList.add('hidden');
         logoutBtn?.classList.add('hidden');
+        manageUsersBtn?.classList.add('hidden');
         statusEl?.classList.add('hidden');
         return;
     }
@@ -157,10 +172,12 @@ const updateAdminAuthUI = () => {
         loginBtn?.classList.add('hidden');
         logoutBtn?.classList.remove('hidden');
         statusEl?.classList.remove('hidden');
+        manageUsersBtn?.classList.toggle('hidden', !canManageUsers);
         if (statusEl) statusEl.textContent = tr('header.adminStatus', { username }, `Admin: ${username}`);
     } else {
         loginBtn?.classList.remove('hidden');
         logoutBtn?.classList.add('hidden');
+        manageUsersBtn?.classList.add('hidden');
         statusEl?.classList.add('hidden');
     }
 
@@ -221,7 +238,7 @@ const loginAdmin = async (username, password) => {
     }
 
     const data = await response.json();
-    setAdminSession(data.username || username);
+    setAdminSession(data.username || username, Boolean(data.can_manage_users));
     updateAdminAuthUI();
     closeAdminLoginModal();
     return data;
@@ -237,7 +254,7 @@ const ensureAdminAuth = async ({ showModal = true, forceCheck = false } = {}) =>
         const response = await fetch(`${API_BASE}/me`, { credentials: 'same-origin' });
         if (response.ok) {
             const data = await response.json();
-            setAdminSession(data.username);
+            setAdminSession(data.username, Boolean(data.can_manage_users));
             updateAdminAuthUI();
             return true;
         }
@@ -557,6 +574,252 @@ window.deleteSingleJob = async (jobId, jobName) => {
             window.showToast(formatErrorMessage(e.message), "error");
         }
     });
+};
+
+// 1.5. Root Admin User Management
+const initUsersManagement = () => {
+    const tableBody = document.getElementById('users-table-body');
+    const createForm = document.getElementById('user-create-form');
+    const refreshBtn = document.getElementById('users-refresh-btn');
+    const rootOnlyGate = document.getElementById('users-root-required');
+
+    if (!tableBody) return;
+
+    const toggleRootOnlyAccess = (allowed) => {
+        document.querySelectorAll('[data-users-root-only]').forEach((element) => {
+            element.classList.toggle('hidden', !allowed);
+            element.setAttribute('aria-hidden', allowed ? 'false' : 'true');
+        });
+
+        if (rootOnlyGate) {
+            rootOnlyGate.classList.toggle('hidden', allowed);
+            rootOnlyGate.setAttribute('aria-hidden', allowed ? 'true' : 'false');
+        }
+    };
+
+    const renderUsers = (users) => {
+        if (!Array.isArray(users) || users.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                        ${escapeHtml(tr('users.list.empty', {}, 'No users found.'))}
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tableBody.innerHTML = users.map((user) => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="font-medium text-slate-900 dark:text-white">${escapeHtml(user.username)}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${user.is_root_admin ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        ${escapeHtml(user.is_root_admin
+                            ? tr('users.roles.rootAdmin', {}, 'Root Admin')
+                            : tr('users.roles.operator', {}, 'Operator'))}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <div class="inline-flex items-center gap-2">
+                        <button
+                            type="button"
+                            class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm"
+                            data-user-action="reset-password"
+                            data-user-id="${user.id}"
+                            data-user-name="${escapeHtml(user.username)}"
+                        >
+                            ${escapeHtml(tr('users.actions.resetPassword', {}, 'Reset Password'))}
+                        </button>
+                        ${user.is_root_admin ? '' : `
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 dark:border-red-800/40 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors shadow-sm"
+                                data-user-action="delete-user"
+                                data-user-id="${user.id}"
+                                data-user-name="${escapeHtml(user.username)}"
+                            >
+                                ${escapeHtml(tr('users.actions.delete', {}, 'Delete'))}
+                            </button>
+                        `}
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    };
+
+    const loadUsers = async () => {
+        if (!canCurrentAdminManageUsers()) {
+            toggleRootOnlyAccess(false);
+            return;
+        }
+
+        toggleRootOnlyAccess(true);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                    ${escapeHtml(tr('users.list.loading', {}, 'Loading users...'))}
+                </td>
+            </tr>
+        `;
+
+        try {
+            const res = await request(`${API_BASE}/admin/users`);
+            if (res.status === 401) {
+                await ensureAdminAuth();
+                return;
+            }
+
+            if (res.status === 403) {
+                toggleRootOnlyAccess(false);
+                return;
+            }
+
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(payload.detail || tr('runtime.users.loadFailed', {}, 'Failed to load users'));
+            }
+
+            renderUsers(payload);
+        } catch (error) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="px-6 py-8 text-center text-red-500">
+                        ${escapeHtml(tr('users.list.error', { message: localizeErrorMessage(error.message) }, `Error loading users: ${error.message}`))}
+                    </td>
+                </tr>
+            `;
+        }
+    };
+
+    createForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!await ensureAdminAuth()) return;
+
+        if (!canCurrentAdminManageUsers()) {
+            window.showToast(tr('runtime.users.rootOnly', {}, 'Only root admin can manage users'), 'error');
+            return;
+        }
+
+        const usernameInput = document.getElementById('new-user-username');
+        const passwordInput = document.getElementById('new-user-password');
+        const confirmInput = document.getElementById('new-user-password-confirm');
+
+        const username = (usernameInput?.value || '').trim();
+        const password = passwordInput?.value || '';
+        const confirmPassword = confirmInput?.value || '';
+
+        if (!username || !password || !confirmPassword) {
+            window.showToast(tr('runtime.users.fillAllFields', {}, 'Please complete all fields'), 'warning');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            window.showToast(tr('runtime.users.passwordMismatch', {}, 'Password confirmation does not match'), 'error');
+            return;
+        }
+
+        try {
+            const res = await request(`${API_BASE}/admin/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(payload.detail || tr('runtime.users.createFailed', {}, 'Failed to create user'));
+            }
+
+            if (createForm) createForm.reset();
+            window.showToast(
+                tr('runtime.users.userCreated', { username: payload.username || username }, `Created user: ${payload.username || username}`),
+                'success'
+            );
+            await loadUsers();
+        } catch (error) {
+            window.showToast(formatErrorMessage(error.message), 'error');
+        }
+    });
+
+    tableBody.addEventListener('click', async (event) => {
+        const actionBtn = event.target.closest('button[data-user-action]');
+        if (!actionBtn) return;
+        if (!await ensureAdminAuth()) return;
+
+        if (!canCurrentAdminManageUsers()) {
+            window.showToast(tr('runtime.users.rootOnly', {}, 'Only root admin can manage users'), 'error');
+            return;
+        }
+
+        const action = actionBtn.dataset.userAction;
+        const userId = actionBtn.dataset.userId;
+        const username = actionBtn.dataset.userName || 'user';
+
+        if (!userId) return;
+
+        if (action === 'reset-password') {
+            const newPassword = window.prompt(
+                tr('runtime.users.promptNewPassword', { username }, `Enter a new password for ${username}:`),
+                ''
+            );
+            if (newPassword === null) return;
+
+            const trimmedPassword = newPassword.trim();
+            if (!trimmedPassword) {
+                window.showToast(tr('runtime.users.passwordRequired', {}, 'Password is required'), 'warning');
+                return;
+            }
+
+            try {
+                const res = await request(`${API_BASE}/admin/users/${userId}/password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: trimmedPassword }),
+                });
+
+                const payload = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(payload.detail || tr('runtime.users.passwordUpdateFailed', {}, 'Failed to update password'));
+                }
+
+                window.showToast(
+                    tr('runtime.users.passwordUpdated', { username }, `Password updated for ${username}`),
+                    'success'
+                );
+            } catch (error) {
+                window.showToast(formatErrorMessage(error.message), 'error');
+            }
+        }
+
+        if (action === 'delete-user') {
+            window.showConfirm(
+                tr('runtime.users.confirmDelete', { username }, `Delete user "${username}"?`),
+                async () => {
+                    try {
+                        const res = await request(`${API_BASE}/admin/users/${userId}`, { method: 'DELETE' });
+                        const payload = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            throw new Error(payload.detail || tr('runtime.users.deleteFailed', {}, 'Failed to delete user'));
+                        }
+
+                        window.showToast(
+                            tr('runtime.users.userDeleted', { username }, `Deleted user: ${username}`),
+                            'success'
+                        );
+                        await loadUsers();
+                    } catch (error) {
+                        window.showToast(formatErrorMessage(error.message), 'error');
+                    }
+                }
+            );
+        }
+    });
+
+    refreshBtn?.addEventListener('click', loadUsers);
+
+    loadUsers();
 };
 
 // 2. Create Job Logic
@@ -1546,13 +1809,27 @@ window.toggleTheme = toggleTheme;
 // ============================================
 // Command Palette (Ctrl+K)
 // ============================================
-const getCommandPaletteCommands = () => ([
-    { id: 'new-job', title: tr('runtime.commandPalette.newJobTitle', {}, 'Create New Job'), subtitle: tr('runtime.commandPalette.newJobSubtitle', {}, 'Create a new migration job'), icon: '➕', action: () => window.location.href = '/admin/create-job.html', shortcut: ['⌘', 'N'] },
-    { id: 'dashboard', title: tr('runtime.commandPalette.dashboardTitle', {}, 'Dashboard'), subtitle: tr('runtime.commandPalette.dashboardSubtitle', {}, 'View jobs overview'), icon: '📊', action: () => window.location.href = '/admin/' },
-    { id: 'guide', title: tr('runtime.commandPalette.guideTitle', {}, 'User Guide'), subtitle: tr('runtime.commandPalette.guideSubtitle', {}, 'View detailed guide'), icon: '📖', action: () => window.location.href = '/guide.html' },
-    { id: 'refresh', title: tr('runtime.commandPalette.refreshTitle', {}, 'Refresh Page'), subtitle: tr('runtime.commandPalette.refreshSubtitle', {}, 'Refresh current data'), icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
-    { id: 'toggle-theme', title: tr('runtime.commandPalette.themeTitle', {}, 'Toggle Theme'), subtitle: tr('runtime.commandPalette.themeSubtitle', {}, 'Light/Dark mode'), icon: '🌓', action: () => toggleTheme() },
-]);
+const getCommandPaletteCommands = () => {
+    const commands = [
+        { id: 'new-job', title: tr('runtime.commandPalette.newJobTitle', {}, 'Create New Job'), subtitle: tr('runtime.commandPalette.newJobSubtitle', {}, 'Create a new migration job'), icon: '➕', action: () => window.location.href = '/admin/create-job.html', shortcut: ['⌘', 'N'] },
+        { id: 'dashboard', title: tr('runtime.commandPalette.dashboardTitle', {}, 'Dashboard'), subtitle: tr('runtime.commandPalette.dashboardSubtitle', {}, 'View jobs overview'), icon: '📊', action: () => window.location.href = '/admin/' },
+        { id: 'guide', title: tr('runtime.commandPalette.guideTitle', {}, 'User Guide'), subtitle: tr('runtime.commandPalette.guideSubtitle', {}, 'View detailed guide'), icon: '📖', action: () => window.location.href = '/guide.html' },
+        { id: 'refresh', title: tr('runtime.commandPalette.refreshTitle', {}, 'Refresh Page'), subtitle: tr('runtime.commandPalette.refreshSubtitle', {}, 'Refresh current data'), icon: '🔄', action: () => window.location.reload(), shortcut: ['R'] },
+        { id: 'toggle-theme', title: tr('runtime.commandPalette.themeTitle', {}, 'Toggle Theme'), subtitle: tr('runtime.commandPalette.themeSubtitle', {}, 'Light/Dark mode'), icon: '🌓', action: () => toggleTheme() },
+    ];
+
+    if (canCurrentAdminManageUsers()) {
+        commands.splice(2, 0, {
+            id: 'manage-users',
+            title: tr('runtime.commandPalette.manageUsersTitle', {}, 'Manage Users'),
+            subtitle: tr('runtime.commandPalette.manageUsersSubtitle', {}, 'Create and control admin accounts'),
+            icon: '👥',
+            action: () => window.location.href = '/admin/users.html',
+        });
+    }
+
+    return commands;
+};
 
 
 let commandPaletteOpen = false;
@@ -1873,7 +2150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const path = window.location.pathname;
                 if (path.includes('create-job.html')) {
                     window.location.reload();
-                } else if (path.includes('check-credentials.html') || path.includes('/admin') || path === '/') {
+                } else if (path.includes('check-credentials.html') || path.includes('users.html') || path.includes('/admin') || path === '/') {
                     window.location.reload();
                 }
             } catch (error) {
@@ -1913,6 +2190,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         initJobDetail();
     } else if (path.includes('check-credentials.html')) {
         // Inline page script handles the rest.
+    } else if (path.includes('users.html')) {
+        initUsersManagement();
     } else if (!path.includes('guide.html')) {
         initDashboard();
         injectFAB();

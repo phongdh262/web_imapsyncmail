@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block page_id %}users{% endblock %}
+{% block title %}Manage Users - IMAP Sync Pro{% endblock %}
+{% block description %}Create and manage admin users for IMAP Sync Pro operations console.{% endblock %}
+
+{% block content %}
+<main class="page-shell">
+    <div class="page-intro">
+        <h1 data-i18n="users.title" class="text-2xl font-bold text-slate-900 dark:text-white">User Management</h1>
+        <p data-i18n="users.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Create and manage admin accounts for operations access.</p>
+    </div>
+
+    <section data-admin-gate class="admin-gate hidden">
+        <div class="admin-gate-card">
+            <div class="admin-gate-copy">
+                <span data-i18n="adminGate.kicker" class="admin-gate-kicker">Admin access required</span>
+                <h2 data-i18n="users.authRequiredTitle" class="admin-gate-title">Sign in to manage admin users.</h2>
+                <p data-i18n="users.authRequiredBody" class="admin-gate-body">User lifecycle operations are restricted to the root admin session.</p>
+            </div>
+            <div class="admin-gate-actions">
+                <button type="button" data-admin-login-trigger onclick="window.showAdminLoginModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-colors shadow-sm text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                    <span data-i18n="adminGate.login">Admin Login</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="users-root-required" data-admin-protected class="admin-gate hidden">
+        <div class="admin-gate-card">
+            <div class="admin-gate-copy">
+                <span data-i18n="users.rootOnlyKicker" class="admin-gate-kicker">Root admin only</span>
+                <h2 data-i18n="users.rootOnlyTitle" class="admin-gate-title">Only root admin can manage users.</h2>
+                <p data-i18n="users.rootOnlyBody" class="admin-gate-body">You are signed in, but this account is not allowed to create, reset, or remove users.</p>
+            </div>
+            <div class="admin-gate-actions">
+                <a href="/admin/" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span data-i18n="header.dashboard">Dashboard</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <div data-admin-protected data-users-root-only class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 tech-panel xl:col-span-1">
+            <h2 data-i18n="users.create.title" class="text-lg font-semibold text-slate-900 dark:text-white">Create User</h2>
+            <p data-i18n="users.create.subtitle" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Create additional accounts with full dashboard access.</p>
+
+            <form id="user-create-form" class="mt-5 space-y-4" novalidate>
+                <div>
+                    <label for="new-user-username" data-i18n="users.fields.username" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Username</label>
+                    <input
+                        id="new-user-username"
+                        name="username"
+                        type="text"
+                        autocomplete="off"
+                        data-i18n-placeholder="users.placeholders.username"
+                        placeholder="new_operator"
+                        class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+                    >
+                </div>
+                <div>
+                    <label for="new-user-password" data-i18n="users.fields.password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password</label>
+                    <input
+                        id="new-user-password"
+                        name="password"
+                        type="password"
+                        autocomplete="new-password"
+                        data-i18n-placeholder="users.placeholders.password"
+                        placeholder="Minimum 8 characters"
+                        class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+                    >
+                </div>
+                <div>
+                    <label for="new-user-password-confirm" data-i18n="users.fields.confirmPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Confirm Password</label>
+                    <input
+                        id="new-user-password-confirm"
+                        name="confirm_password"
+                        type="password"
+                        autocomplete="new-password"
+                        data-i18n-placeholder="users.placeholders.confirmPassword"
+                        placeholder="Repeat the same password"
+                        class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+                    >
+                </div>
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors shadow-sm text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span data-i18n="users.create.submit">Create User</span>
+                </button>
+            </form>
+        </section>
+
+        <section class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden tech-panel xl:col-span-2">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+                <div>
+                    <h2 data-i18n="users.list.title" class="text-lg font-semibold text-slate-900 dark:text-white">Admin Users</h2>
+                    <p data-i18n="users.list.subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">All accounts can use dashboard, root admin can manage users.</p>
+                </div>
+                <button id="users-refresh-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span data-i18n="users.list.refresh">Refresh</span>
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                        <tr>
+                            <th data-i18n="users.list.table.username" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Username</th>
+                            <th data-i18n="users.list.table.role" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Role</th>
+                            <th data-i18n="users.list.table.actions" class="px-6 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-slate-200 dark:divide-slate-800">
+                        <tr>
+                            <td colspan="3" data-i18n="users.list.loading" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

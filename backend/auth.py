@@ -39,6 +39,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     username: Optional[str] = None
+    can_manage_users: Optional[bool] = None
 
 class TokenData(BaseModel):
     username: Optional[str] = None

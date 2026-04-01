@@ -10,6 +10,7 @@ import io
 import os
 import sys
 import logging
+import re
 from datetime import datetime, timedelta
 from urllib.parse import quote, unquote
 import secrets
@@ -29,6 +30,48 @@ from auth import Token, get_current_user, create_access_token, verify_password, 
 from pydantic import BaseModel
 from worker import run_imapsync, cleanup_stale_passfiles
 
+ROOT_ADMIN_DEFAULT_USERNAME = "phongdh"
+MANAGED_USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]{3,32}$")
+
+
+def get_root_admin_username() -> str:
+    return os.getenv("ADMIN_USERNAME", ROOT_ADMIN_DEFAULT_USERNAME).strip() or ROOT_ADMIN_DEFAULT_USERNAME
+
+
+def is_root_admin_username(username: str) -> bool:
+    if not username:
+        return False
+    return secrets.compare_digest(username, get_root_admin_username())
+
+
+def normalize_managed_username(raw_username: str) -> str:
+    username = (raw_username or "").strip()
+    if not MANAGED_USERNAME_PATTERN.fullmatch(username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username must be 3-32 characters and may only include letters, numbers, dot, underscore, and hyphen",
+        )
+    return username
+
+
+def normalize_managed_password(raw_password: str) -> str:
+    password = (raw_password or "").strip()
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters",
+        )
+    return password
+
+
+def require_root_admin(current_user: User = Depends(get_current_user)):
+    if not is_root_admin_username(current_user.username):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only root admin can manage users",
+        )
+    return current_user
+
 # Initialize DB safely
 try:
     init_db()
@@ -45,7 +88,7 @@ except Exception as e:
         pass
 
 def bootstrap_admin_account():
-    admin_username = os.getenv("ADMIN_USERNAME", "phongdh").strip() or "phongdh"
+    admin_username = get_root_admin_username()
     admin_password = os.getenv("ADMIN_PASSWORD")
 
     if not admin_password:
@@ -136,7 +179,7 @@ def health_check(current_user: User = Depends(get_current_user)):
 @app.post("/api/login", response_model=Token)
 async def login_for_access_token(response: Response, request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     _check_rate_limit(db, request.client.host if request.client else "unknown", "login", max_requests=10, window_seconds=900)
-    admin_username = os.getenv("ADMIN_USERNAME", "phongdh").strip() or "phongdh"
+    admin_username = get_root_admin_username()
     admin_password = os.getenv("ADMIN_PASSWORD")
     user = db.query(User).filter(User.username == form_data.username).first()
     
@@ -199,7 +242,12 @@ async def login_for_access_token(response: Response, request: Request, form_data
         samesite="strict",
         path="/"
     )
-    return {"access_token": access_token, "token_type": "bearer", "username": user.username}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "username": user.username,
+        "can_manage_users": is_root_admin_username(user.username),
+    }
 
 @app.post("/api/logout")
 async def logout(response: Response):
@@ -209,7 +257,12 @@ async def logout(response: Response):
 
 @app.get("/api/me")
 async def get_me(current_user: User = Depends(get_current_user)):
-    return {"username": current_user.username}
+    can_manage_users = is_root_admin_username(current_user.username)
+    return {
+        "username": current_user.username,
+        "is_root_admin": can_manage_users,
+        "can_manage_users": can_manage_users,
+    }
 
 # Pydantic Schemas
 class JobCreate(BaseModel):
@@ -244,6 +297,104 @@ class MailboxCreate(BaseModel):
     source_pass: str
     target_user: str
     target_pass: str
+
+class ManagedUserCreate(BaseModel):
+    username: str
+    password: str
+
+class ManagedUserPasswordUpdate(BaseModel):
+    password: str
+
+class ManagedUserResponse(BaseModel):
+    id: int
+    username: str
+    is_root_admin: bool = False
+
+# Root-admin User Management API
+@app.get("/api/admin/users", response_model=List[ManagedUserResponse])
+def list_admin_users(db: Session = Depends(get_db), current_user: User = Depends(require_root_admin)):
+    users = db.query(User).order_by(User.username.asc()).all()
+    return [
+        ManagedUserResponse(
+            id=user.id,
+            username=user.username,
+            is_root_admin=is_root_admin_username(user.username),
+        )
+        for user in users
+    ]
+
+@app.post("/api/admin/users", response_model=ManagedUserResponse, status_code=status.HTTP_201_CREATED)
+def create_admin_user(
+    data: ManagedUserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_root_admin),
+    _: None = Depends(verify_csrf),
+):
+    username = normalize_managed_username(data.username)
+    password = normalize_managed_password(data.password)
+
+    existing_user = db.query(User).filter(User.username == username).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already exists",
+        )
+
+    user = User(username=username, hashed_password=get_password_hash(password))
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return ManagedUserResponse(
+        id=user.id,
+        username=user.username,
+        is_root_admin=is_root_admin_username(user.username),
+    )
+
+@app.put("/api/admin/users/{user_id}/password")
+def update_admin_user_password(
+    user_id: int,
+    data: ManagedUserPasswordUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_root_admin),
+    _: None = Depends(verify_csrf),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    password = normalize_managed_password(data.password)
+    user.hashed_password = get_password_hash(password)
+    db.commit()
+
+    return {"message": "Password updated", "id": user.id, "username": user.username}
+
+@app.delete("/api/admin/users/{user_id}")
+def delete_admin_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_root_admin),
+    _: None = Depends(verify_csrf),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if is_root_admin_username(user.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete root admin account",
+        )
+
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete your own account",
+        )
+
+    db.delete(user)
+    db.commit()
+    return {"message": "User deleted", "id": user_id}
 
 # API Routes
 @app.post("/api/jobs", response_model=JobResponse)
@@ -947,6 +1098,14 @@ async def read_create_job(request: Request):
 @app.get("/admin/create-job.html", response_class=HTMLResponse)
 async def read_admin_create_job(request: Request):
     return render_template(request, "create-job.html", True)
+
+@app.get("/users.html", response_class=HTMLResponse)
+async def read_users(request: Request):
+    return RedirectResponse(url="/admin/users.html", status_code=302)
+
+@app.get("/admin/users.html", response_class=HTMLResponse)
+async def read_admin_users(request: Request):
+    return render_template(request, "users.html", True)
 
 @app.get("/job-detail.html", response_class=HTMLResponse)
 async def read_job_detail(request: Request):

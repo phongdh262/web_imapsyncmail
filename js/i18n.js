@@ -370,6 +370,7 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 commandPaletteTitle: 'Mở bảng lệnh',
                 guide: 'Hướng dẫn',
                 checkCredentials: 'Kiểm tra credential',
+                manageUsers: 'Quản lý user',
                 createJob: 'Tạo job mới',
                 dashboard: 'Dashboard',
                 languageSwitcherAria: 'Chuyển ngôn ngữ',
@@ -415,6 +416,8 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 }
             },
             dashboard: {
+                title: 'Bảng điều khiển admin',
+                subtitle: 'Tổng quan các job migration đang chạy và thống kê hệ thống.',
                 hero: {
                     kicker: 'Bảng Điều Khiển Admin',
                     title: 'Dashboard vận hành cho các phiên IMAP migration có kiểm soát.',
@@ -459,6 +462,8 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 }
             },
             createJob: {
+                title: 'Tạo job migration',
+                subtitle: 'Cấu hình máy chủ nguồn và đích cho một phiên migration mới.',
                 hero: {
                     kicker: 'Quy Trình Admin',
                     title: 'Tạo một phiên migration có kiểm soát.',
@@ -530,6 +535,8 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 }
             },
             check: {
+                title: 'Kiểm tra credential',
+                subtitle: 'Xác minh tổ hợp IMAP và thiết lập server override một cách an toàn.',
                 hero: {
                     kicker: 'Kiểm Tra Trước Khi Chạy',
                     title: 'Xác minh credential trước khi đụng vào mailbox production.',
@@ -586,6 +593,51 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                         server: 'Server',
                         details: 'Chi tiết'
                     }
+                }
+            },
+            users: {
+                title: 'Quản lý user',
+                subtitle: 'Tạo và quản lý tài khoản admin cho khu vực vận hành.',
+                authRequiredTitle: 'Đăng nhập để quản lý user admin.',
+                authRequiredBody: 'Các thao tác vòng đời user chỉ dành cho phiên root admin.',
+                rootOnlyKicker: 'Chỉ root admin',
+                rootOnlyTitle: 'Chỉ root admin được quyền quản lý user.',
+                rootOnlyBody: 'Bạn đã đăng nhập, nhưng tài khoản này không có quyền tạo, đổi mật khẩu hoặc xóa user.',
+                create: {
+                    title: 'Tạo user mới',
+                    subtitle: 'Tạo thêm tài khoản để truy cập dashboard vận hành.',
+                    submit: 'Tạo user'
+                },
+                fields: {
+                    username: 'Tên đăng nhập',
+                    password: 'Mật khẩu',
+                    confirmPassword: 'Nhập lại mật khẩu'
+                },
+                placeholders: {
+                    username: 'new_operator',
+                    password: 'Tối thiểu 8 ký tự',
+                    confirmPassword: 'Nhập lại đúng mật khẩu'
+                },
+                list: {
+                    title: 'Danh sách user admin',
+                    subtitle: 'Mọi user đều vào dashboard được, chỉ root admin được quản lý user.',
+                    refresh: 'Làm mới',
+                    loading: 'Đang tải danh sách user...',
+                    empty: 'Chưa có user nào.',
+                    error: 'Lỗi tải danh sách user: {message}',
+                    table: {
+                        username: 'Tên đăng nhập',
+                        role: 'Vai trò',
+                        actions: 'Thao tác'
+                    }
+                },
+                roles: {
+                    rootAdmin: 'Root Admin',
+                    operator: 'Operator'
+                },
+                actions: {
+                    resetPassword: 'Đổi mật khẩu',
+                    delete: 'Xóa user'
                 }
             },
             jobDetail: {
@@ -815,11 +867,34 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                     failedCount: '{count} lỗi',
                     exportFilePrefix: 'credential_loi'
                 },
+                users: {
+                    loadFailed: 'Không thể tải danh sách user',
+                    rootOnly: 'Chỉ root admin mới được quản lý user',
+                    usernameExists: 'Tên đăng nhập đã tồn tại',
+                    passwordTooShort: 'Mật khẩu phải có ít nhất 8 ký tự',
+                    invalidUsername: 'Username phải dài 3-32 ký tự và chỉ gồm chữ, số, dấu chấm, gạch dưới hoặc gạch ngang',
+                    cannotDeleteRoot: 'Không thể xóa tài khoản root admin',
+                    cannotDeleteSelf: 'Không thể xóa chính tài khoản đang đăng nhập',
+                    userNotFound: 'Không tìm thấy user',
+                    fillAllFields: 'Vui lòng nhập đầy đủ thông tin',
+                    passwordMismatch: 'Mật khẩu xác nhận không khớp',
+                    createFailed: 'Không thể tạo user',
+                    userCreated: 'Đã tạo user: {username}',
+                    promptNewPassword: 'Nhập mật khẩu mới cho {username}:',
+                    passwordRequired: 'Mật khẩu không được để trống',
+                    passwordUpdateFailed: 'Không thể đổi mật khẩu',
+                    passwordUpdated: 'Đã cập nhật mật khẩu cho {username}',
+                    confirmDelete: 'Bạn có chắc muốn xóa user "{username}"?',
+                    deleteFailed: 'Không thể xóa user',
+                    userDeleted: 'Đã xóa user: {username}'
+                },
                 commandPalette: {
                     newJobTitle: 'Tạo job mới',
                     newJobSubtitle: 'Tạo một phiên migration mới',
                     dashboardTitle: 'Dashboard',
                     dashboardSubtitle: 'Xem tổng quan job',
+                    manageUsersTitle: 'Quản lý user',
+                    manageUsersSubtitle: 'Tạo và quản lý tài khoản admin',
                     guideTitle: 'Hướng dẫn sử dụng',
                     guideSubtitle: 'Xem tài liệu chi tiết',
                     refreshTitle: 'Làm mới trang',
@@ -857,6 +932,10 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 title: 'Check Credentials - IMAP Sync Pro',
                 description: 'Verify email App Passwords and IMAP credentials before migration. Supports Gmail, Yandex, Office 365, and more.'
             },
+            users: {
+                title: 'User Management - IMAP Sync Pro',
+                description: 'Create and manage admin users for IMAP Sync Pro.'
+            },
             jobDetail: {
                 title: 'Job Details - IMAP Sync Pro',
                 description: 'Track email migration progress in detail with real-time logs.'
@@ -882,6 +961,10 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
             checkCredentials: {
                 title: 'Kiểm Tra Credential - IMAP Sync Pro',
                 description: 'Xác minh App Password và credential IMAP trước khi di chuyển. Hỗ trợ Gmail, Yandex, Office 365 và nhiều dịch vụ khác.'
+            },
+            users: {
+                title: 'Quản Lý User - IMAP Sync Pro',
+                description: 'Tạo và quản lý tài khoản admin cho IMAP Sync Pro.'
             },
             jobDetail: {
                 title: 'Chi Tiết Job - IMAP Sync Pro',
