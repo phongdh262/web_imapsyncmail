@@ -880,6 +880,7 @@ def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_u
 
     # Reset Status
     mb.status = 'pending'
+    mb.progress = 0
     mb.message = 'Queued for retry'
     # Optional: Reset data transferred? 
     # mb.data_transferred = 0 
@@ -898,7 +899,12 @@ def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_u
     # Re-submit to executor
     executor.submit(run_imapsync, mb.id)
     
-    return {"message": "Mailbox retry started", "mailbox_id": mb.id}
+    return {
+        "message": "Mailbox retry started",
+        "mailbox_id": mb.id,
+        "status": mb.status,
+        "mailbox_message": mb.message,
+    }
 
 @app.post("/api/jobs/{job_id}/cancel")
 def cancel_job(job_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):

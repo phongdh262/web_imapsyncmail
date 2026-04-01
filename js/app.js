@@ -1497,6 +1497,7 @@ window.submitJobPassword = async (jobId) => {
 let isJobPolling = false;
 let forcePollRestart = false;
 let currentMailboxes = [];
+let jobDetailPollTimer = null;
 
 const initJobDetail = async () => {
     const params = new URLSearchParams(window.location.search);
@@ -1513,6 +1514,10 @@ const initJobDetail = async () => {
 
     // Prevent multiple polling loops
     if (isJobPolling && !forcePollRestart) return;
+    if (forcePollRestart && jobDetailPollTimer) {
+        clearTimeout(jobDetailPollTimer);
+        jobDetailPollTimer = null;
+    }
     isJobPolling = true;
     forcePollRestart = false;
 
@@ -1532,6 +1537,10 @@ const initJobDetail = async () => {
             if (res.status === 401) {
                 const data = await res.json();
                 if (data.detail === 'Password required' || data.detail === 'Incorrect password') {
+                    if (jobDetailPollTimer) {
+                        clearTimeout(jobDetailPollTimer);
+                        jobDetailPollTimer = null;
+                    }
                     isJobPolling = false;
                     showPasswordModal(jobId, data.detail === 'Incorrect password');
                     return;
@@ -1597,8 +1606,12 @@ const initJobDetail = async () => {
 
             if (job.status === 'running' || job.status === 'pending' || forcePollRestart) {
                 if (forcePollRestart) forcePollRestart = false;
-                setTimeout(updateUI, 2000);
+                jobDetailPollTimer = setTimeout(updateUI, 2000);
             } else {
+                if (jobDetailPollTimer) {
+                    clearTimeout(jobDetailPollTimer);
+                    jobDetailPollTimer = null;
+                }
                 isJobPolling = false;
             }
 
@@ -1606,6 +1619,10 @@ const initJobDetail = async () => {
         } catch (e) {
             console.error(e);
             document.getElementById('job-name').textContent = tr('runtime.jobDetail.errorLoadingJob', {}, 'Error loading job');
+            if (jobDetailPollTimer) {
+                clearTimeout(jobDetailPollTimer);
+                jobDetailPollTimer = null;
+            }
             isJobPolling = false;
         }
 
@@ -1730,19 +1747,20 @@ window.retrySync = async (mailboxId) => {
                 await ensureAdminAuth();
                 throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
             }
+            const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                const data = await res.json();
                 throw new Error(data.detail || tr('runtime.jobDetail.failedRetry', {}, 'Failed to retry'));
             }
             window.showToast(tr('runtime.jobDetail.retrying', {}, 'Retrying...'), 'success');
 
-            // Force restart polling if it stopped
-            if (!isJobPolling) {
-                forcePollRestart = true;
-                initJobDetail();
-            } else {
-                forcePollRestart = true;
+            // Force immediate refresh after retry request so status/message updates
+            if (jobDetailPollTimer) {
+                clearTimeout(jobDetailPollTimer);
+                jobDetailPollTimer = null;
             }
+            isJobPolling = false;
+            forcePollRestart = true;
+            await initJobDetail();
 
         } catch (e) {
             window.showToast(formatErrorMessage(e.message), 'error');
