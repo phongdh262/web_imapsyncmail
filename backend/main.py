@@ -3,7 +3,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
+from collections import defaultdict
 import uuid
 import csv
 import io
@@ -309,6 +311,63 @@ class ManagedUserResponse(BaseModel):
     username: str
     is_root_admin: bool = False
 
+
+def _load_mailbox_status_counts(db: Session, job_ids: List[str]) -> dict:
+    counts_by_job = defaultdict(dict)
+    if not job_ids:
+        return counts_by_job
+
+    rows = (
+        db.query(Mailbox.job_id, Mailbox.status, func.count(Mailbox.id))
+        .filter(Mailbox.job_id.in_(job_ids))
+        .group_by(Mailbox.job_id, Mailbox.status)
+        .all()
+    )
+    for job_id, mailbox_status, count in rows:
+        counts_by_job[job_id][mailbox_status] = int(count or 0)
+
+    return counts_by_job
+
+
+def _sync_job_runtime(job: Job, status_counts: dict) -> bool:
+    success_count = int(status_counts.get("success", 0))
+    warning_count = int(status_counts.get("warning", 0))
+    failed_count = int(status_counts.get("failed", 0))
+    running_count = int(status_counts.get("running", 0))
+    pending_count = int(status_counts.get("pending", 0))
+
+    observed_total = success_count + warning_count + failed_count + running_count + pending_count
+    total_mailboxes = observed_total if observed_total > 0 else int(job.total_mailboxes or 0)
+    completed_count = success_count + warning_count
+
+    if total_mailboxes == 0:
+        desired_status = job.status or "pending"
+    elif running_count > 0:
+        desired_status = "running"
+    elif pending_count > 0 and (completed_count + failed_count) < total_mailboxes:
+        desired_status = "running"
+    elif (completed_count + failed_count) >= total_mailboxes:
+        desired_status = "failed" if completed_count == 0 and failed_count > 0 else "completed"
+    else:
+        desired_status = "pending"
+
+    changed = False
+    if job.total_mailboxes != total_mailboxes:
+        job.total_mailboxes = total_mailboxes
+        changed = True
+    if job.completed != completed_count:
+        job.completed = completed_count
+        changed = True
+    if job.failed != failed_count:
+        job.failed = failed_count
+        changed = True
+    if job.status != desired_status:
+        job.status = desired_status
+        changed = True
+
+    return changed
+
+
 # Root-admin User Management API
 @app.get("/api/admin/users", response_model=List[ManagedUserResponse])
 def list_admin_users(db: Session = Depends(get_db), current_user: User = Depends(require_root_admin)):
@@ -584,6 +643,14 @@ def delete_single_job(job_id: str, db: Session = Depends(get_db), current_user: 
 def list_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         jobs = db.query(Job).order_by(Job.created_at.desc()).all()
+        if jobs:
+            counts_by_job = _load_mailbox_status_counts(db, [job.id for job in jobs])
+            has_updates = False
+            for job in jobs:
+                if _sync_job_runtime(job, counts_by_job.get(job.id, {})):
+                    has_updates = True
+            if has_updates:
+                db.commit()
         return [format_job_response(j) for j in jobs]
     except Exception as e:
         with open("error_log.txt", "a") as f:
@@ -621,21 +688,9 @@ def get_job(job_id: str, request: Request, db: Session = Depends(get_db), passwo
             raise HTTPException(status_code=401, detail="Incorrect password")
     
     
-    # Self-heal / Real-time Stats Calculation
-    # Trust the mailboxes table more than the job counters
-    completed_count = db.query(Mailbox).filter(Mailbox.job_id == job_id, Mailbox.status.in_(['success', 'warning'])).count()
-    failed_count = db.query(Mailbox).filter(Mailbox.job_id == job_id, Mailbox.status == 'failed').count()
-    
-    # Update Job record if out of sync
-    if job.completed != completed_count or job.failed != failed_count:
-        job.completed = completed_count
-        job.failed = failed_count
-        
-        # Check for completion
-        if job.total_mailboxes > 0 and (completed_count + failed_count) >= job.total_mailboxes:
-             if job.status == 'running':
-                 job.status = 'completed'
-        
+    # Self-heal / Real-time Stats Calculation from mailbox table
+    counts_by_job = _load_mailbox_status_counts(db, [job_id])
+    if _sync_job_runtime(job, counts_by_job.get(job_id, {})):
         db.commit()
         db.refresh(job)
 
@@ -979,13 +1034,28 @@ def list_providers(current_user: User = Depends(get_current_user)):
 
 @app.get("/api/stats")
 def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    from sqlalchemy import func
-    total_jobs = db.query(Job).count()
-    active_jobs = db.query(Job).filter(Job.status == "running").count()
-    completed_mailboxes = db.query(Mailbox).filter(Mailbox.status == "success").count()
+    jobs = db.query(Job).all()
+    counts_by_job = _load_mailbox_status_counts(db, [job.id for job in jobs]) if jobs else {}
+
+    has_updates = False
+    active_jobs = 0
+    for job in jobs:
+        if _sync_job_runtime(job, counts_by_job.get(job.id, {})):
+            has_updates = True
+        if job.status == "running":
+            active_jobs += 1
+
+    if has_updates:
+        db.commit()
+
+    total_jobs = len(jobs)
+    completed_mailboxes = sum(
+        int(status_counts.get("success", 0)) + int(status_counts.get("warning", 0))
+        for status_counts in counts_by_job.values()
+    )
     
     # Calculate Data Transferred
-    total_bytes = db.query(func.sum(Job.data_transferred)).scalar() or 0
+    total_bytes = db.query(func.sum(Mailbox.data_transferred)).scalar() or 0
     
     # Format
     if total_bytes > 1024**3:
@@ -1006,8 +1076,10 @@ def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depe
 
 def format_job_response(job: Job):
     progress = 0
-    if job.total_mailboxes > 0:
-        progress = int(((job.completed + job.failed) / job.total_mailboxes) * 100)
+    total_mailboxes = int(job.total_mailboxes or 0)
+    processed_mailboxes = max(0, int(job.completed or 0) + int(job.failed or 0))
+    if total_mailboxes > 0:
+        progress = min(100, int((processed_mailboxes / total_mailboxes) * 100))
 
     # Format Bytes
     bytes_val = job.data_transferred or 0

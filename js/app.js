@@ -116,6 +116,43 @@ const normalizeJobsPayload = (payload) => {
     return null;
 };
 
+const updateActiveJobsBadge = (activeJobs = 0) => {
+    const activeCount = Number(activeJobs) || 0;
+    const hasActiveJobs = activeCount > 0;
+    const cardEl = document.getElementById('active-jobs-card');
+    const badgeEl = document.getElementById('active-jobs-badge');
+    const dotEl = document.getElementById('active-jobs-dot');
+    const labelEl = document.getElementById('active-jobs-label');
+
+    if (!badgeEl || !labelEl) return;
+
+    labelEl.textContent = hasActiveJobs
+        ? tr('dashboard.stats.activeBadge', {}, 'Active')
+        : tr('dashboard.stats.idleBadge', {}, 'Idle');
+
+    badgeEl.classList.toggle('bg-emerald-100', hasActiveJobs);
+    badgeEl.classList.toggle('dark:bg-emerald-900/30', hasActiveJobs);
+    badgeEl.classList.toggle('text-emerald-700', hasActiveJobs);
+    badgeEl.classList.toggle('dark:text-emerald-400', hasActiveJobs);
+    badgeEl.classList.toggle('bg-slate-100', !hasActiveJobs);
+    badgeEl.classList.toggle('dark:bg-slate-800', !hasActiveJobs);
+    badgeEl.classList.toggle('text-slate-600', !hasActiveJobs);
+    badgeEl.classList.toggle('dark:text-slate-300', !hasActiveJobs);
+
+    if (dotEl) {
+        dotEl.classList.toggle('hidden', !hasActiveJobs);
+        dotEl.classList.toggle('animate-pulse', hasActiveJobs);
+    }
+
+    if (cardEl) {
+        cardEl.classList.toggle('border-emerald-200', hasActiveJobs);
+        cardEl.classList.toggle('dark:border-emerald-900/50', hasActiveJobs);
+        cardEl.classList.toggle('border-slate-200', !hasActiveJobs);
+        cardEl.classList.toggle('dark:border-slate-800', !hasActiveJobs);
+        cardEl.classList.toggle('tech-stat-card-active', hasActiveJobs);
+    }
+};
+
 const getCookieValue = (name) => {
     const cookies = document.cookie ? document.cookie.split('; ') : [];
     const match = cookies.find((cookie) => cookie.startsWith(`${name}=`));
@@ -498,6 +535,9 @@ const initDashboard = async () => {
             animateCounter('stat-active-jobs', stats.active_jobs);
             animateCounter('stat-completed-mailboxes', stats.completed_mailboxes);
             document.getElementById('stat-data-transferred').textContent = stats.data_transferred;
+            updateActiveJobsBadge(stats.active_jobs);
+        } else {
+            updateActiveJobsBadge(0);
         }
 
 

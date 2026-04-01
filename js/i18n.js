@@ -434,6 +434,7 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 stats: {
                     allJobs: 'Tổng Job Migration',
                     activeBadge: 'Đang chạy',
+                    idleBadge: 'Nhàn rỗi',
                     activeJobs: 'Đang hoạt động',
                     mailboxesSynced: 'Mailbox đã sync',
                     dataTransferred: 'Dữ liệu đã chuyển'

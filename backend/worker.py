@@ -123,7 +123,6 @@ def build_imapsync_command(job, mailbox, pass1_path: str, pass2_path: str, optio
         '--split1', str(tuning['split']),
         '--split2', str(tuning['split']),
         '--allowsizemismatch',
-        '--maxretries', str(tuning['message_retries']),
     ]
 
     if job.source_security == "SSL/TLS":

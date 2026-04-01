@@ -43,16 +43,16 @@
     </div>
 
     <!-- Active Stat -->
-    <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-emerald-200 dark:border-emerald-900/50 shadow-sm relative overflow-hidden group tech-stat-card tech-stat-card-active">
+    <div id="active-jobs-card" class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-emerald-200 dark:border-emerald-900/50 shadow-sm relative overflow-hidden group tech-stat-card tech-stat-card-active">
         <div class="flex items-center justify-between mb-4 relative z-10">
             <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-            <span class="text-xs font-semibold px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span data-i18n="dashboard.stats.activeBadge">Active</span>
+            <span id="active-jobs-badge" class="text-xs font-semibold px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full flex items-center gap-1">
+                <span id="active-jobs-dot" class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span id="active-jobs-label" data-i18n="dashboard.stats.activeBadge">Active</span>
             </span>
         </div>
         <div class="relative z-10">
