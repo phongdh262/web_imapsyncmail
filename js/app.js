@@ -1467,6 +1467,10 @@ const initJobDetail = async () => {
         return;
     }
 
+    // Job detail is public, but we still silently check admin session so
+    // Stop/Retry controls appear when an authenticated admin is viewing.
+    await ensureAdminAuth({ showModal: false, forceCheck: true });
+
     // Prevent multiple polling loops
     if (isJobPolling && !forcePollRestart) return;
     isJobPolling = true;
