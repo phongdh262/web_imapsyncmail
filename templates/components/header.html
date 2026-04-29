@@ -14,41 +14,7 @@
         </a>
 
         <div class="app-header-grid header-controls">
-            <div class="app-header-group app-header-group-primary">
-                <span id="admin-auth-status" class="{% if admin_mode %}hidden{% else %}hidden{% endif %} admin-status-badge">
-                    <span data-i18n="header.adminLocked">Admin Locked</span>
-                </span>
 
-                <button type="button" id="admin-login-btn" data-admin-login-trigger onclick="showAdminLoginModal()" class="{% if admin_mode %}inline-flex{% else %}hidden{% endif %} header-btn header-btn-admin">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                    <span class="header-btn-label" data-i18n="header.adminLogin">Admin Login</span>
-                </button>
-
-                <button id="admin-logout-btn" onclick="logoutAdmin()" class="hidden header-btn header-btn-muted">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V7m-6 12h8a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span class="header-btn-label" data-i18n="header.logout">Logout</span>
-                </button>
-
-                {% if admin_mode and request.url.path != '/admin/create-job.html' %}
-                <a href="/admin/create-job.html" class="header-btn header-btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span class="header-btn-label header-btn-label-compact" data-i18n="header.createJob">Create New Job</span>
-                </a>
-                {% elif admin_mode %}
-                <a href="/admin/" class="header-btn header-btn-muted">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    <span class="header-btn-label header-btn-label-compact" data-i18n="header.dashboard">Dashboard</span>
-                </a>
-                {% endif %}
-            </div>
 
             <!-- Mobile menu toggle -->
             <button type="button" id="mobile-menu-toggle" class="header-icon-btn mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
@@ -112,6 +78,42 @@
                     </svg>
                     <span class="kbd">⌘K</span>
                 </button>
+            </div>
+
+            <div class="app-header-group app-header-group-primary sm:ml-auto">
+                <span id="admin-auth-status" class="{% if admin_mode %}hidden{% else %}hidden{% endif %} admin-status-badge">
+                    <span data-i18n="header.adminLocked">Admin Locked</span>
+                </span>
+
+                <button type="button" id="admin-login-btn" data-admin-login-trigger onclick="showAdminLoginModal()" class="{% if admin_mode %}inline-flex{% else %}hidden{% endif %} header-btn header-btn-admin">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                    <span class="header-btn-label" data-i18n="header.adminLogin">Admin Login</span>
+                </button>
+
+                <button id="admin-logout-btn" onclick="logoutAdmin()" class="hidden header-btn header-btn-muted">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V7m-6 12h8a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span class="header-btn-label" data-i18n="header.logout">Logout</span>
+                </button>
+
+                {% if admin_mode and request.url.path != '/admin/create-job.html' %}
+                <a href="/admin/create-job.html" class="header-btn header-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span class="header-btn-label header-btn-label-compact" data-i18n="header.createJob">Create New Job</span>
+                </a>
+                {% elif admin_mode %}
+                <a href="/admin/" class="header-btn header-btn-muted">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span class="header-btn-label header-btn-label-compact" data-i18n="header.dashboard">Dashboard</span>
+                </a>
+                {% endif %}
             </div>
         </div>
         </div>
