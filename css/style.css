@@ -758,6 +758,15 @@ body[data-admin-mode="true"]::after {
     box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
 }
 
+button:focus-visible, 
+a:focus-visible, 
+input:focus-visible, 
+select:focus-visible, 
+textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+}
+
 .input-validation:invalid:not(:placeholder-shown) {
     border-color: var(--error);
 }
@@ -1467,6 +1476,32 @@ body[data-page="guide"] .app-shell {
     .app-footer-inner {
         padding: 0.65rem;
     }
+
+    /* Mobile hamburger menu */
+    .mobile-menu-btn {
+        display: inline-flex !important;
+        order: 10;
+    }
+
+    .mobile-collapsible {
+        display: none !important;
+        width: 100%;
+        flex-basis: 100%;
+        order: 20;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border-primary);
+        margin-top: 0.35rem;
+    }
+
+    .mobile-collapsible.mobile-open {
+        display: flex !important;
+        flex-wrap: wrap;
+    }
+}
+
+/* Hide hamburger on desktop */
+.mobile-menu-btn {
+    display: none;
 }
 
 .page-intro {
@@ -3102,17 +3137,7 @@ button:disabled {
     animation: slideUp 0.4s ease-out;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
 .csv-preview-header {
     padding: 1rem 1.5rem;
@@ -3185,7 +3210,7 @@ button:disabled {
 }
 
 [data-theme="dark"] .dropzone-icon-wrapper {
-    background: #1e293b;
+    background: var(--bg-card);
     color: #94a3b8;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }

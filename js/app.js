@@ -1353,12 +1353,15 @@ window.showToast = (message, type = 'info') => {
 
     // Limit to 3 visible toasts — dismiss oldest if over limit
     const MAX_TOASTS = 3;
-    while (container.children.length >= MAX_TOASTS) {
-        const oldest = container.children[0];
-        oldest.classList.remove('animate-slide-in-right');
-        oldest.classList.add('animate-fade-out-right');
-        setTimeout(() => oldest.remove(), 300);
-        break;
+    const activeToasts = Array.from(container.children).filter(child => !child.classList.contains('animate-fade-out-right'));
+    if (activeToasts.length >= MAX_TOASTS) {
+        const toRemove = activeToasts.length - MAX_TOASTS + 1;
+        for (let i = 0; i < toRemove; i++) {
+            const oldest = activeToasts[i];
+            oldest.classList.remove('animate-slide-in-right');
+            oldest.classList.add('animate-fade-out-right');
+            setTimeout(() => oldest.remove(), 300);
+        }
     }
 
     container.appendChild(toast);

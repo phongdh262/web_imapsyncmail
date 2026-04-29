@@ -11,31 +11,12 @@
     <meta property="og:description"
         content="Migrate emails securely and efficiently between IMAP servers with an intuitive interface.">
     <meta property="og:type" content="website">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/css/tailwind.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css?v={{ asset_version('css/style.css') }}">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: ['class', '[data-theme="dark"]'],
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        slate: {
-                            850: '#1e293b',
-                            900: '#0f172a',
-                            950: '#020617',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+
     {% block extra_head %}{% endblock %}
 </head>
 
@@ -160,6 +141,19 @@
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeUI(newTheme);
+        }
+
+        function toggleMobileMenu() {
+            const collapsible = document.querySelector('.mobile-collapsible');
+            if (collapsible) {
+                collapsible.classList.toggle('mobile-open');
+            }
+            const hamburgerIcon = document.querySelector('.hamburger-icon');
+            const closeIcon = document.querySelector('.close-icon');
+            if (hamburgerIcon && closeIcon) {
+                hamburgerIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            }
         }
 
         function updateThemeUI(theme) {

@@ -50,7 +50,18 @@
                 {% endif %}
             </div>
 
-            <div class="app-header-group app-header-group-nav">
+            <!-- Mobile menu toggle -->
+            <button type="button" id="mobile-menu-toggle" class="header-icon-btn mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                <svg class="hamburger-icon w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <svg class="close-icon w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="mobile-collapsible w-full sm:w-auto sm:flex sm:items-center sm:gap-4">
+                <div class="app-header-group app-header-group-nav">
                 {% if admin_mode %}
                 <a id="manage-users-btn" href="/admin/users.html" class="hidden header-btn header-btn-muted header-btn-nav">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,6 +113,7 @@
                     <span class="kbd">⌘K</span>
                 </button>
             </div>
+        </div>
         </div>
     </div>
 </nav>

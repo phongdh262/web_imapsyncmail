@@ -13,3 +13,4 @@ backend/secret.key
 backend/.env
 error_log.txt
 startup_error.log
+node_modules/
