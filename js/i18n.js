@@ -420,16 +420,43 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 subtitle: 'Tổng quan các job migration đang chạy và thống kê hệ thống.',
                 hero: {
                     kicker: 'Bảng Điều Khiển Admin',
-                    title: 'Dashboard vận hành cho các phiên IMAP migration có kiểm soát.',
-                    subtitle: 'Theo dõi job đang chạy, kiểm tra hàng đợi, và mở viewer bảo vệ bằng password mà không lộ các thao tác quản trị cho người xem công khai.',
-                    signalTrustTitle: 'Tách lớp truy cập',
-                    signalTrustCopy: 'Các thao tác admin được giữ riêng khỏi link viewer chia sẻ.',
-                    signalLiveTitle: 'Quan sát trực tiếp',
-                    signalLiveCopy: 'Thống kê, trạng thái và tiến độ mailbox vẫn dễ đọc trong lúc job đang chạy lâu.',
+                    title: 'Trung tâm điều phối migration.',
+                    subtitle: 'Đăng nhập để tạo job, kiểm tra credential và theo dõi tiến độ IMAP.',
+                    signalTrustTitle: 'Phân lớp truy cập rõ',
+                    signalTrustCopy: 'Admin ở sau phiên đăng nhập, còn link viewer vẫn tách riêng bằng Job Password.',
+                    signalLiveTitle: 'Theo dõi đúng phần cần xem',
+                    signalLiveCopy: 'Sức khỏe hàng đợi, trạng thái và lịch sử job được gom lại thành một khu vực dễ quét sau khi đăng nhập.',
+                    signalFlowTitle: 'Quy trình ít nhiễu',
+                    signalFlowCopy: 'Đi từ kiểm tra credential đến migration và nghiệm thu theo một flow ngắn, rõ.',
                     focusLabel: 'Trọng tâm',
                     focusValue: 'Vận hành migration chắc tay với giao diện ít nhiễu.',
                     flowLabel: 'Luồng khuyến nghị',
                     flowValue: 'Kiểm tra credential, tạo job, theo dõi tiến độ, xuất report.'
+                },
+                workspace: {
+                    kicker: 'Không gian làm việc',
+                    title: 'Truy cập admin',
+                    body: 'Trang chủ mới đóng vai trò điểm bắt đầu gọn gàng. Các control vận hành và hành động nhạy cảm chỉ hiện sau khi xác thực admin.',
+                    guide: 'Mở hướng dẫn',
+                    reviewChecks: 'Xem flow kiểm tra credential',
+                    createJob: 'Tạo job migration',
+                    openChecks: 'Mở kiểm tra credential'
+                },
+                process: {
+                    kicker: 'Luồng đề xuất',
+                    title: 'Luồng vận hành đơn giản hơn',
+                    note: 'Phần lớn công việc hằng ngày chỉ cần 3 bước này, nên trang chủ không cần nhồi toàn bộ thông tin.',
+                    prepareTitle: '1. Kiểm tra credential',
+                    prepareBody: 'Xác nhận host, app password và khả năng đăng nhập trước khi tạo batch.',
+                    launchTitle: '2. Tạo job đúng phạm vi',
+                    launchBody: 'Khai báo nguồn, đích và đặt Job Password để tách viewer khỏi khu vực admin.',
+                    monitorTitle: '3. Theo dõi và nghiệm thu',
+                    monitorBody: 'Mở job detail để xem tiến độ, log và xuất report khi toàn bộ mailbox hoàn tất.'
+                },
+                authenticated: {
+                    kicker: 'Hàng đợi trực tiếp',
+                    title: 'Số liệu và job đang chạy',
+                    note: 'Sau khi đăng nhập, phần bên dưới tập trung vào thống kê hệ thống và danh sách job đang vận hành.'
                 },
                 stats: {
                     allJobs: 'Tổng Job Migration',
@@ -440,7 +467,9 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                     dataTransferred: 'Dữ liệu đã chuyển'
                 },
                 jobsList: {
+                    kicker: 'Hàng đợi job',
                     title: 'Danh sách Job',
+                    note: 'Tìm, lọc và mở đúng job cần xử lý mà không bị lẫn bởi các khối thông tin phụ.',
                     clearAll: 'Xóa toàn bộ',
                     refresh: 'Làm mới',
                     searchPlaceholder: 'Tìm job theo tên, server...',

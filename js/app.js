@@ -193,6 +193,8 @@ const updateAdminAuthUI = () => {
     const logoutBtn = document.getElementById('admin-logout-btn');
     const manageUsersBtn = document.getElementById('manage-users-btn');
     const statusEl = document.getElementById('admin-auth-status');
+    const createJobHeaderBtn = document.getElementById('create-job-header-btn');
+    const footerNewJobLink = document.getElementById('footer-new-job-link');
     const username = localStorage.getItem(ADMIN_USERNAME_KEY) || 'Admin';
     const canManageUsers = canCurrentAdminManageUsers();
     const isAdminMode = document.body?.dataset?.adminMode === 'true';
@@ -202,6 +204,8 @@ const updateAdminAuthUI = () => {
         logoutBtn?.classList.add('hidden');
         manageUsersBtn?.classList.add('hidden');
         statusEl?.classList.add('hidden');
+        createJobHeaderBtn?.classList.add('hidden');
+        footerNewJobLink?.classList.add('hidden');
         return;
     }
 
@@ -210,12 +214,16 @@ const updateAdminAuthUI = () => {
         logoutBtn?.classList.remove('hidden');
         statusEl?.classList.remove('hidden');
         manageUsersBtn?.classList.toggle('hidden', !canManageUsers);
+        createJobHeaderBtn?.classList.remove('hidden');
+        footerNewJobLink?.classList.remove('hidden');
         if (statusEl) statusEl.textContent = tr('header.adminStatus', { username }, `Admin: ${username}`);
     } else {
         loginBtn?.classList.remove('hidden');
         logoutBtn?.classList.add('hidden');
         manageUsersBtn?.classList.add('hidden');
         statusEl?.classList.add('hidden');
+        createJobHeaderBtn?.classList.add('hidden');
+        footerNewJobLink?.classList.add('hidden');
     }
 
     updateAdminPageAccess(adminSessionActive);
