@@ -1764,9 +1764,6 @@ body[data-page="guide"] .app-shell {
     margin-top: 0.9rem;
 }
 
-.admin-gate {
-    display: block;
-}
 
 .admin-gate-card {
     display: grid;
