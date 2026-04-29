@@ -1242,7 +1242,7 @@ const initCreateJob = () => {
             // Update dropzone appearance
             dropZone.classList.add('has-file');
             if (dropzoneText) {
-                dropzoneText.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">${escapeHtml(file.name)}</span> <span class="text-slate-400 font-normal">(${(file.size / 1024).toFixed(1)} KB)</span>`;
+                dropzoneText.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-semibold">${escapeHtml(file.name)}</span> <span class="text-slate-400 font-normal">(${(file.size / 1024).toFixed(1)} KB)</span>`;
             }
             if (dropzoneIcon) {
                 dropzoneIcon.innerHTML = `
@@ -1262,7 +1262,7 @@ const initCreateJob = () => {
                 let html = `
                     <div class="csv-preview-card">
                         <div class="csv-preview-header bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
-                            <h3 class="font-bold text-slate-800 dark:text-slate-200">${escapeHtml(tr('runtime.createJob.csvPreviewTitle', {}, 'CSV Preview'))}</h3>
+                            <h3 class="font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(tr('runtime.createJob.csvPreviewTitle', {}, 'CSV Preview'))}</h3>
                             <span class="csv-count-badge bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                 ${escapeHtml(tr('runtime.createJob.mailboxesCount', { count: lines.length }, `${lines.length} mailboxes`))}
                             </span>
@@ -1350,6 +1350,16 @@ window.showToast = (message, type = 'info') => {
         toast.classList.add('animate-fade-out-right');
         setTimeout(() => toast.remove(), 300);
     };
+
+    // Limit to 3 visible toasts — dismiss oldest if over limit
+    const MAX_TOASTS = 3;
+    while (container.children.length >= MAX_TOASTS) {
+        const oldest = container.children[0];
+        oldest.classList.remove('animate-slide-in-right');
+        oldest.classList.add('animate-fade-out-right');
+        setTimeout(() => oldest.remove(), 300);
+        break;
+    }
 
     container.appendChild(toast);
 
