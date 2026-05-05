@@ -8,6 +8,7 @@ import imaplib
 import ssl
 import socket
 import logging
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from check_credentials import detect_provider, TIMEOUT
 
@@ -16,6 +17,9 @@ logger = logging.getLogger(__name__)
 FETCH_BATCH_SIZE = 500
 MAX_REASONABLE_MAILBOX_QUOTA_BYTES = 100 * (1024 ** 4)
 SUSPICIOUS_KB_INTERPRETATION_BYTES = 5 * (1024 ** 4)
+FOLDER_ROLE_ALL = "all_mail"
+FOLDER_ROLE_SPAM = "spam"
+FOLDER_ROLE_TRASH = "trash"
 
 
 def _format_size(size_bytes):
@@ -117,13 +121,45 @@ def _parse_quota_response(quota_data):
                 item = item.decode("utf-8", errors="replace")
             if isinstance(item, str) and "STORAGE" in item.upper():
                 # Extract numbers after STORAGE
-                import re
                 match = re.search(r'STORAGE\s+(\d+)\s+(\d+)', item, re.IGNORECASE)
                 if match:
                     return _quota_storage_to_bytes(match.group(1), match.group(2))
     except Exception as e:
         logger.debug(f"Quota parse error: {e}")
     return None, None
+
+
+def _parse_list_item(item):
+    """Parse a LIST response line into folder metadata."""
+    if item is None:
+        return None
+    if isinstance(item, bytes):
+        item = item.decode("utf-8", errors="replace")
+    if not isinstance(item, str):
+        return None
+
+    flags_match = re.match(r"^\((?P<flags>[^)]*)\)", item)
+    flags = []
+    if flags_match:
+        flags = [flag.lower() for flag in flags_match.group("flags").split() if flag]
+
+    name = None
+    quoted_match = re.search(r'"((?:[^"\\]|\\.)*)"$', item)
+    if quoted_match:
+        name = quoted_match.group(1).replace('\\"', '"')
+    else:
+        parts = item.rsplit(" ", 1)
+        if len(parts) == 2:
+            name = parts[1].strip('"')
+
+    if not name:
+        return None
+
+    return {
+        "name": name,
+        "attributes": flags,
+        "selectable": "\\noselect" not in flags,
+    }
 
 
 def _list_folders(imap):
@@ -133,60 +169,104 @@ def _list_folders(imap):
         status, folder_list = imap.list()
         if status == "OK" and folder_list:
             for item in folder_list:
-                if item is None:
-                    continue
-                if isinstance(item, bytes):
-                    item = item.decode("utf-8", errors="replace")
-                # Parse folder name from LIST response
-                # Typical format: '(\\HasNoChildren) "/" "INBOX"'
-                import re
-                match = re.search(r'"([^"]*)"$', item)
-                if match:
-                    folders.append(match.group(1))
-                else:
-                    # Try last part after space
-                    parts = item.rsplit(" ", 1)
-                    if len(parts) == 2:
-                        folders.append(parts[1].strip('"'))
+                parsed = _parse_list_item(item)
+                if parsed:
+                    folders.append(parsed)
     except Exception as e:
         logger.debug(f"Error listing folders: {e}")
-    return folders if folders else ["INBOX"]
+    return folders if folders else [{
+        "name": "INBOX",
+        "attributes": [],
+        "selectable": True,
+    }]
+
+
+def _folder_has_attribute(folder, *attributes):
+    attrs = set(folder.get("attributes", []))
+    return any(attribute in attrs for attribute in attributes)
+
+
+def _folder_matches_role(folder, role):
+    name = folder["name"].lower()
+    if role == FOLDER_ROLE_ALL:
+        return _folder_has_attribute(folder, "\\all", "\\allmail") or "all mail" in name
+    if role == FOLDER_ROLE_SPAM:
+        return _folder_has_attribute(folder, "\\junk", "\\spam") or name.endswith("/spam") or name in {"spam", "junk", "bulk mail"}
+    if role == FOLDER_ROLE_TRASH:
+        return _folder_has_attribute(folder, "\\trash") or name.endswith("/trash") or name in {"trash", "bin", "deleted items", "deleted messages"}
+    return False
+
+
+def _dedupe_folder_names(folders):
+    unique = []
+    seen = set()
+    for folder in folders:
+        name = folder["name"]
+        if name in seen:
+            continue
+        seen.add(name)
+        unique.append(folder)
+    return unique
 
 
 def _prioritize_folders(folders):
-    """Prefer a single All Mail folder when present, otherwise scan all folders once."""
-    unique_folders = []
-    for folder in folders:
-        if folder not in unique_folders:
-            unique_folders.append(folder)
+    """
+    Pick folders that maximize coverage while avoiding Gmail label double-counting.
 
-    for folder in unique_folders:
-        if "all mail" in folder.lower():
-            return [folder]
+    Gmail/Google Workspace:
+    - Prefer All Mail as the canonical store.
+    - Add Spam/Junk and Trash because they are typically excluded from All Mail.
+    Other providers:
+    - Scan every selectable folder once.
+    """
+    unique_folders = _dedupe_folder_names(folders)
+    selectable_folders = [folder for folder in unique_folders if folder.get("selectable", True)]
+    skipped_folders = [folder["name"] for folder in unique_folders if not folder.get("selectable", True)]
 
-    preferred = []
-    remaining = []
-    for folder in unique_folders:
-        normalized = folder.lower()
-        if normalized == "inbox" or "all mail" in normalized:
-            preferred.append(folder)
-        else:
-            remaining.append(folder)
+    all_mail_folder = next((folder for folder in selectable_folders if _folder_matches_role(folder, FOLDER_ROLE_ALL)), None)
 
-    selected = []
-    for folder in preferred + remaining:
-        if folder not in selected:
-            selected.append(folder)
-    return selected or ["INBOX"]
+    if all_mail_folder:
+        selected = [all_mail_folder]
+        for role in (FOLDER_ROLE_SPAM, FOLDER_ROLE_TRASH):
+            for folder in selectable_folders:
+                if folder["name"] == all_mail_folder["name"]:
+                    continue
+                if _folder_matches_role(folder, role) and folder not in selected:
+                    selected.append(folder)
+
+        selected_names = {folder["name"] for folder in selected}
+        for folder in selectable_folders:
+            if folder["name"] not in selected_names:
+                skipped_folders.append(folder["name"])
+
+        return {
+            "folders": selected,
+            "strategy": "all_mail_plus_spam_trash",
+            "skipped_folders": skipped_folders,
+        }
+
+    selected = selectable_folders or [{
+        "name": "INBOX",
+        "attributes": [],
+        "selectable": True,
+    }]
+    return {
+        "folders": selected,
+        "strategy": "all_selectable_folders",
+        "skipped_folders": skipped_folders,
+    }
 
 
 def _get_folder_size(imap, folder_name):
     """Calculate folder size by fetching RFC822.SIZE metadata in batches."""
     total_size = 0
+    scan_complete = True
+    scan_error = None
+    total_messages = 0
     try:
         status, data = imap.select(f'"{folder_name}"', readonly=True)
         if status != "OK":
-            return 0, 0, False
+            return 0, 0, False, "Folder select failed"
 
         # Get message count
         msg_count_raw = data[0]
@@ -195,14 +275,14 @@ def _get_folder_size(imap, folder_name):
         total_messages = int(msg_count_raw)
 
         if total_messages == 0:
-            return 0, 0, False
+            return 0, 0, True, None
 
-        import re
         for start in range(1, total_messages + 1, FETCH_BATCH_SIZE):
             end = min(start + FETCH_BATCH_SIZE - 1, total_messages)
             fetch_range = f"{start}:{end}"
             status, batch_data = imap.fetch(fetch_range, "(RFC822.SIZE)")
             if status != "OK" or not batch_data:
+                scan_complete = False
                 logger.debug("RFC822.SIZE fetch failed for %s range %s", folder_name, fetch_range)
                 continue
 
@@ -217,36 +297,59 @@ def _get_folder_size(imap, folder_name):
                         total_size += int(match.group(1))
 
     except Exception as e:
+        scan_complete = False
+        scan_error = str(e)
         logger.debug(f"Error getting folder size for {folder_name}: {e}")
 
-    return total_size, total_messages, False
+    return total_size, total_messages, scan_complete, scan_error
+
+
+def _describe_scan_strategy(strategy):
+    if strategy == "all_mail_plus_spam_trash":
+        return "All Mail + Spam + Trash"
+    if strategy == "all_selectable_folders":
+        return "all selectable folders"
+    return "selected folders"
 
 
 def _collect_mailbox_metrics(imap):
     """Compute mailbox size from RFC822.SIZE metadata across the scan folders."""
-    folders = _prioritize_folders(_list_folders(imap))
+    selection = _prioritize_folders(_list_folders(imap))
+    folders = selection["folders"]
     total_size = 0
     total_messages = 0
     folder_details = []
+    scan_complete = True
 
     for folder in folders:
         try:
-            size, msgs, estimated = _get_folder_size(imap, folder)
+            size, msgs, folder_complete, scan_error = _get_folder_size(imap, folder["name"])
             total_size += size
             total_messages += msgs
-            if size > 0 or msgs > 0:
-                folder_details.append({
-                    "name": folder,
-                    "size": size,
-                    "size_formatted": _format_size(size),
-                    "messages": msgs,
-                    "estimated": estimated
-                })
+            scan_complete = scan_complete and folder_complete
+            folder_details.append({
+                "name": folder["name"],
+                "size": size,
+                "size_formatted": _format_size(size),
+                "messages": msgs,
+                "complete": folder_complete,
+                "attributes": folder.get("attributes", []),
+                "error": scan_error,
+            })
         except Exception:
+            scan_complete = False
             continue
 
     folder_details.sort(key=lambda f: f["size"], reverse=True)
-    return total_size, total_messages, folder_details, False
+    return {
+        "total_size": total_size,
+        "total_messages": total_messages,
+        "folder_details": folder_details,
+        "scan_strategy": selection["strategy"],
+        "scanned_folders": [folder["name"] for folder in folders],
+        "skipped_folders": selection["skipped_folders"],
+        "scan_complete": scan_complete,
+    }
 
 
 def check_mailbox_quota(email: str, password: str, host: str = None, port: int = 993) -> dict:
@@ -299,6 +402,10 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
             "total_size_formatted": "0 B",
             "total_messages": 0,
             "folder_sizes": [],
+            "scan_strategy": "quota_only",
+            "scanned_folders": [],
+            "skipped_folders": [],
+            "scan_complete": True,
             "message": "",
             "method": "unknown"
         }
@@ -335,12 +442,23 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
             logger.debug(f"GETQUOTAROOT not supported for {email}: {e}")
 
         if not quota_available or quota_needs_mailbox_scan:
-            total_size, total_messages, folder_details, estimated_fallback = _collect_mailbox_metrics(imap)
+            mailbox_metrics = _collect_mailbox_metrics(imap)
+            total_size = mailbox_metrics["total_size"]
+            total_messages = mailbox_metrics["total_messages"]
+            folder_details = mailbox_metrics["folder_details"]
             result["total_size"] = total_size
             result["total_size_formatted"] = _format_size(total_size)
             result["total_messages"] = total_messages
             result["folder_sizes"] = folder_details
-            estimate_note = "calculated from RFC822.SIZE across scanned folders"
+            result["scan_strategy"] = mailbox_metrics["scan_strategy"]
+            result["scanned_folders"] = mailbox_metrics["scanned_folders"]
+            result["skipped_folders"] = mailbox_metrics["skipped_folders"]
+            result["scan_complete"] = mailbox_metrics["scan_complete"]
+            estimate_note = (
+                f"calculated from RFC822.SIZE using {_describe_scan_strategy(result['scan_strategy'])}"
+            )
+            if not result["scan_complete"]:
+                estimate_note += "; partial coverage because some folders or ranges could not be fetched"
 
             if quota_available:
                 result["method"] = "QUOTA+FETCH"
@@ -352,7 +470,7 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
                     result["message"] = (
                         f"Mailbox size: {result['quota_used_formatted']} / "
                         f"{result['quota_limit_formatted']} ({result['usage_percent']}%) "
-                        f"from {total_messages} messages across {len(folder_details)} folders, {estimate_note}"
+                        f"from {total_messages} messages across {len(result['scanned_folders'])} scanned folders, {estimate_note}"
                     )
                 else:
                     result["total_size"] = result["quota_used"] or 0
@@ -361,7 +479,10 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
                 result["method"] = "FETCH"
                 result["quota_used"] = total_size
                 result["quota_used_formatted"] = _format_size(total_size)
-                result["message"] = f"Mailbox size: {_format_size(total_size)} ({total_messages} messages across {len(folder_details)} folders, {estimate_note})"
+                result["message"] = (
+                    f"Mailbox size: {_format_size(total_size)} "
+                    f"({total_messages} messages across {len(result['scanned_folders'])} scanned folders, {estimate_note})"
+                )
         else:
             result["total_size"] = result["quota_used"] or 0
             result["total_size_formatted"] = result["quota_used_formatted"]
