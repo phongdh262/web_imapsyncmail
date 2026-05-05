@@ -13,8 +13,7 @@ from check_credentials import detect_provider, TIMEOUT
 
 logger = logging.getLogger(__name__)
 
-MAX_FALLBACK_FOLDERS = 6
-MAX_FALLBACK_MESSAGES_PER_FOLDER = 500
+FETCH_BATCH_SIZE = 500
 MAX_REASONABLE_MAILBOX_QUOTA_BYTES = 100 * (1024 ** 4)
 SUSPICIOUS_KB_INTERPRETATION_BYTES = 5 * (1024 ** 4)
 
@@ -155,7 +154,7 @@ def _list_folders(imap):
 
 
 def _prioritize_folders(folders):
-    """Keep fallback predictable by checking INBOX/All Mail first, then a small remainder."""
+    """Prefer a single All Mail folder when present, otherwise scan all folders once."""
     unique_folders = []
     for folder in folders:
         if folder not in unique_folders:
@@ -178,16 +177,12 @@ def _prioritize_folders(folders):
     for folder in preferred + remaining:
         if folder not in selected:
             selected.append(folder)
-        if len(selected) >= MAX_FALLBACK_FOLDERS:
-            break
     return selected or ["INBOX"]
 
 
 def _get_folder_size(imap, folder_name):
-    """Estimate folder size with a bounded RFC822.SIZE sample."""
+    """Calculate folder size by fetching RFC822.SIZE metadata in batches."""
     total_size = 0
-    message_count = 0
-    estimated = False
     try:
         status, data = imap.select(f'"{folder_name}"', readonly=True)
         if status != "OK":
@@ -202,16 +197,16 @@ def _get_folder_size(imap, folder_name):
         if total_messages == 0:
             return 0, 0, False
 
-        fetch_range = "1:*"
-        if total_messages > MAX_FALLBACK_MESSAGES_PER_FOLDER:
-            fetch_start = total_messages - MAX_FALLBACK_MESSAGES_PER_FOLDER + 1
-            fetch_range = f"{fetch_start}:*"
-            estimated = True
+        import re
+        for start in range(1, total_messages + 1, FETCH_BATCH_SIZE):
+            end = min(start + FETCH_BATCH_SIZE - 1, total_messages)
+            fetch_range = f"{start}:{end}"
+            status, batch_data = imap.fetch(fetch_range, "(RFC822.SIZE)")
+            if status != "OK" or not batch_data:
+                logger.debug("RFC822.SIZE fetch failed for %s range %s", folder_name, fetch_range)
+                continue
 
-        status, data = imap.fetch(fetch_range, "(RFC822.SIZE)")
-        if status == "OK" and data:
-            import re
-            for item in data:
+            for item in batch_data:
                 if item is None:
                     continue
                 if isinstance(item, bytes):
@@ -220,33 +215,25 @@ def _get_folder_size(imap, folder_name):
                     match = re.search(r'RFC822\.SIZE\s+(\d+)', item)
                     if match:
                         total_size += int(match.group(1))
-                        message_count += 1
-
-        if estimated and message_count > 0:
-            average_size = total_size / message_count
-            total_size = int(average_size * total_messages)
-            message_count = total_messages
 
     except Exception as e:
         logger.debug(f"Error getting folder size for {folder_name}: {e}")
 
-    return total_size, message_count, estimated
+    return total_size, total_messages, False
 
 
 def _collect_mailbox_metrics(imap):
-    """Compute a bounded mailbox size estimate across a small folder set."""
+    """Compute mailbox size from RFC822.SIZE metadata across the scan folders."""
     folders = _prioritize_folders(_list_folders(imap))
     total_size = 0
     total_messages = 0
     folder_details = []
-    estimated_fallback = False
 
     for folder in folders:
         try:
             size, msgs, estimated = _get_folder_size(imap, folder)
             total_size += size
             total_messages += msgs
-            estimated_fallback = estimated_fallback or estimated
             if size > 0 or msgs > 0:
                 folder_details.append({
                     "name": folder,
@@ -259,7 +246,7 @@ def _collect_mailbox_metrics(imap):
             continue
 
     folder_details.sort(key=lambda f: f["size"], reverse=True)
-    return total_size, total_messages, folder_details, estimated_fallback
+    return total_size, total_messages, folder_details, False
 
 
 def check_mailbox_quota(email: str, password: str, host: str = None, port: int = 993) -> dict:
@@ -353,10 +340,10 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
             result["total_size_formatted"] = _format_size(total_size)
             result["total_messages"] = total_messages
             result["folder_sizes"] = folder_details
-            estimate_note = "estimated from a bounded sample" if estimated_fallback else "calculated from sampled folders"
+            estimate_note = "calculated from RFC822.SIZE across scanned folders"
 
             if quota_available:
-                result["method"] = "QUOTA+SAMPLED_FETCH" if estimated_fallback else "QUOTA+FETCH"
+                result["method"] = "QUOTA+FETCH"
                 if total_size > 0 or total_messages > 0:
                     result["quota_used"] = total_size
                     result["quota_used_formatted"] = _format_size(total_size)
@@ -371,7 +358,7 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
                     result["total_size"] = result["quota_used"] or 0
                     result["total_size_formatted"] = result["quota_used_formatted"]
             else:
-                result["method"] = "SAMPLED_FETCH" if estimated_fallback else "FETCH"
+                result["method"] = "FETCH"
                 result["quota_used"] = total_size
                 result["quota_used_formatted"] = _format_size(total_size)
                 result["message"] = f"Mailbox size: {_format_size(total_size)} ({total_messages} messages across {len(folder_details)} folders, {estimate_note})"
