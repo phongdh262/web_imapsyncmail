@@ -565,7 +565,7 @@ def _parse_quota_csv_text(csv_text: str) -> list:
     return credentials
 
 
-def _run_quota_bulk_job(job_id: str, credentials: list, host: Optional[str], port: int):
+def _run_quota_bulk_job(job_id: str, credentials: list, host: Optional[str], port: int, skip_trash: bool):
     def on_result(index: int, result: dict):
         with quota_bulk_jobs_lock:
             job = quota_bulk_jobs.get(job_id)
@@ -583,7 +583,7 @@ def _run_quota_bulk_job(job_id: str, credentials: list, host: Optional[str], por
         job["updated_at"] = datetime.utcnow()
 
     try:
-        results = check_bulk_quota(credentials, host=host, port=port, max_concurrent=3, on_result=on_result)
+        results = check_bulk_quota(credentials, host=host, port=port, max_concurrent=3, on_result=on_result, skip_trash=skip_trash)
         with quota_bulk_jobs_lock:
             job = quota_bulk_jobs.get(job_id)
             if not job:
@@ -1137,6 +1137,7 @@ class QuotaCheck(BaseModel):
     password: str
     host: Optional[str] = None
     port: int = 993
+    skip_trash: bool = True
 
 @app.post("/api/check-quota")
 async def check_single_quota(data: QuotaCheck, request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
@@ -1147,7 +1148,8 @@ async def check_single_quota(data: QuotaCheck, request: Request, db: Session = D
         email=data.email,
         password=data.password,
         host=data.host,
-        port=data.port
+        port=data.port,
+        skip_trash=data.skip_trash,
     )
     return result
 
@@ -1157,6 +1159,7 @@ async def start_bulk_quota_job(
     file: UploadFile = File(...),
     host: Optional[str] = Form(None),
     port: int = Form(993),
+    skip_trash: bool = Form(True),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     _: None = Depends(verify_csrf),
@@ -1189,7 +1192,7 @@ async def start_bulk_quota_job(
     with quota_bulk_jobs_lock:
         quota_bulk_jobs[job_id] = job_data
 
-    executor.submit(_run_quota_bulk_job, job_id, credentials, host, port)
+    executor.submit(_run_quota_bulk_job, job_id, credentials, host, port, skip_trash)
     return _serialize_quota_bulk_job(job_data)
 
 
@@ -1213,6 +1216,7 @@ async def check_bulk_quota_endpoint(
     file: UploadFile = File(...),
     host: Optional[str] = Form(None),
     port: int = Form(993),
+    skip_trash: bool = Form(True),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     _: None = Depends(verify_csrf),
@@ -1226,7 +1230,7 @@ async def check_bulk_quota_endpoint(
     if not credentials:
         raise HTTPException(status_code=400, detail="No valid credentials found in CSV. Format: email,password")
 
-    results = await run_in_threadpool(check_bulk_quota, credentials, host=host, port=port, max_concurrent=3)
+    results = await run_in_threadpool(check_bulk_quota, credentials, host=host, port=port, max_concurrent=3, skip_trash=skip_trash)
 
     success_count = sum(1 for r in results if r.get("status") == "success")
     failed_count = sum(1 for r in results if r.get("status") == "failed")

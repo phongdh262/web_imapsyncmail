@@ -17,9 +17,8 @@ logger = logging.getLogger(__name__)
 FETCH_BATCH_SIZE = 500
 MAX_REASONABLE_MAILBOX_QUOTA_BYTES = 100 * (1024 ** 4)
 SUSPICIOUS_KB_INTERPRETATION_BYTES = 5 * (1024 ** 4)
-FOLDER_ROLE_ALL = "all_mail"
-FOLDER_ROLE_SPAM = "spam"
 FOLDER_ROLE_TRASH = "trash"
+SYNC_DEDUPE_HEADER = "message-id"
 
 
 def _format_size(size_bytes):
@@ -188,10 +187,6 @@ def _folder_has_attribute(folder, *attributes):
 
 def _folder_matches_role(folder, role):
     name = folder["name"].lower()
-    if role == FOLDER_ROLE_ALL:
-        return _folder_has_attribute(folder, "\\all", "\\allmail") or "all mail" in name
-    if role == FOLDER_ROLE_SPAM:
-        return _folder_has_attribute(folder, "\\junk", "\\spam") or name.endswith("/spam") or name in {"spam", "junk", "bulk mail"}
     if role == FOLDER_ROLE_TRASH:
         return _folder_has_attribute(folder, "\\trash") or name.endswith("/trash") or name in {"trash", "bin", "deleted items", "deleted messages"}
     return False
@@ -209,133 +204,235 @@ def _dedupe_folder_names(folders):
     return unique
 
 
-def _prioritize_folders(folders):
-    """
-    Pick folders that maximize coverage while avoiding Gmail label double-counting.
+def _folder_excluded_by_sync(folder, skip_trash):
+    if skip_trash and _folder_matches_role(folder, FOLDER_ROLE_TRASH):
+        return True, "trash_excluded"
+    return False, None
 
-    Gmail/Google Workspace:
-    - Prefer All Mail as the canonical store.
-    - Add Spam/Junk and Trash because they are typically excluded from All Mail.
-    Other providers:
-    - Scan every selectable folder once.
-    """
+
+def _select_sync_folders(folders, skip_trash=True):
+    """Select folders according to current imapsync rules used by worker.py."""
     unique_folders = _dedupe_folder_names(folders)
-    selectable_folders = [folder for folder in unique_folders if folder.get("selectable", True)]
-    skipped_folders = [folder["name"] for folder in unique_folders if not folder.get("selectable", True)]
+    selected = []
+    skipped_folders = []
+    for folder in unique_folders:
+        if not folder.get("selectable", True):
+            skipped_folders.append(folder["name"])
+            continue
+        excluded, reason = _folder_excluded_by_sync(folder, skip_trash)
+        if excluded:
+            skipped_folders.append(folder["name"])
+            continue
+        selected.append(folder)
 
-    all_mail_folder = next((folder for folder in selectable_folders if _folder_matches_role(folder, FOLDER_ROLE_ALL)), None)
-
-    if all_mail_folder:
-        selected = [all_mail_folder]
-        for role in (FOLDER_ROLE_SPAM, FOLDER_ROLE_TRASH):
-            for folder in selectable_folders:
-                if folder["name"] == all_mail_folder["name"]:
-                    continue
-                if _folder_matches_role(folder, role) and folder not in selected:
-                    selected.append(folder)
-
-        selected_names = {folder["name"] for folder in selected}
-        for folder in selectable_folders:
-            if folder["name"] not in selected_names:
-                skipped_folders.append(folder["name"])
-
-        return {
-            "folders": selected,
-            "strategy": "all_mail_plus_spam_trash",
-            "skipped_folders": skipped_folders,
-        }
-
-    selected = selectable_folders or [{
+    if not selected:
+        selected = [{
         "name": "INBOX",
         "attributes": [],
         "selectable": True,
     }]
+
     return {
         "folders": selected,
-        "strategy": "all_selectable_folders",
+        "strategy": "sync_rules_skip_trash" if skip_trash else "sync_rules_include_trash",
         "skipped_folders": skipped_folders,
     }
 
 
-def _get_folder_size(imap, folder_name):
-    """Calculate folder size by fetching RFC822.SIZE metadata in batches."""
-    total_size = 0
+def _extract_message_id(header_blob):
+    if header_blob is None:
+        return None
+    if isinstance(header_blob, bytes):
+        header_blob = header_blob.decode("utf-8", errors="replace")
+    match = re.search(r"^\s*Message-ID:\s*(.+?)\s*$", header_blob, re.IGNORECASE | re.MULTILINE)
+    if not match:
+        return None
+    return re.sub(r"\s+", "", match.group(1).strip()).lower()
+
+
+def _iter_fetch_metadata(batch_data):
+    """Yield parsed metadata rows from IMAP FETCH results."""
+    for item in batch_data:
+        if item is None:
+            continue
+
+        meta_text = None
+        header_blob = None
+
+        if isinstance(item, tuple) and item:
+            meta_text = item[0]
+            if len(item) > 1:
+                header_blob = item[1]
+        else:
+            meta_text = item
+
+        if isinstance(meta_text, bytes):
+            meta_text = meta_text.decode("utf-8", errors="replace")
+        if not isinstance(meta_text, str):
+            continue
+
+        size_match = re.search(r"RFC822\.SIZE\s+(\d+)", meta_text)
+        uid_match = re.search(r"\bUID\s+(\d+)", meta_text)
+        seq_match = re.match(r"^\s*(\d+)", meta_text)
+
+        if not size_match:
+            continue
+
+        yield {
+            "size": int(size_match.group(1)),
+            "uid": uid_match.group(1) if uid_match else None,
+            "seq": seq_match.group(1) if seq_match else None,
+            "message_id": _extract_message_id(header_blob),
+        }
+
+
+def _build_message_identity(folder_name, metadata):
+    """Match the effective imapsync dedupe key as closely as possible."""
+    if metadata["message_id"]:
+        return f"{SYNC_DEDUPE_HEADER}:{metadata['message_id']}", True
+    if metadata["uid"]:
+        return f"{folder_name}::uid:{metadata['uid']}", False
+    if metadata["seq"]:
+        return f"{folder_name}::seq:{metadata['seq']}", False
+    return f"{folder_name}::anon:{metadata['size']}", False
+
+
+def _get_folder_sync_metrics(imap, folder_name, seen_messages):
+    """Estimate synced bytes/messages for one folder using imapsync-like dedupe."""
+    raw_size = 0
+    synced_size = 0
+    raw_messages = 0
+    synced_messages = 0
+    duplicate_messages = 0
+    duplicate_bytes = 0
+    missing_message_ids = 0
     scan_complete = True
     scan_error = None
-    total_messages = 0
+    selected_messages = 0
     try:
         status, data = imap.select(f'"{folder_name}"', readonly=True)
         if status != "OK":
-            return 0, 0, False, "Folder select failed"
+            return {
+                "name": folder_name,
+                "size": 0,
+                "size_formatted": "0 B",
+                "messages": 0,
+                "raw_size": 0,
+                "raw_size_formatted": "0 B",
+                "raw_messages": 0,
+                "duplicate_messages": 0,
+                "duplicate_bytes": 0,
+                "duplicate_bytes_formatted": "0 B",
+                "missing_message_id_count": 0,
+                "complete": False,
+                "error": "Folder select failed",
+            }
 
         # Get message count
         msg_count_raw = data[0]
         if isinstance(msg_count_raw, bytes):
             msg_count_raw = msg_count_raw.decode()
-        total_messages = int(msg_count_raw)
+        selected_messages = int(msg_count_raw)
 
-        if total_messages == 0:
-            return 0, 0, True, None
+        if selected_messages == 0:
+            return {
+                "name": folder_name,
+                "size": 0,
+                "size_formatted": "0 B",
+                "messages": 0,
+                "raw_size": 0,
+                "raw_size_formatted": "0 B",
+                "raw_messages": 0,
+                "duplicate_messages": 0,
+                "duplicate_bytes": 0,
+                "duplicate_bytes_formatted": "0 B",
+                "missing_message_id_count": 0,
+                "complete": True,
+                "error": None,
+            }
 
-        for start in range(1, total_messages + 1, FETCH_BATCH_SIZE):
-            end = min(start + FETCH_BATCH_SIZE - 1, total_messages)
+        for start in range(1, selected_messages + 1, FETCH_BATCH_SIZE):
+            end = min(start + FETCH_BATCH_SIZE - 1, selected_messages)
             fetch_range = f"{start}:{end}"
-            status, batch_data = imap.fetch(fetch_range, "(RFC822.SIZE)")
+            status, batch_data = imap.fetch(fetch_range, "(UID RFC822.SIZE BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)])")
             if status != "OK" or not batch_data:
                 scan_complete = False
-                logger.debug("RFC822.SIZE fetch failed for %s range %s", folder_name, fetch_range)
+                logger.debug("RFC822.SIZE + MESSAGE-ID fetch failed for %s range %s", folder_name, fetch_range)
                 continue
 
-            for item in batch_data:
-                if item is None:
+            for metadata in _iter_fetch_metadata(batch_data):
+                size = metadata["size"]
+                raw_messages += 1
+                raw_size += size
+                dedupe_key, dedupe_eligible = _build_message_identity(folder_name, metadata)
+                if not dedupe_eligible:
+                    missing_message_ids += 1
+                if dedupe_key in seen_messages:
+                    duplicate_messages += 1
+                    duplicate_bytes += size
                     continue
-                if isinstance(item, bytes):
-                    item = item.decode("utf-8", errors="replace")
-                if isinstance(item, str):
-                    match = re.search(r'RFC822\.SIZE\s+(\d+)', item)
-                    if match:
-                        total_size += int(match.group(1))
+                seen_messages.add(dedupe_key)
+                synced_messages += 1
+                synced_size += size
 
     except Exception as e:
         scan_complete = False
         scan_error = str(e)
         logger.debug(f"Error getting folder size for {folder_name}: {e}")
 
-    return total_size, total_messages, scan_complete, scan_error
+    return {
+        "name": folder_name,
+        "size": synced_size,
+        "size_formatted": _format_size(synced_size),
+        "messages": synced_messages,
+        "raw_size": raw_size,
+        "raw_size_formatted": _format_size(raw_size),
+        "raw_messages": raw_messages,
+        "duplicate_messages": duplicate_messages,
+        "duplicate_bytes": duplicate_bytes,
+        "duplicate_bytes_formatted": _format_size(duplicate_bytes),
+        "missing_message_id_count": missing_message_ids,
+        "complete": scan_complete,
+        "error": scan_error,
+    }
 
 
 def _describe_scan_strategy(strategy):
-    if strategy == "all_mail_plus_spam_trash":
-        return "All Mail + Spam + Trash"
-    if strategy == "all_selectable_folders":
-        return "all selectable folders"
+    if strategy == "sync_rules_skip_trash":
+        return "sync rules with Trash excluded"
+    if strategy == "sync_rules_include_trash":
+        return "sync rules with Trash included"
     return "selected folders"
 
 
-def _collect_mailbox_metrics(imap):
-    """Compute mailbox size from RFC822.SIZE metadata across the scan folders."""
-    selection = _prioritize_folders(_list_folders(imap))
+def _collect_sync_estimate(imap, skip_trash=True):
+    """Compute the bytes/messages likely to be transferred by the current sync rules."""
+    selection = _select_sync_folders(_list_folders(imap), skip_trash=skip_trash)
     folders = selection["folders"]
     total_size = 0
     total_messages = 0
+    raw_total_size = 0
+    raw_total_messages = 0
+    duplicate_messages = 0
+    duplicate_bytes = 0
+    missing_message_id_count = 0
     folder_details = []
     scan_complete = True
+    seen_messages = set()
 
     for folder in folders:
         try:
-            size, msgs, folder_complete, scan_error = _get_folder_size(imap, folder["name"])
-            total_size += size
-            total_messages += msgs
-            scan_complete = scan_complete and folder_complete
-            folder_details.append({
-                "name": folder["name"],
-                "size": size,
-                "size_formatted": _format_size(size),
-                "messages": msgs,
-                "complete": folder_complete,
-                "attributes": folder.get("attributes", []),
-                "error": scan_error,
-            })
+            folder_result = _get_folder_sync_metrics(imap, folder["name"], seen_messages)
+            total_size += folder_result["size"]
+            total_messages += folder_result["messages"]
+            raw_total_size += folder_result["raw_size"]
+            raw_total_messages += folder_result["raw_messages"]
+            duplicate_messages += folder_result["duplicate_messages"]
+            duplicate_bytes += folder_result["duplicate_bytes"]
+            missing_message_id_count += folder_result["missing_message_id_count"]
+            folder_result["attributes"] = folder.get("attributes", [])
+            scan_complete = scan_complete and folder_result["complete"]
+            folder_details.append(folder_result)
         except Exception:
             scan_complete = False
             continue
@@ -344,6 +441,11 @@ def _collect_mailbox_metrics(imap):
     return {
         "total_size": total_size,
         "total_messages": total_messages,
+        "raw_total_size": raw_total_size,
+        "raw_total_messages": raw_total_messages,
+        "duplicate_messages": duplicate_messages,
+        "duplicate_bytes": duplicate_bytes,
+        "missing_message_id_count": missing_message_id_count,
         "folder_details": folder_details,
         "scan_strategy": selection["strategy"],
         "scanned_folders": [folder["name"] for folder in folders],
@@ -352,7 +454,7 @@ def _collect_mailbox_metrics(imap):
     }
 
 
-def check_mailbox_quota(email: str, password: str, host: str = None, port: int = 993) -> dict:
+def check_mailbox_quota(email: str, password: str, host: str = None, port: int = 993, skip_trash: bool = True) -> dict:
     """
     Check mailbox quota/size via IMAP.
     Returns {
@@ -401,8 +503,15 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
             "total_size": 0,
             "total_size_formatted": "0 B",
             "total_messages": 0,
+            "raw_total_size": 0,
+            "raw_total_size_formatted": "0 B",
+            "raw_total_messages": 0,
+            "duplicate_messages": 0,
+            "duplicate_bytes": 0,
+            "duplicate_bytes_formatted": "0 B",
+            "missing_message_id_count": 0,
             "folder_sizes": [],
-            "scan_strategy": "quota_only",
+            "scan_strategy": "sync_rules_skip_trash" if skip_trash else "sync_rules_include_trash",
             "scanned_folders": [],
             "skipped_folders": [],
             "scan_complete": True,
@@ -442,33 +551,47 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
             logger.debug(f"GETQUOTAROOT not supported for {email}: {e}")
 
         if not quota_available or quota_needs_mailbox_scan:
-            mailbox_metrics = _collect_mailbox_metrics(imap)
+            mailbox_metrics = _collect_sync_estimate(imap, skip_trash=skip_trash)
             total_size = mailbox_metrics["total_size"]
             total_messages = mailbox_metrics["total_messages"]
             folder_details = mailbox_metrics["folder_details"]
             result["total_size"] = total_size
             result["total_size_formatted"] = _format_size(total_size)
             result["total_messages"] = total_messages
+            result["raw_total_size"] = mailbox_metrics["raw_total_size"]
+            result["raw_total_size_formatted"] = _format_size(mailbox_metrics["raw_total_size"])
+            result["raw_total_messages"] = mailbox_metrics["raw_total_messages"]
+            result["duplicate_messages"] = mailbox_metrics["duplicate_messages"]
+            result["duplicate_bytes"] = mailbox_metrics["duplicate_bytes"]
+            result["duplicate_bytes_formatted"] = _format_size(mailbox_metrics["duplicate_bytes"])
+            result["missing_message_id_count"] = mailbox_metrics["missing_message_id_count"]
             result["folder_sizes"] = folder_details
             result["scan_strategy"] = mailbox_metrics["scan_strategy"]
             result["scanned_folders"] = mailbox_metrics["scanned_folders"]
             result["skipped_folders"] = mailbox_metrics["skipped_folders"]
             result["scan_complete"] = mailbox_metrics["scan_complete"]
             estimate_note = (
-                f"calculated from RFC822.SIZE using {_describe_scan_strategy(result['scan_strategy'])}"
+                f"sync estimate from RFC822.SIZE + Message-Id using {_describe_scan_strategy(result['scan_strategy'])}"
             )
             if not result["scan_complete"]:
                 estimate_note += "; partial coverage because some folders or ranges could not be fetched"
+            if result["duplicate_messages"] > 0:
+                estimate_note += (
+                    f"; skipped {result['duplicate_messages']} duplicate messages "
+                    f"({result['duplicate_bytes_formatted']}) by Message-Id"
+                )
+            if result["missing_message_id_count"] > 0:
+                estimate_note += f"; {result['missing_message_id_count']} messages had no Message-Id and were kept as unique"
 
             if quota_available:
-                result["method"] = "QUOTA+FETCH"
+                result["method"] = "QUOTA+SYNC_ESTIMATE"
                 if total_size > 0 or total_messages > 0:
                     result["quota_used"] = total_size
                     result["quota_used_formatted"] = _format_size(total_size)
                     if result["quota_limit"] and result["quota_limit"] > 0:
                         result["usage_percent"] = round((total_size / result["quota_limit"]) * 100, 1)
                     result["message"] = (
-                        f"Mailbox size: {result['quota_used_formatted']} / "
+                        f"Sync estimate: {result['quota_used_formatted']} / "
                         f"{result['quota_limit_formatted']} ({result['usage_percent']}%) "
                         f"from {total_messages} messages across {len(result['scanned_folders'])} scanned folders, {estimate_note}"
                     )
@@ -476,11 +599,11 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
                     result["total_size"] = result["quota_used"] or 0
                     result["total_size_formatted"] = result["quota_used_formatted"]
             else:
-                result["method"] = "FETCH"
+                result["method"] = "SYNC_ESTIMATE"
                 result["quota_used"] = total_size
                 result["quota_used_formatted"] = _format_size(total_size)
                 result["message"] = (
-                    f"Mailbox size: {_format_size(total_size)} "
+                    f"Sync estimate: {_format_size(total_size)} "
                     f"({total_messages} messages across {len(result['scanned_folders'])} scanned folders, {estimate_note})"
                 )
         else:
@@ -514,7 +637,7 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
         return {"email": email, "status": "failed", "message": f"Unexpected error: {str(e)}", "provider": provider_name}
 
 
-def check_bulk_quota(credentials: list, host: str = None, port: int = 993, max_concurrent: int = 3, on_result=None) -> list:
+def check_bulk_quota(credentials: list, host: str = None, port: int = 993, max_concurrent: int = 3, on_result=None, skip_trash: bool = True) -> list:
     """
     Check quota for multiple mailboxes concurrently.
     credentials: list of { email, password }
@@ -524,7 +647,7 @@ def check_bulk_quota(credentials: list, host: str = None, port: int = 993, max_c
 
     with ThreadPoolExecutor(max_workers=max_concurrent) as pool:
         future_to_cred = {
-            pool.submit(check_mailbox_quota, cred["email"], cred["password"], host, port): (index, cred)
+            pool.submit(check_mailbox_quota, cred["email"], cred["password"], host, port, skip_trash): (index, cred)
             for index, cred in enumerate(credentials)
         }
 
