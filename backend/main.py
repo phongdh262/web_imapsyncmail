@@ -15,6 +15,7 @@ import sys
 import logging
 import re
 from datetime import datetime, timedelta
+from threading import Lock
 from urllib.parse import quote, unquote
 import secrets
 
@@ -510,6 +511,97 @@ from concurrent.futures import ThreadPoolExecutor
 # Global Executor
 max_workers = int(os.getenv("MAX_WORKERS", 7))
 executor = ThreadPoolExecutor(max_workers=max_workers) 
+QUOTA_BULK_JOB_TTL = timedelta(hours=2)
+quota_bulk_jobs = {}
+quota_bulk_jobs_lock = Lock()
+
+
+def _cleanup_quota_bulk_jobs():
+    cutoff = datetime.utcnow() - QUOTA_BULK_JOB_TTL
+    with quota_bulk_jobs_lock:
+        stale_ids = [
+            job_id
+            for job_id, job in quota_bulk_jobs.items()
+            if job.get("updated_at", job["created_at"]) < cutoff
+        ]
+        for job_id in stale_ids:
+            quota_bulk_jobs.pop(job_id, None)
+
+
+def _refresh_quota_bulk_job_stats(job: dict):
+    completed_results = list(job["results_by_index"].values())
+    job["completed"] = len(completed_results)
+    job["success_count"] = sum(1 for result in completed_results if result.get("status") == "success")
+    job["failed_count"] = sum(1 for result in completed_results if result.get("status") == "failed")
+
+
+def _serialize_quota_bulk_job(job: dict) -> dict:
+    ordered_results = [
+        job["results_by_index"][index]
+        for index in sorted(job["results_by_index"])
+    ]
+    return {
+        "job_id": job["job_id"],
+        "status": job["status"],
+        "total": job["total"],
+        "completed": job["completed"],
+        "success_count": job["success_count"],
+        "failed_count": job["failed_count"],
+        "results": ordered_results,
+        "error": job.get("error"),
+    }
+
+
+def _parse_quota_csv_text(csv_text: str) -> list:
+    reader = csv.reader(io.StringIO(csv_text))
+    credentials = []
+    for row in reader:
+        if len(row) < 2:
+            continue
+        email = row[0].strip()
+        password = row[1].strip()
+        if email and password:
+            credentials.append({"email": email, "password": password})
+    return credentials
+
+
+def _run_quota_bulk_job(job_id: str, credentials: list, host: Optional[str], port: int):
+    def on_result(index: int, result: dict):
+        with quota_bulk_jobs_lock:
+            job = quota_bulk_jobs.get(job_id)
+            if not job:
+                return
+            job["results_by_index"][index] = result
+            job["updated_at"] = datetime.utcnow()
+            _refresh_quota_bulk_job_stats(job)
+
+    with quota_bulk_jobs_lock:
+        job = quota_bulk_jobs.get(job_id)
+        if not job:
+            return
+        job["status"] = "running"
+        job["updated_at"] = datetime.utcnow()
+
+    try:
+        results = check_bulk_quota(credentials, host=host, port=port, max_concurrent=3, on_result=on_result)
+        with quota_bulk_jobs_lock:
+            job = quota_bulk_jobs.get(job_id)
+            if not job:
+                return
+            for index, result in enumerate(results):
+                job["results_by_index"].setdefault(index, result)
+            job["updated_at"] = datetime.utcnow()
+            job["status"] = "completed"
+            _refresh_quota_bulk_job_stats(job)
+    except Exception as e:
+        logger.exception("Bulk quota background job failed: %s", job_id)
+        with quota_bulk_jobs_lock:
+            job = quota_bulk_jobs.get(job_id)
+            if not job:
+                return
+            job["updated_at"] = datetime.utcnow()
+            job["status"] = "failed"
+            job["error"] = str(e)
 
 @app.post("/api/jobs/{job_id}/mailboxes")
 async def add_single_mailbox(job_id: str, mailbox_data: MailboxCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
@@ -1059,6 +1151,62 @@ async def check_single_quota(data: QuotaCheck, request: Request, db: Session = D
     )
     return result
 
+@app.post("/api/check-quota/bulk/start")
+async def start_bulk_quota_job(
+    request: Request,
+    file: UploadFile = File(...),
+    host: Optional[str] = Form(None),
+    port: int = Form(993),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_csrf),
+):
+    """Start a background quota check job for CSV credentials."""
+    _check_rate_limit(db, request.client.host if request.client else "unknown", "check_quota_bulk", max_requests=3, window_seconds=300)
+    _cleanup_quota_bulk_jobs()
+
+    content = await file.read()
+    csv_text = content.decode('utf-8')
+    credentials = _parse_quota_csv_text(csv_text)
+
+    if not credentials:
+        raise HTTPException(status_code=400, detail="No valid credentials found in CSV. Format: email,password")
+
+    job_id = str(uuid.uuid4())
+    job_data = {
+        "job_id": job_id,
+        "status": "queued",
+        "total": len(credentials),
+        "completed": 0,
+        "success_count": 0,
+        "failed_count": 0,
+        "results_by_index": {},
+        "error": None,
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow(),
+    }
+
+    with quota_bulk_jobs_lock:
+        quota_bulk_jobs[job_id] = job_data
+
+    executor.submit(_run_quota_bulk_job, job_id, credentials, host, port)
+    return _serialize_quota_bulk_job(job_data)
+
+
+@app.get("/api/check-quota/bulk/{job_id}")
+async def get_bulk_quota_job_status(
+    job_id: str,
+    current_user: User = Depends(get_current_user),
+):
+    """Get progress and partial results for a background quota check job."""
+    _cleanup_quota_bulk_jobs()
+    with quota_bulk_jobs_lock:
+        job = quota_bulk_jobs.get(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Quota bulk job not found or expired")
+        return _serialize_quota_bulk_job(job)
+
+
 @app.post("/api/check-quota/bulk")
 async def check_bulk_quota_endpoint(
     request: Request,
@@ -1073,18 +1221,7 @@ async def check_bulk_quota_endpoint(
     _check_rate_limit(db, request.client.host if request.client else "unknown", "check_quota_bulk", max_requests=3, window_seconds=300)
     content = await file.read()
     csv_text = content.decode('utf-8')
-
-    import csv as csv_module
-    reader = csv_module.reader(io.StringIO(csv_text))
-
-    credentials = []
-    for row in reader:
-        if len(row) < 2:
-            continue
-        email = row[0].strip()
-        password = row[1].strip()
-        if email and password:
-            credentials.append({"email": email, "password": password})
+    credentials = _parse_quota_csv_text(csv_text)
 
     if not credentials:
         raise HTTPException(status_code=400, detail="No valid credentials found in CSV. Format: email,password")

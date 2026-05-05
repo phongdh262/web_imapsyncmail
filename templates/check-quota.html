@@ -274,6 +274,16 @@
 // ========= Quota Check Logic =========
     let quotaResults = [];
     let quotaBulkFile = null;
+    let quotaBulkJobId = null;
+    let quotaBulkPollTimer = null;
+    let quotaBulkActiveFilter = 'all';
+    let quotaBulkSummary = {
+        status: 'idle',
+        total: 0,
+        completed: 0,
+        success_count: 0,
+        failed_count: 0
+    };
 
     // Single quota check
     async function handleSingleQuota() {
@@ -410,17 +420,88 @@
         document.getElementById('quota-bulk-btn').disabled = true;
     }
 
+    function setQuotaBulkButtonState(isProcessing, label) {
+        const btn = document.getElementById('quota-bulk-btn');
+        const btnText = btn?.querySelector('.quota-bulk-text');
+        const btnIcon = btn?.querySelector('.quota-bulk-icon');
+        if (!btn || !btnText || !btnIcon) return;
+        btn.disabled = isProcessing;
+        btnText.textContent = label || (isProcessing
+            ? tc('runtime.check.processing', {}, 'Processing...')
+            : tc('check.quota.bulkBtn', {}, 'Start Bulk Quota Check'));
+        btnIcon.classList.toggle('animate-spin', isProcessing);
+    }
+
+    function stopQuotaBulkPolling() {
+        if (quotaBulkPollTimer) {
+            clearTimeout(quotaBulkPollTimer);
+            quotaBulkPollTimer = null;
+        }
+    }
+
+    function queueQuotaBulkPoll(delay = 1200) {
+        stopQuotaBulkPolling();
+        quotaBulkPollTimer = setTimeout(() => {
+            pollQuotaBulkJob().catch((error) => {
+                stopQuotaBulkPolling();
+                quotaBulkJobId = null;
+                setQuotaBulkButtonState(false);
+                window.showToast?.(error.message || 'Bulk quota polling failed', 'error');
+            });
+        }, delay);
+    }
+
+    async function pollQuotaBulkJob() {
+        if (!quotaBulkJobId) return;
+        const res = await window.apiFetch(`${API}/check-quota/bulk/${quotaBulkJobId}`);
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.detail || `Bulk quota status failed (${res.status})`);
+        }
+
+        const data = await res.json();
+        quotaResults = data.results || [];
+        quotaBulkSummary = data;
+        document.getElementById('quota-bulk-results-container').classList.remove('hidden');
+        renderQuotaResults(quotaBulkActiveFilter);
+
+        if (data.status === 'completed') {
+            quotaBulkJobId = null;
+            stopQuotaBulkPolling();
+            setQuotaBulkButtonState(false);
+            window.showToast?.(`Checked quota for ${data.total} accounts`, 'success');
+            return;
+        }
+
+        if (data.status === 'failed') {
+            quotaBulkJobId = null;
+            stopQuotaBulkPolling();
+            setQuotaBulkButtonState(false);
+            throw new Error(data.error || 'Bulk quota job failed');
+        }
+
+        setQuotaBulkButtonState(true, `Processing ${data.completed}/${data.total}...`);
+        queueQuotaBulkPoll();
+    }
+
     async function handleBulkQuota() {
         if (!quotaBulkFile) return;
-        const btn = document.getElementById('quota-bulk-btn');
-        const btnText = btn.querySelector('.quota-bulk-text');
-        const btnIcon = btn.querySelector('.quota-bulk-icon');
         const overrideHost = document.getElementById('quota-bulk-host')?.value.trim() || null;
         const overridePort = parseInt(document.getElementById('quota-bulk-port')?.value) || 993;
 
-        btn.disabled = true;
-        btnText.textContent = tc('runtime.check.processing', {}, 'Processing...');
-        btnIcon.classList.add('animate-spin');
+        stopQuotaBulkPolling();
+        quotaBulkJobId = null;
+        quotaResults = [];
+        quotaBulkSummary = {
+            status: 'queued',
+            total: 0,
+            completed: 0,
+            success_count: 0,
+            failed_count: 0
+        };
+        quotaBulkActiveFilter = 'all';
+        setQuotaBulkButtonState(true);
+        filterQuotaResults('all');
 
         const formData = new FormData();
         formData.append('file', quotaBulkFile);
@@ -428,32 +509,53 @@
         formData.append('port', String(overridePort));
 
         try {
-            const res = await window.apiFetch(`${API}/check-quota/bulk`, { method: 'POST', body: formData });
-            if (!res.ok) throw new Error('Bulk quota check failed');
+            const res = await window.apiFetch(`${API}/check-quota/bulk/start`, { method: 'POST', body: formData });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || 'Bulk quota check failed');
+            }
             const data = await res.json();
+            quotaBulkJobId = data.job_id;
+            quotaBulkSummary = data;
             quotaResults = data.results || [];
-            renderQuotaResults();
             document.getElementById('quota-bulk-results-container').classList.remove('hidden');
-            window.showToast?.(`Checked quota for ${quotaResults.length} accounts`, 'success');
+            renderQuotaResults(quotaBulkActiveFilter);
             document.getElementById('quota-bulk-results-container').scrollIntoView({ behavior: 'smooth' });
+            setQuotaBulkButtonState(true, `Processing ${data.completed}/${data.total}...`);
+            queueQuotaBulkPoll(800);
         } catch (e) {
+            stopQuotaBulkPolling();
+            quotaBulkJobId = null;
+            setQuotaBulkButtonState(false);
             window.showToast?.(e.message, 'error');
-        } finally {
-            btn.disabled = false;
-            btnText.textContent = tc('check.quota.bulkBtn', {}, 'Start Bulk Quota Check');
-            btnIcon.classList.remove('animate-spin');
         }
     }
 
-    function renderQuotaResults(filter = 'all') {
+    function renderQuotaResults(filter = quotaBulkActiveFilter) {
         const container = document.getElementById('quota-bulk-results-list');
         const statsEl = document.getElementById('quota-bulk-stats');
+        quotaBulkActiveFilter = filter;
         let filtered = quotaResults;
         if (filter === 'success') filtered = quotaResults.filter(r => r.status === 'success');
         if (filter === 'failed') filtered = quotaResults.filter(r => r.status === 'failed');
-        const ok = quotaResults.filter(r => r.status === 'success').length;
-        const fail = quotaResults.length - ok;
-        statsEl.innerHTML = `<span class="text-emerald-600">${ok} OK</span>, <span class="text-red-500">${fail} failed</span>`;
+        const completed = quotaBulkSummary.completed != null ? quotaBulkSummary.completed : quotaResults.length;
+        const total = quotaBulkSummary.total != null ? quotaBulkSummary.total : quotaResults.length;
+        const ok = quotaBulkSummary.success_count != null ? quotaBulkSummary.success_count : quotaResults.filter(r => r.status === 'success').length;
+        const fail = quotaBulkSummary.failed_count != null ? quotaBulkSummary.failed_count : quotaResults.filter(r => r.status === 'failed').length;
+        const pending = Math.max(total - completed, 0);
+        const progressLabel = quotaBulkSummary.status === 'queued' || quotaBulkSummary.status === 'running'
+            ? `<span class="text-slate-500">${completed}/${total} processed</span>`
+            : `<span class="text-slate-500">${completed}/${total} completed</span>`;
+        statsEl.innerHTML = `${progressLabel} <span class="text-emerald-600 ml-2">${ok} OK</span>, <span class="text-red-500">${fail} failed</span>${pending > 0 ? `, <span class="text-amber-500">${pending} pending</span>` : ''}`;
+
+        if (!filtered.length) {
+            const waitingLabel = quotaBulkSummary.status === 'queued' || quotaBulkSummary.status === 'running'
+                ? 'Waiting for completed accounts...'
+                : 'No results yet';
+            container.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500">${waitingLabel}</td></tr>`;
+            return;
+        }
+
         container.innerHTML = filtered.map(r => {
             const isOk = r.status === 'success';
             return `<tr>
@@ -468,6 +570,7 @@
     }
 
     function filterQuotaResults(filter) {
+        quotaBulkActiveFilter = filter;
         document.querySelectorAll('.quota-filter-btn').forEach(btn => {
             if (btn.getAttribute('onclick').includes(filter)) {
                 btn.classList.add('active', 'bg-violet-500', 'text-white');

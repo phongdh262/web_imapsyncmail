@@ -393,7 +393,7 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
         return {"email": email, "status": "failed", "message": f"Unexpected error: {str(e)}", "provider": provider_name}
 
 
-def check_bulk_quota(credentials: list, host: str = None, port: int = 993, max_concurrent: int = 3) -> list:
+def check_bulk_quota(credentials: list, host: str = None, port: int = 993, max_concurrent: int = 3, on_result=None) -> list:
     """
     Check quota for multiple mailboxes concurrently.
     credentials: list of { email, password }
@@ -403,25 +403,29 @@ def check_bulk_quota(credentials: list, host: str = None, port: int = 993, max_c
 
     with ThreadPoolExecutor(max_workers=max_concurrent) as pool:
         future_to_cred = {
-            pool.submit(check_mailbox_quota, cred["email"], cred["password"], host, port): cred
-            for cred in credentials
+            pool.submit(check_mailbox_quota, cred["email"], cred["password"], host, port): (index, cred)
+            for index, cred in enumerate(credentials)
         }
 
         for future in as_completed(future_to_cred):
+            index, cred = future_to_cred[future]
             try:
                 result = future.result()
-                results.append(result)
+                results.append((index, result))
             except Exception as e:
-                cred = future_to_cred[future]
-                results.append({
+                result = {
                     "email": cred["email"],
                     "status": "failed",
                     "message": f"Check error: {str(e)}",
                     "provider": "Unknown"
-                })
+                }
+                results.append((index, result))
 
-    # Sort results to match original order
-    email_order = {cred["email"]: i for i, cred in enumerate(credentials)}
-    results.sort(key=lambda r: email_order.get(r["email"], 999))
+            if on_result:
+                try:
+                    on_result(index, result)
+                except Exception:
+                    logger.exception("Bulk quota progress callback failed for %s", cred["email"])
 
-    return results
+    results.sort(key=lambda item: item[0])
+    return [result for _, result in results]
