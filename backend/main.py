@@ -1261,6 +1261,14 @@ async def read_check_credentials(request: Request):
 async def read_admin_check_credentials(request: Request):
     return render_template(request, "check-credentials.html", True)
 
+@app.get("/check-quota.html", response_class=HTMLResponse)
+async def read_check_quota(request: Request):
+    return RedirectResponse(url="/admin/check-quota.html", status_code=302)
+
+@app.get("/admin/check-quota.html", response_class=HTMLResponse)
+async def read_admin_check_quota(request: Request):
+    return render_template(request, "check-quota.html", True)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
