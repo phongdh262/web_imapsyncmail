@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 MAX_FALLBACK_FOLDERS = 6
 MAX_FALLBACK_MESSAGES_PER_FOLDER = 500
+MAX_PLAUSIBLE_MAILBOX_QUOTA_BYTES = 1024 ** 4
 
 
 def _format_size(size_bytes):
@@ -45,6 +46,33 @@ def _flatten_quota_items(items):
             yield item
 
 
+def _quota_storage_to_bytes(used_value, limit_value):
+    """
+    Normalize IMAP QUOTA STORAGE values to bytes.
+
+    RFC 2087 defines STORAGE in 1024-octet units, but some providers return
+    byte values. A 7 GB byte quota may arrive as 7516192768; treating that as
+    KB produces an obviously inflated limit. Prefer bytes when the raw value
+    already looks like a realistic mailbox quota and the RFC interpretation
+    would exceed a practical per-mailbox limit.
+    """
+    used_value = int(used_value)
+    limit_value = int(limit_value)
+
+    used_as_kb = used_value * 1024
+    limit_as_kb = limit_value * 1024
+
+    raw_values_look_like_bytes = (
+        limit_value >= 1024 ** 3
+        and limit_value <= MAX_PLAUSIBLE_MAILBOX_QUOTA_BYTES
+        and limit_as_kb > MAX_PLAUSIBLE_MAILBOX_QUOTA_BYTES
+    )
+    if raw_values_look_like_bytes:
+        return used_value, limit_value
+
+    return used_as_kb, limit_as_kb
+
+
 def _parse_quota_response(quota_data):
     """
     Parse IMAP GETQUOTAROOT response.
@@ -60,9 +88,7 @@ def _parse_quota_response(quota_data):
                 import re
                 match = re.search(r'STORAGE\s+(\d+)\s+(\d+)', item, re.IGNORECASE)
                 if match:
-                    used_kb = int(match.group(1))
-                    limit_kb = int(match.group(2))
-                    return used_kb * 1024, limit_kb * 1024
+                    return _quota_storage_to_bytes(match.group(1), match.group(2))
     except Exception as e:
         logger.debug(f"Quota parse error: {e}")
     return None, None
