@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 MAX_FALLBACK_FOLDERS = 6
 MAX_FALLBACK_MESSAGES_PER_FOLDER = 500
-MAX_PLAUSIBLE_MAILBOX_QUOTA_BYTES = 1024 ** 4
+MAX_REASONABLE_MAILBOX_QUOTA_BYTES = 100 * (1024 ** 4)
+SUSPICIOUS_KB_INTERPRETATION_BYTES = 5 * (1024 ** 4)
 
 
 def _format_size(size_bytes):
@@ -64,13 +65,45 @@ def _quota_storage_to_bytes(used_value, limit_value):
 
     raw_values_look_like_bytes = (
         limit_value >= 1024 ** 3
-        and limit_value <= MAX_PLAUSIBLE_MAILBOX_QUOTA_BYTES
-        and limit_as_kb > MAX_PLAUSIBLE_MAILBOX_QUOTA_BYTES
+        and limit_value <= MAX_REASONABLE_MAILBOX_QUOTA_BYTES
+        and limit_as_kb > SUSPICIOUS_KB_INTERPRETATION_BYTES
     )
     if raw_values_look_like_bytes:
         return used_value, limit_value
 
     return used_as_kb, limit_as_kb
+
+
+def _quota_values_look_plausible(used_bytes, limit_bytes):
+    """Reject quota payloads that decode into obviously wrong mailbox sizes."""
+    if used_bytes is None or limit_bytes is None:
+        return False
+
+    used_bytes = int(used_bytes)
+    limit_bytes = int(limit_bytes)
+
+    if used_bytes < 0 or limit_bytes < 0:
+        return False
+    if limit_bytes > MAX_REASONABLE_MAILBOX_QUOTA_BYTES:
+        return False
+    if limit_bytes > 0 and used_bytes > limit_bytes:
+        return False
+
+    return True
+
+
+def _quota_values_need_mailbox_scan(used_bytes, limit_bytes):
+    """
+    Validate quota with a bounded mailbox scan when the server response looks
+    incomplete. Several providers report a limit but keep used/messages at 0.
+    """
+    if used_bytes is None:
+        return True
+    if used_bytes == 0:
+        return True
+    if limit_bytes == 0:
+        return True
+    return False
 
 
 def _parse_quota_response(quota_data):
@@ -123,9 +156,18 @@ def _list_folders(imap):
 
 def _prioritize_folders(folders):
     """Keep fallback predictable by checking INBOX/All Mail first, then a small remainder."""
+    unique_folders = []
+    for folder in folders:
+        if folder not in unique_folders:
+            unique_folders.append(folder)
+
+    for folder in unique_folders:
+        if "all mail" in folder.lower():
+            return [folder]
+
     preferred = []
     remaining = []
-    for folder in folders:
+    for folder in unique_folders:
         normalized = folder.lower()
         if normalized == "inbox" or "all mail" in normalized:
             preferred.append(folder)
@@ -191,6 +233,35 @@ def _get_folder_size(imap, folder_name):
     return total_size, message_count, estimated
 
 
+def _collect_mailbox_metrics(imap):
+    """Compute a bounded mailbox size estimate across a small folder set."""
+    folders = _prioritize_folders(_list_folders(imap))
+    total_size = 0
+    total_messages = 0
+    folder_details = []
+    estimated_fallback = False
+
+    for folder in folders:
+        try:
+            size, msgs, estimated = _get_folder_size(imap, folder)
+            total_size += size
+            total_messages += msgs
+            estimated_fallback = estimated_fallback or estimated
+            if size > 0 or msgs > 0:
+                folder_details.append({
+                    "name": folder,
+                    "size": size,
+                    "size_formatted": _format_size(size),
+                    "messages": msgs,
+                    "estimated": estimated
+                })
+        except Exception:
+            continue
+
+    folder_details.sort(key=lambda f: f["size"], reverse=True)
+    return total_size, total_messages, folder_details, estimated_fallback
+
+
 def check_mailbox_quota(email: str, password: str, host: str = None, port: int = 993) -> dict:
     """
     Check mailbox quota/size via IMAP.
@@ -247,64 +318,66 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
 
         # Try GETQUOTAROOT first (RFC 2087)
         quota_available = False
+        quota_needs_mailbox_scan = True
         try:
             status, quota_data = imap.getquotaroot("INBOX")
             if status == "OK":
                 used_bytes, limit_bytes = _parse_quota_response(quota_data)
                 if used_bytes is not None and limit_bytes is not None:
-                    quota_available = True
-                    result["quota_used"] = used_bytes
-                    result["quota_limit"] = limit_bytes
-                    result["quota_used_formatted"] = _format_size(used_bytes)
-                    result["quota_limit_formatted"] = _format_size(limit_bytes)
-                    if limit_bytes > 0:
-                        result["usage_percent"] = round((used_bytes / limit_bytes) * 100, 1)
+                    if _quota_values_look_plausible(used_bytes, limit_bytes):
+                        quota_available = True
+                        quota_needs_mailbox_scan = _quota_values_need_mailbox_scan(used_bytes, limit_bytes)
+                        result["quota_used"] = used_bytes
+                        result["quota_limit"] = limit_bytes
+                        result["quota_used_formatted"] = _format_size(used_bytes)
+                        result["quota_limit_formatted"] = _format_size(limit_bytes)
+                        if limit_bytes > 0:
+                            result["usage_percent"] = round((used_bytes / limit_bytes) * 100, 1)
+                        else:
+                            result["usage_percent"] = 0
+                        result["method"] = "QUOTA"
+                        result["message"] = f"Quota: {result['quota_used_formatted']} / {result['quota_limit_formatted']} ({result['usage_percent']}%)"
                     else:
-                        result["usage_percent"] = 0
-                    result["method"] = "QUOTA"
-                    result["message"] = f"Quota: {result['quota_used_formatted']} / {result['quota_limit_formatted']} ({result['usage_percent']}%)"
+                        logger.warning(
+                            "Ignoring suspicious quota response for %s: used=%s limit=%s",
+                            email,
+                            used_bytes,
+                            limit_bytes,
+                        )
         except (imaplib.IMAP4.error, Exception) as e:
             logger.debug(f"GETQUOTAROOT not supported for {email}: {e}")
 
-        if quota_available:
-            result["total_size"] = result["quota_used"] or 0
-            result["total_size_formatted"] = result["quota_used_formatted"]
-        else:
-            folders = _prioritize_folders(_list_folders(imap))
-            total_size = 0
-            total_messages = 0
-            folder_details = []
-            estimated_fallback = False
-
-            for folder in folders:
-                try:
-                    size, msgs, estimated = _get_folder_size(imap, folder)
-                    total_size += size
-                    total_messages += msgs
-                    estimated_fallback = estimated_fallback or estimated
-                    if size > 0 or msgs > 0:
-                        folder_details.append({
-                            "name": folder,
-                            "size": size,
-                            "size_formatted": _format_size(size),
-                            "messages": msgs,
-                            "estimated": estimated
-                        })
-                except Exception:
-                    continue
-
-            # Sort folders by size descending
-            folder_details.sort(key=lambda f: f["size"], reverse=True)
-
+        if not quota_available or quota_needs_mailbox_scan:
+            total_size, total_messages, folder_details, estimated_fallback = _collect_mailbox_metrics(imap)
             result["total_size"] = total_size
             result["total_size_formatted"] = _format_size(total_size)
             result["total_messages"] = total_messages
             result["folder_sizes"] = folder_details
-            result["method"] = "SAMPLED_FETCH" if estimated_fallback else "FETCH"
-            result["quota_used"] = total_size
-            result["quota_used_formatted"] = _format_size(total_size)
             estimate_note = "estimated from a bounded sample" if estimated_fallback else "calculated from sampled folders"
-            result["message"] = f"Mailbox size: {_format_size(total_size)} ({total_messages} messages across {len(folder_details)} folders, {estimate_note})"
+
+            if quota_available:
+                result["method"] = "QUOTA+SAMPLED_FETCH" if estimated_fallback else "QUOTA+FETCH"
+                if total_size > 0 or total_messages > 0:
+                    result["quota_used"] = total_size
+                    result["quota_used_formatted"] = _format_size(total_size)
+                    if result["quota_limit"] and result["quota_limit"] > 0:
+                        result["usage_percent"] = round((total_size / result["quota_limit"]) * 100, 1)
+                    result["message"] = (
+                        f"Mailbox size: {result['quota_used_formatted']} / "
+                        f"{result['quota_limit_formatted']} ({result['usage_percent']}%) "
+                        f"from {total_messages} messages across {len(folder_details)} folders, {estimate_note}"
+                    )
+                else:
+                    result["total_size"] = result["quota_used"] or 0
+                    result["total_size_formatted"] = result["quota_used_formatted"]
+            else:
+                result["method"] = "SAMPLED_FETCH" if estimated_fallback else "FETCH"
+                result["quota_used"] = total_size
+                result["quota_used_formatted"] = _format_size(total_size)
+                result["message"] = f"Mailbox size: {_format_size(total_size)} ({total_messages} messages across {len(folder_details)} folders, {estimate_note})"
+        else:
+            result["total_size"] = result["quota_used"] or 0
+            result["total_size_formatted"] = result["quota_used_formatted"]
 
         try:
             imap.logout()
