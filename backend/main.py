@@ -939,6 +939,7 @@ def cancel_job(job_id: str, db: Session = Depends(get_db), current_user: User = 
 
 # --- Check Credentials API (Public, Rate-Limited) ---
 from check_credentials import check_imap_login, check_bulk, detect_provider, PROVIDER_MAP
+from check_quota import check_mailbox_quota, check_bulk_quota
 import time as _time
 
 def _check_rate_limit(db: Session, client_ip: str, scope: str, max_requests: int, window_seconds: int):
@@ -1037,6 +1038,66 @@ def list_providers(current_user: User = Depends(get_current_user)):
             seen[name] = {"name": name, "host": info["host"], "port": info["port"], "domains": []}
         seen[name]["domains"].append(domain)
     return list(seen.values())
+
+class QuotaCheck(BaseModel):
+    email: str
+    password: str
+    host: Optional[str] = None
+    port: int = 993
+
+@app.post("/api/check-quota")
+async def check_single_quota(data: QuotaCheck, request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
+    """Check mailbox quota/size for a single email via IMAP."""
+    _check_rate_limit(db, request.client.host if request.client else "unknown", "check_quota_single", max_requests=15, window_seconds=300)
+    result = check_mailbox_quota(
+        email=data.email,
+        password=data.password,
+        host=data.host,
+        port=data.port
+    )
+    return result
+
+@app.post("/api/check-quota/bulk")
+async def check_bulk_quota_endpoint(
+    request: Request,
+    file: UploadFile = File(...),
+    host: Optional[str] = Form(None),
+    port: int = Form(993),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_csrf),
+):
+    """Check mailbox quota for multiple emails from a CSV file (format: email,password per line)."""
+    _check_rate_limit(db, request.client.host if request.client else "unknown", "check_quota_bulk", max_requests=3, window_seconds=300)
+    content = await file.read()
+    csv_text = content.decode('utf-8')
+
+    import csv as csv_module
+    reader = csv_module.reader(io.StringIO(csv_text))
+
+    credentials = []
+    for row in reader:
+        if len(row) < 2:
+            continue
+        email = row[0].strip()
+        password = row[1].strip()
+        if email and password:
+            credentials.append({"email": email, "password": password})
+
+    if not credentials:
+        raise HTTPException(status_code=400, detail="No valid credentials found in CSV. Format: email,password")
+
+    results = check_bulk_quota(credentials, host=host, port=port, max_concurrent=3)
+
+    success_count = sum(1 for r in results if r.get("status") == "success")
+    failed_count = sum(1 for r in results if r.get("status") == "failed")
+
+    return {
+        "results": results,
+        "total": len(results),
+        "success_count": success_count,
+        "failed_count": failed_count
+    }
 
 @app.get("/api/stats")
 def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

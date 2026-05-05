@@ -578,7 +578,8 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 },
                 tabs: {
                     single: 'Kiểm tra đơn lẻ',
-                    bulk: 'Kiểm tra hàng loạt (CSV)'
+                    bulk: 'Kiểm tra hàng loạt (CSV)',
+                    quota: 'Dung lượng Email'
                 },
                 single: {
                     title: 'Kiểm tra credential đơn lẻ',
@@ -623,6 +624,19 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                         server: 'Server',
                         details: 'Chi tiết'
                     }
+                },
+                quota: {
+                    singleTitle: 'Kiểm tra dung lượng đơn lẻ',
+                    singleSubtitle: 'Kiểm tra dung lượng hộp thư trên server nguồn',
+                    bulkTitle: 'Kiểm tra dung lượng hàng loạt',
+                    checkBtn: 'Kiểm tra dung lượng',
+                    bulkBtn: 'Bắt đầu kiểm tra hàng loạt',
+                    resultsTitle: 'Kết quả dung lượng',
+                    exportCsv: 'Xuất CSV',
+                    csvHelper: 'File CSV chứa credential email cần kiểm tra dung lượng',
+                    colUsed: 'Đã dùng',
+                    colLimit: 'Giới hạn',
+                    colMessages: 'Số email'
                 }
             },
             users: {
