@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks, Up
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
@@ -1049,7 +1050,8 @@ class QuotaCheck(BaseModel):
 async def check_single_quota(data: QuotaCheck, request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     """Check mailbox quota/size for a single email via IMAP."""
     _check_rate_limit(db, request.client.host if request.client else "unknown", "check_quota_single", max_requests=15, window_seconds=300)
-    result = check_mailbox_quota(
+    result = await run_in_threadpool(
+        check_mailbox_quota,
         email=data.email,
         password=data.password,
         host=data.host,
@@ -1087,7 +1089,7 @@ async def check_bulk_quota_endpoint(
     if not credentials:
         raise HTTPException(status_code=400, detail="No valid credentials found in CSV. Format: email,password")
 
-    results = check_bulk_quota(credentials, host=host, port=port, max_concurrent=3)
+    results = await run_in_threadpool(check_bulk_quota, credentials, host=host, port=port, max_concurrent=3)
 
     success_count = sum(1 for r in results if r.get("status") == "success")
     failed_count = sum(1 for r in results if r.get("status") == "failed")

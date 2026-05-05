@@ -13,6 +13,9 @@ from check_credentials import detect_provider, TIMEOUT
 
 logger = logging.getLogger(__name__)
 
+MAX_FALLBACK_FOLDERS = 6
+MAX_FALLBACK_MESSAGES_PER_FOLDER = 500
+
 
 def _format_size(size_bytes):
     """Format bytes to human-readable string."""
@@ -28,6 +31,20 @@ def _format_size(size_bytes):
         return f"{size_bytes} B"
 
 
+def _flatten_quota_items(items):
+    """Yield nested quota response parts as bytes/strings."""
+    if items is None:
+        return
+    if isinstance(items, (bytes, str)):
+        yield items
+        return
+    for item in items:
+        if isinstance(item, (list, tuple)):
+            yield from _flatten_quota_items(item)
+        else:
+            yield item
+
+
 def _parse_quota_response(quota_data):
     """
     Parse IMAP GETQUOTAROOT response.
@@ -35,7 +52,7 @@ def _parse_quota_response(quota_data):
     Returns (used_bytes, limit_bytes) or (None, None).
     """
     try:
-        for item in quota_data:
+        for item in _flatten_quota_items(quota_data):
             if isinstance(item, bytes):
                 item = item.decode("utf-8", errors="replace")
             if isinstance(item, str) and "STORAGE" in item.upper():
@@ -78,14 +95,35 @@ def _list_folders(imap):
     return folders if folders else ["INBOX"]
 
 
+def _prioritize_folders(folders):
+    """Keep fallback predictable by checking INBOX/All Mail first, then a small remainder."""
+    preferred = []
+    remaining = []
+    for folder in folders:
+        normalized = folder.lower()
+        if normalized == "inbox" or "all mail" in normalized:
+            preferred.append(folder)
+        else:
+            remaining.append(folder)
+
+    selected = []
+    for folder in preferred + remaining:
+        if folder not in selected:
+            selected.append(folder)
+        if len(selected) >= MAX_FALLBACK_FOLDERS:
+            break
+    return selected or ["INBOX"]
+
+
 def _get_folder_size(imap, folder_name):
-    """Calculate total size of all messages in a folder using RFC822.SIZE."""
+    """Estimate folder size with a bounded RFC822.SIZE sample."""
     total_size = 0
     message_count = 0
+    estimated = False
     try:
         status, data = imap.select(f'"{folder_name}"', readonly=True)
         if status != "OK":
-            return 0, 0
+            return 0, 0, False
 
         # Get message count
         msg_count_raw = data[0]
@@ -94,10 +132,15 @@ def _get_folder_size(imap, folder_name):
         total_messages = int(msg_count_raw)
 
         if total_messages == 0:
-            return 0, 0
+            return 0, 0, False
 
-        # Fetch sizes for all messages
-        status, data = imap.fetch("1:*", "(RFC822.SIZE)")
+        fetch_range = "1:*"
+        if total_messages > MAX_FALLBACK_MESSAGES_PER_FOLDER:
+            fetch_start = total_messages - MAX_FALLBACK_MESSAGES_PER_FOLDER + 1
+            fetch_range = f"{fetch_start}:*"
+            estimated = True
+
+        status, data = imap.fetch(fetch_range, "(RFC822.SIZE)")
         if status == "OK" and data:
             import re
             for item in data:
@@ -111,10 +154,15 @@ def _get_folder_size(imap, folder_name):
                         total_size += int(match.group(1))
                         message_count += 1
 
+        if estimated and message_count > 0:
+            average_size = total_size / message_count
+            total_size = int(average_size * total_messages)
+            message_count = total_messages
+
     except Exception as e:
         logger.debug(f"Error getting folder size for {folder_name}: {e}")
 
-    return total_size, message_count
+    return total_size, message_count, estimated
 
 
 def check_mailbox_quota(email: str, password: str, host: str = None, port: int = 993) -> dict:
@@ -192,40 +240,45 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
         except (imaplib.IMAP4.error, Exception) as e:
             logger.debug(f"GETQUOTAROOT not supported for {email}: {e}")
 
-        # Fallback: calculate folder sizes via RFC822.SIZE
-        folders = _list_folders(imap)
-        total_size = 0
-        total_messages = 0
-        folder_details = []
+        if quota_available:
+            result["total_size"] = result["quota_used"] or 0
+            result["total_size_formatted"] = result["quota_used_formatted"]
+        else:
+            folders = _prioritize_folders(_list_folders(imap))
+            total_size = 0
+            total_messages = 0
+            folder_details = []
+            estimated_fallback = False
 
-        for folder in folders:
-            try:
-                size, msgs = _get_folder_size(imap, folder)
-                total_size += size
-                total_messages += msgs
-                if size > 0 or msgs > 0:
-                    folder_details.append({
-                        "name": folder,
-                        "size": size,
-                        "size_formatted": _format_size(size),
-                        "messages": msgs
-                    })
-            except Exception:
-                continue
+            for folder in folders:
+                try:
+                    size, msgs, estimated = _get_folder_size(imap, folder)
+                    total_size += size
+                    total_messages += msgs
+                    estimated_fallback = estimated_fallback or estimated
+                    if size > 0 or msgs > 0:
+                        folder_details.append({
+                            "name": folder,
+                            "size": size,
+                            "size_formatted": _format_size(size),
+                            "messages": msgs,
+                            "estimated": estimated
+                        })
+                except Exception:
+                    continue
 
-        # Sort folders by size descending
-        folder_details.sort(key=lambda f: f["size"], reverse=True)
+            # Sort folders by size descending
+            folder_details.sort(key=lambda f: f["size"], reverse=True)
 
-        result["total_size"] = total_size
-        result["total_size_formatted"] = _format_size(total_size)
-        result["total_messages"] = total_messages
-        result["folder_sizes"] = folder_details
-
-        if not quota_available:
-            result["method"] = "FETCH"
+            result["total_size"] = total_size
+            result["total_size_formatted"] = _format_size(total_size)
+            result["total_messages"] = total_messages
+            result["folder_sizes"] = folder_details
+            result["method"] = "SAMPLED_FETCH" if estimated_fallback else "FETCH"
             result["quota_used"] = total_size
             result["quota_used_formatted"] = _format_size(total_size)
-            result["message"] = f"Mailbox size: {_format_size(total_size)} ({total_messages} messages across {len(folder_details)} folders)"
+            estimate_note = "estimated from a bounded sample" if estimated_fallback else "calculated from sampled folders"
+            result["message"] = f"Mailbox size: {_format_size(total_size)} ({total_messages} messages across {len(folder_details)} folders, {estimate_note})"
 
         try:
             imap.logout()
