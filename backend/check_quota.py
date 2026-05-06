@@ -20,6 +20,72 @@ SUSPICIOUS_KB_INTERPRETATION_BYTES = 5 * (1024 ** 4)
 FOLDER_ROLE_TRASH = "trash"
 SYNC_DEDUPE_HEADER = "message-id"
 
+# Exact folder names excluded by worker.py --exclude flags when skip_trash=True
+# Must be lowercase for case-insensitive comparison
+SYNC_SKIP_TRASH_NAMES = {"trash", "bin", "deleted items", "deleted messages", "[gmail]/trash"}
+
+# Provider-specific virtual/aggregate folders to exclude, keyed by provider name.
+# These mirror the behaviour of imapsync provider flags (--gmail1, --office3651, etc.)
+#
+# Gmail  --gmail1: [Gmail]/All Mail is a virtual copy of the ENTIRE mailbox.
+#   Counting it would double-count every message. Spam/Important/Starred are
+#   also virtual labels, not real folders, excluded by --gmail1.
+#
+# Yandex: no virtual aggregate folders. Spam/Trash are real folders with
+#   unique messages. Standard trash exclusion handles Trash.
+#
+# Office365/Outlook  --office3651: No virtual aggregate folder. Exchange
+#   internal folders like "Recoverable Items" are not accessible via IMAP in
+#   most configurations, but we exclude them to be safe.
+#
+# Generic/custom servers: only standard trash exclusion applies.
+PROVIDER_VIRTUAL_FOLDERS: dict[str, set] = {
+    "gmail": {
+        "[gmail]/all mail",   # virtual aggregate — would double-count entire mailbox
+        "[gmail]/spam",       # virtual label view
+        "[gmail]/important",  # virtual label view
+        "[gmail]/starred",    # virtual label view
+    },
+    "office365": {
+        # Recoverable Items and sub-folders are Exchange internals;
+        # not normally reachable via IMAP but exclude defensively.
+        "recoverable items",
+        "recoverable items/deletions",
+        "recoverable items/purges",
+        "recoverable items/versions",
+    },
+    "yandex": set(),   # no virtual aggregate folders
+    "zoho": set(),     # no virtual aggregate folders
+    "exchange": {
+        "recoverable items",
+        "recoverable items/deletions",
+        "recoverable items/purges",
+        "recoverable items/versions",
+    },
+    "generic": set(),
+}
+
+
+def _detect_imap_provider(host: str) -> str:
+    """
+    Detect the email provider from the IMAP hostname.
+    Mirrors worker.py _detect_provider() so folder exclusion rules stay in sync.
+    """
+    if not host:
+        return "generic"
+    h = host.lower()
+    if any(token in h for token in ("gmail.com", "googlemail.com")):
+        return "gmail"
+    if any(token in h for token in ("office365.com", "outlook.com", "hotmail.com", "live.com", "microsoftonline.com")):
+        return "office365"
+    if "yandex" in h:
+        return "yandex"
+    if "zoho" in h:
+        return "zoho"
+    if "exchange" in h:
+        return "exchange"
+    return "generic"
+
 
 def _format_size(size_bytes):
     """Format bytes to human-readable string."""
@@ -185,13 +251,6 @@ def _folder_has_attribute(folder, *attributes):
     return any(attribute in attrs for attribute in attributes)
 
 
-def _folder_matches_role(folder, role):
-    name = folder["name"].lower()
-    if role == FOLDER_ROLE_TRASH:
-        return _folder_has_attribute(folder, "\\trash") or name.endswith("/trash") or name in {"trash", "bin", "deleted items", "deleted messages"}
-    return False
-
-
 def _dedupe_folder_names(folders):
     unique = []
     seen = set()
@@ -204,14 +263,43 @@ def _dedupe_folder_names(folders):
     return unique
 
 
-def _folder_excluded_by_sync(folder, skip_trash):
-    if skip_trash and _folder_matches_role(folder, FOLDER_ROLE_TRASH):
-        return True, "trash_excluded"
+def _folder_excluded_by_sync(folder, skip_trash, provider="generic"):
+    """
+    Return (excluded: bool, reason: str|None) matching worker.py imapsync provider flags.
+
+    Rules applied (in order):
+    1. Provider virtual/aggregate folders are always excluded regardless of skip_trash.
+       These are folders that duplicate content from other folders (e.g. Gmail All Mail).
+    2. Trash folder names are excluded when skip_trash=True, matching imapsync
+       --exclude flags used in worker.py.
+    3. The IMAP \\Trash attribute is honoured when skip_trash=True.
+    """
+    name_lower = folder["name"].lower()
+    virtual_folders = PROVIDER_VIRTUAL_FOLDERS.get(provider, set())
+
+    # Provider-specific virtual/aggregate folders excluded unconditionally.
+    if name_lower in virtual_folders:
+        return True, f"{provider}_virtual_folder"
+
+    if skip_trash:
+        # Match worker.py exact --exclude folder names (case-insensitive)
+        if name_lower in SYNC_SKIP_TRASH_NAMES:
+            return True, "trash_excluded"
+        # Also honour the IMAP \\Trash flag set by the server
+        if _folder_has_attribute(folder, "\\trash"):
+            return True, "trash_excluded"
+        # Yandex uses Russian folder names; honour \\Trash attribute (handled above)
+        # Office365 uses 'Deleted Items' which is in SYNC_SKIP_TRASH_NAMES
+        # Exchange uses 'Deleted Items' / 'Deleted Messages' — already covered
+
     return False, None
 
 
-def _select_sync_folders(folders, skip_trash=True):
-    """Select folders according to current imapsync rules used by worker.py."""
+def _select_sync_folders(folders, skip_trash=True, provider="generic"):
+    """
+    Select folders according to current imapsync rules for the given provider.
+    Mirrors the folder-exclusion logic of worker.py build_imapsync_command().
+    """
     unique_folders = _dedupe_folder_names(folders)
     selected = []
     skipped_folders = []
@@ -219,7 +307,7 @@ def _select_sync_folders(folders, skip_trash=True):
         if not folder.get("selectable", True):
             skipped_folders.append(folder["name"])
             continue
-        excluded, reason = _folder_excluded_by_sync(folder, skip_trash)
+        excluded, reason = _folder_excluded_by_sync(folder, skip_trash, provider=provider)
         if excluded:
             skipped_folders.append(folder["name"])
             continue
@@ -227,14 +315,18 @@ def _select_sync_folders(folders, skip_trash=True):
 
     if not selected:
         selected = [{
-        "name": "INBOX",
-        "attributes": [],
-        "selectable": True,
-    }]
+            "name": "INBOX",
+            "attributes": [],
+            "selectable": True,
+        }]
+
+    # Build strategy label
+    trash_part = "skip_trash" if skip_trash else "include_trash"
+    strategy = f"sync_rules_{provider}_{trash_part}"
 
     return {
         "folders": selected,
-        "strategy": "sync_rules_skip_trash" if skip_trash else "sync_rules_include_trash",
+        "strategy": strategy,
         "skipped_folders": skipped_folders,
     }
 
@@ -397,17 +489,54 @@ def _get_folder_sync_metrics(imap, folder_name, seen_messages):
     }
 
 
+_PROVIDER_LABELS = {
+    "gmail": "Gmail",
+    "office365": "Outlook/Office365",
+    "yandex": "Yandex",
+    "zoho": "Zoho",
+    "exchange": "Exchange",
+    "generic": "Generic IMAP",
+}
+
+_PROVIDER_VIRTUAL_LABELS = {
+    "gmail": "All Mail/Spam/Important/Starred excluded",
+    "office365": "Recoverable Items excluded",
+    "exchange": "Recoverable Items excluded",
+}
+
+
 def _describe_scan_strategy(strategy):
-    if strategy == "sync_rules_skip_trash":
-        return "sync rules with Trash excluded"
-    if strategy == "sync_rules_include_trash":
-        return "sync rules with Trash included"
-    return "selected folders"
+    """
+    Human-readable description of the scan strategy string produced by
+    _select_sync_folders(). Format: sync_rules_{provider}_{trash_mode}
+    """
+    # Parse strategy string
+    prefix = "sync_rules_"
+    if not strategy.startswith(prefix):
+        return "selected folders"
+    rest = strategy[len(prefix):]  # e.g. "gmail_skip_trash"
+
+    provider = "generic"
+    skip_trash = True
+    for p in _PROVIDER_LABELS:
+        if rest.startswith(p + "_"):
+            provider = p
+            rest = rest[len(p) + 1:]  # e.g. "skip_trash"
+            break
+
+    skip_trash = rest == "skip_trash"
+    provider_label = _PROVIDER_LABELS.get(provider, provider)
+    virtual_note = _PROVIDER_VIRTUAL_LABELS.get(provider, "")
+    trash_note = "Trash excluded" if skip_trash else "Trash included"
+    parts = [provider_label, trash_note]
+    if virtual_note:
+        parts.append(virtual_note)
+    return ", ".join(parts)
 
 
-def _collect_sync_estimate(imap, skip_trash=True):
+def _collect_sync_estimate(imap, skip_trash=True, provider="generic"):
     """Compute the bytes/messages likely to be transferred by the current sync rules."""
-    selection = _select_sync_folders(_list_folders(imap), skip_trash=skip_trash)
+    selection = _select_sync_folders(_list_folders(imap), skip_trash=skip_trash, provider=provider)
     folders = selection["folders"]
     total_size = 0
     total_messages = 0
@@ -511,7 +640,7 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
             "duplicate_bytes_formatted": "0 B",
             "missing_message_id_count": 0,
             "folder_sizes": [],
-            "scan_strategy": "sync_rules_skip_trash" if skip_trash else "sync_rules_include_trash",
+            "scan_strategy": "",  # set after provider detection below
             "scanned_folders": [],
             "skipped_folders": [],
             "scan_complete": True,
@@ -550,8 +679,14 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
         except (imaplib.IMAP4.error, Exception) as e:
             logger.debug(f"GETQUOTAROOT not supported for {email}: {e}")
 
+        # Detect provider to apply correct imapsync flag-equivalent folder exclusions.
+        # Mirrors worker.py _detect_provider() / build_imapsync_command() logic.
+        provider = _detect_imap_provider(host)
+        trash_mode = "skip_trash" if skip_trash else "include_trash"
+        result["scan_strategy"] = f"sync_rules_{provider}_{trash_mode}"
+
         if not quota_available or quota_needs_mailbox_scan:
-            mailbox_metrics = _collect_sync_estimate(imap, skip_trash=skip_trash)
+            mailbox_metrics = _collect_sync_estimate(imap, skip_trash=skip_trash, provider=provider)
             total_size = mailbox_metrics["total_size"]
             total_messages = mailbox_metrics["total_messages"]
             folder_details = mailbox_metrics["folder_details"]
