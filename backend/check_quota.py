@@ -65,6 +65,13 @@ PROVIDER_VIRTUAL_FOLDERS: dict[str, set] = {
     "generic": set(),
 }
 
+# Providers whose GETQUOTAROOT response reflects SHARED account storage rather
+# than email-only storage. Gmail's GETQUOTAROOT reports total Google Storage
+# (Drive + Gmail + Photos combined), which would massively over-report the
+# sync size. For these providers we always run the RFC822.SIZE mailbox scan
+# and treat the GETQUOTAROOT value as the "account limit" reference only.
+PROVIDERS_WITH_SHARED_QUOTA = {"gmail"}
+
 
 def _detect_imap_provider(host: str) -> str:
     """
@@ -685,6 +692,22 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
         trash_mode = "skip_trash" if skip_trash else "include_trash"
         result["scan_strategy"] = f"sync_rules_{provider}_{trash_mode}"
 
+        # Some providers (e.g. Gmail) report *shared* account storage via GETQUOTAROOT
+        # rather than email-only storage. Gmail's QUOTA reflects total Google Storage
+        # (Drive + Gmail + Photos), which would massively over-report the sync size.
+        # For these providers: always run the RFC822.SIZE scan so we report email-only
+        # bytes. Preserve the GETQUOTAROOT values as informational account quota.
+        google_account_quota_used_fmt = None
+        google_account_quota_limit_fmt = None
+        if provider in PROVIDERS_WITH_SHARED_QUOTA and quota_available:
+            google_account_quota_used_fmt = result["quota_used_formatted"]
+            google_account_quota_limit_fmt = result["quota_limit_formatted"]
+            # Keep limit for reference but reset used — will be set from RFC822.SIZE scan
+            result["quota_used"] = None
+            result["quota_used_formatted"] = "N/A"
+            result["usage_percent"] = None
+            quota_needs_mailbox_scan = True  # force scan
+
         if not quota_available or quota_needs_mailbox_scan:
             mailbox_metrics = _collect_sync_estimate(imap, skip_trash=skip_trash, provider=provider)
             total_size = mailbox_metrics["total_size"]
@@ -725,10 +748,19 @@ def check_mailbox_quota(email: str, password: str, host: str = None, port: int =
                     result["quota_used_formatted"] = _format_size(total_size)
                     if result["quota_limit"] and result["quota_limit"] > 0:
                         result["usage_percent"] = round((total_size / result["quota_limit"]) * 100, 1)
+                    # Build message — if provider uses shared quota, clarify the account quota
+                    if google_account_quota_used_fmt:
+                        acct_note = (
+                            f" (Google account storage: "
+                            f"{google_account_quota_used_fmt} / {google_account_quota_limit_fmt})"
+                        )
+                    else:
+                        acct_note = ""
                     result["message"] = (
                         f"Sync estimate: {result['quota_used_formatted']} / "
                         f"{result['quota_limit_formatted']} ({result['usage_percent']}%) "
-                        f"from {total_messages} messages across {len(result['scanned_folders'])} scanned folders, {estimate_note}"
+                        f"from {total_messages} messages across {len(result['scanned_folders'])} scanned folders, "
+                        f"{estimate_note}{acct_note}"
                     )
                 else:
                     result["total_size"] = result["quota_used"] or 0
