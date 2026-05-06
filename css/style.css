@@ -174,9 +174,12 @@ body[data-admin-mode="true"]::after {
     opacity: 0.3;
 }
 
-/* Dark mode body background */
+/* Dark mode body — override Tailwind text-slate-800 class so inherited
+   text colour is correct on dark backgrounds. Specificity (0,1,1) beats
+   Tailwind's class selector (0,1,0) without needing !important. */
 [data-theme="dark"] body {
     background-color: var(--bg-primary) !important;
+    color: var(--text-primary);
 }
 
 [data-theme="dark"] body::before {
@@ -230,6 +233,28 @@ body[data-admin-mode="true"]::after {
 }
 
 .text-gray-400 {
+    color: var(--text-tertiary) !important;
+}
+
+/* Slate text — Tailwind uses slate-* across templates; mirror the gray-*
+   CSS-variable mapping so dark mode colours adapt correctly. */
+[data-theme="dark"] .text-slate-900 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-slate-800 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-slate-700 {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .text-slate-600 {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .text-slate-500 {
     color: var(--text-tertiary) !important;
 }
 
@@ -391,6 +416,10 @@ body[data-admin-mode="true"]::after {
 }
 
 @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body {
+        color: var(--text-primary);
+    }
+
     :root:not([data-theme="light"]) .bg-gray-100 {
         background-color: var(--bg-tertiary) !important;
     }
@@ -401,6 +430,20 @@ body[data-admin-mode="true"]::after {
 
     :root:not([data-theme="light"]) .text-gray-700 {
         color: var(--text-secondary) !important;
+    }
+
+    :root:not([data-theme="light"]) .text-slate-900,
+    :root:not([data-theme="light"]) .text-slate-800 {
+        color: var(--text-primary) !important;
+    }
+
+    :root:not([data-theme="light"]) .text-slate-700,
+    :root:not([data-theme="light"]) .text-slate-600 {
+        color: var(--text-secondary) !important;
+    }
+
+    :root:not([data-theme="light"]) .text-slate-500 {
+        color: var(--text-tertiary) !important;
     }
 }
 
@@ -3558,6 +3601,11 @@ button:disabled {
     background: var(--bg-card);
     color: #94a3b8;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .dropzone-area.has-file .dropzone-icon-wrapper {
+    background: rgba(22, 163, 74, 0.15);
+    color: #4ade80;
 }
 
 [data-theme="dark"] .csv-preview-card {
