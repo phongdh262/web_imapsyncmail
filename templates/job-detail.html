@@ -59,33 +59,33 @@
     </div>
 
     <!-- Progress Section -->
-    <div class="rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 mb-8 text-white relative overflow-hidden" style="background: linear-gradient(135deg, #0f5fc3 0%, #0f7ab7 52%, #16324f 100%);">
+    <div class="job-progress-hero rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 mb-8 text-white relative overflow-hidden">
         <div class="relative z-10">
             <div class="flex justify-between items-center mb-4">
                 <h2 data-i18n="jobDetail.progress.title" class="text-lg font-semibold opacity-90">Overall Progress</h2>
                 <span id="progress-percent" class="text-4xl font-semibold">0%</span>
             </div>
-            <div class="bg-black/20 rounded-full h-3 overflow-hidden mb-6 backdrop-blur-sm">
+            <div class="job-progress-track rounded-full h-3 overflow-hidden mb-6 backdrop-blur-sm">
                 <div id="main-progress-bar"
                     class="h-full bg-white rounded-full transition-all duration-500 progress-bar-animated progress-shimmer"
                     style="width: 0%"></div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
+                <div class="job-progress-metric rounded-lg p-4 card-lift">
                     <div id="stat-total" class="text-2xl font-mono font-semibold stat-value">0</div>
                     <div data-i18n="jobDetail.progress.totalMailboxes" class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Total Mailboxes</div>
                 </div>
-                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
-                    <div id="stat-completed" class="text-2xl font-mono font-semibold text-emerald-300 stat-value">0</div>
+                <div class="job-progress-metric rounded-lg p-4 card-lift">
+                    <div id="stat-completed" class="job-progress-success text-2xl font-mono font-semibold stat-value">0</div>
                     <div data-i18n="jobDetail.progress.completed" class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Completed</div>
                 </div>
-                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
-                    <div id="stat-failed" class="text-2xl font-mono font-semibold text-red-300 stat-value">0</div>
+                <div class="job-progress-metric rounded-lg p-4 card-lift">
+                    <div id="stat-failed" class="job-progress-error text-2xl font-mono font-semibold stat-value">0</div>
                     <div data-i18n="jobDetail.progress.failed" class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Failed</div>
                 </div>
-                <div class="bg-blue-700/50 dark:bg-slate-900/50 rounded-lg p-4 border border-blue-500/30 dark:border-slate-700/50 card-lift">
-                    <div id="stat-data" class="text-2xl font-mono font-semibold text-cyan-300 stat-value">0 B</div>
+                <div class="job-progress-metric rounded-lg p-4 card-lift">
+                    <div id="stat-data" class="job-progress-accent text-2xl font-mono font-semibold stat-value">0 B</div>
                     <div data-i18n="jobDetail.progress.dataTransferred" class="text-xs uppercase tracking-wider font-semibold opacity-75 mt-1">Data Transferred</div>
                 </div>
             </div>

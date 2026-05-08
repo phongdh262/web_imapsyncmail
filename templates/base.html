@@ -11,6 +11,16 @@
     <meta property="og:description"
         content="Migrate emails securely and efficiently between IMAP servers with an intuitive interface.">
     <meta property="og:type" content="website">
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
     <link href="/css/tailwind.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css?v={{ asset_version('css/style.css') }}">
     <link
@@ -125,24 +135,6 @@
             window.showAdminLoginModal();
         });
 
-        // Init theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeUI(savedTheme);
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            updateThemeUI('dark');
-        }
-
-        window.toggleTheme = window.toggleTheme || function () {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeUI(newTheme);
-        };
-
         window.toggleMobileMenu = window.toggleMobileMenu || function () {
             const collapsible = document.querySelector('.mobile-collapsible');
             if (collapsible) {
@@ -155,20 +147,6 @@
                 closeIcon.classList.toggle('hidden');
             }
         };
-
-        function updateThemeUI(theme) {
-            const sunIcon = document.querySelector('.sun-icon');
-            const moonIcon = document.querySelector('.moon-icon');
-            if(sunIcon && moonIcon){
-                if (theme === 'dark') {
-                    sunIcon.classList.add('hidden');
-                    moonIcon.classList.remove('hidden');
-                } else {
-                    sunIcon.classList.remove('hidden');
-                    moonIcon.classList.add('hidden');
-                }
-            }
-        }
     </script>
     {% block extra_scripts %}{% endblock %}
 </body>

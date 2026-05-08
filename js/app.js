@@ -996,14 +996,25 @@ const initCreateJob = () => {
             input.classList.add('border-red-500', 'focus:ring-red-500', 'input-invalid');
             input.classList.remove('border-gray-200', 'border-slate-200', 'focus:ring-blue-500', 'input-valid');
             errorEl?.classList.remove('hidden');
-            if (iconEl) { iconEl.style.display = 'block'; iconEl.textContent = '✗'; iconEl.style.color = '#dc2626'; }
+            if (iconEl) {
+                iconEl.style.display = '';
+                iconEl.textContent = '';
+                iconEl.style.color = '';
+            }
             return false;
         } else {
             input.classList.remove('border-red-500', 'focus:ring-red-500', 'input-invalid');
             input.classList.add('border-slate-200', 'focus:ring-blue-500', 'input-valid');
             errorEl?.classList.add('hidden');
-            if (iconEl && input.value.trim()) { iconEl.style.display = 'block'; iconEl.textContent = '✓'; iconEl.style.color = '#16a34a'; }
-            else if (iconEl) { iconEl.style.display = 'none'; }
+            if (iconEl && input.value.trim()) {
+                iconEl.style.display = '';
+                iconEl.textContent = '';
+                iconEl.style.color = '';
+            } else if (iconEl) {
+                iconEl.style.display = 'none';
+                iconEl.textContent = '';
+                iconEl.style.color = '';
+            }
             return true;
         }
     };
@@ -1269,9 +1280,9 @@ const initCreateJob = () => {
 
                 let html = `
                     <div class="csv-preview-card">
-                        <div class="csv-preview-header bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
+                        <div class="csv-preview-header">
                             <h3 class="font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(tr('runtime.createJob.csvPreviewTitle', {}, 'CSV Preview'))}</h3>
-                            <span class="csv-count-badge bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                            <span class="csv-count-badge">
                                 ${escapeHtml(tr('runtime.createJob.mailboxesCount', { count: lines.length }, `${lines.length} mailboxes`))}
                             </span>
                         </div>
@@ -1296,7 +1307,7 @@ const initCreateJob = () => {
                                 <td class="font-mono text-xs">${escapeHtml(parts[0] || '-')}</td>
                                 <td class="font-mono text-xs">${escapeHtml(parts[2] || '-')}</td>
                                 <td>
-                                    <span class="password-badge ${hasPass ? 'password-present' : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'}">
+                                    <span class="password-badge ${hasPass ? 'password-present' : 'password-missing'}">
                                         ${hasPass ? `✓ ${escapeHtml(tr('runtime.createJob.passwordPresent', {}, 'Present'))}` : `✗ ${escapeHtml(tr('runtime.createJob.passwordMissing', {}, 'Missing'))}`}
                                     </span>
                                 </td>
@@ -1903,23 +1914,13 @@ const updateThemeIcon = () => {
 
 // Update body classes for theme compatibility
 const updateBodyTheme = () => {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     const body = document.body;
-
-    // Light mode gradient classes
     const lightClasses = ['bg-gradient-to-br', 'from-slate-50', 'via-white', 'to-blue-50'];
+    if (!body) return;
 
-    if (isDark) {
-        // Remove light gradient classes in dark mode
-        lightClasses.forEach(cls => body.classList.remove(cls));
-        body.style.backgroundColor = '#0f172a';
-        body.style.backgroundImage = 'none';
-    } else {
-        // Restore light gradient classes
-        lightClasses.forEach(cls => body.classList.add(cls));
-        body.style.backgroundColor = '';
-        body.style.backgroundImage = '';
-    }
+    lightClasses.forEach(cls => body.classList.remove(cls));
+    body.style.backgroundColor = '';
+    body.style.backgroundImage = '';
 };
 
 window.toggleTheme = toggleTheme;
@@ -2287,6 +2288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!localStorage.getItem('theme')) {
             document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
             updateThemeIcon();
+            updateBodyTheme();
         }
     });
 
