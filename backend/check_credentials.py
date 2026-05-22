@@ -24,6 +24,7 @@ PROVIDER_MAP = {
     "yahoo.com": {"host": "imap.mail.yahoo.com", "port": 993, "name": "Yahoo"},
     "yahoo.co.jp": {"host": "imap.mail.yahoo.co.jp", "port": 993, "name": "Yahoo Japan"},
     "zoho.com": {"host": "imap.zoho.com", "port": 993, "name": "Zoho"},
+    "zohomail.com": {"host": "imap.zoho.com", "port": 993, "name": "Zoho"},
     "icloud.com": {"host": "imap.mail.me.com", "port": 993, "name": "iCloud"},
     "me.com": {"host": "imap.mail.me.com", "port": 993, "name": "iCloud"},
     "mac.com": {"host": "imap.mail.me.com", "port": 993, "name": "iCloud"},
@@ -33,6 +34,39 @@ PROVIDER_MAP = {
 }
 
 TIMEOUT = 15  # seconds
+
+
+def infer_provider_from_host(host: str) -> dict | None:
+    normalized = (host or "").strip().lower()
+    if not normalized:
+        return None
+
+    host_patterns = (
+        (("imap.gmail.com", "imap.googlemail.com"), PROVIDER_MAP["gmail.com"]),
+        (("imap.yandex.com",), PROVIDER_MAP["yandex.com"]),
+        (("outlook.office365.com", "imap-mail.outlook.com"), PROVIDER_MAP["outlook.com"]),
+        (("imap.mail.yahoo.com",), PROVIDER_MAP["yahoo.com"]),
+        (("imap.mail.yahoo.co.jp",), PROVIDER_MAP["yahoo.co.jp"]),
+        (("imap.zoho.com", "imappro.zoho.com"), PROVIDER_MAP["zoho.com"]),
+        (("imap.mail.me.com",), PROVIDER_MAP["icloud.com"]),
+        (("imap.aol.com",), PROVIDER_MAP["aol.com"]),
+        (("imap.mail.ru",), PROVIDER_MAP["mail.ru"]),
+    )
+
+    for patterns, provider in host_patterns:
+        if any(pattern in normalized for pattern in patterns):
+            return provider
+
+    return None
+
+
+def _build_auth_failure_message(provider_name: str) -> str:
+    if provider_name == "Zoho":
+        return (
+            "Authentication failed - Wrong email or password. "
+            "If Zoho MFA is enabled, use a 12-character Application-Specific Password and make sure IMAP access is enabled."
+        )
+    return "Authentication failed - Wrong email or password / App Password required"
 
 
 def detect_provider(email: str) -> dict:
@@ -82,6 +116,7 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
     
     if host:
         # If user explicitly provided a host, use it
+        provider_info = infer_provider_from_host(host) or provider_info
         provider_name = provider_info["name"] if provider_info else host
     else:
         # No host provided, rely on auto-detection
@@ -94,7 +129,9 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
                 "email": email,
                 "status": "failed",
                 "message": f"Cannot detect IMAP server for domain. Please specify host manually.",
-                "provider": "Unknown"
+                "provider": "Unknown",
+                "host": None,
+                "port": port,
             }
 
     try:
@@ -117,14 +154,16 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
             "email": email,
             "status": "success",
             "message": f"Login successful via {host}",
-            "provider": provider_name
+            "provider": provider_name,
+            "host": host,
+            "port": port,
         }
 
     except imaplib.IMAP4.error as e:
         error_msg = str(e)
         # Parse common IMAP errors
         if "AUTHENTICATIONFAILED" in error_msg.upper() or "AUTH" in error_msg.upper():
-            msg = "Authentication failed - Wrong email or password / App Password required"
+            msg = _build_auth_failure_message(provider_name)
         elif "ALERT" in error_msg.upper():
             msg = f"Server alert: {error_msg}"
         else:
@@ -134,7 +173,9 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
             "email": email,
             "status": "failed",
             "message": msg,
-            "provider": provider_name
+            "provider": provider_name,
+            "host": host,
+            "port": port,
         }
 
     except socket.timeout:
@@ -142,7 +183,9 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
             "email": email,
             "status": "failed",
             "message": f"Connection timed out to {host}:{port}",
-            "provider": provider_name
+            "provider": provider_name,
+            "host": host,
+            "port": port,
         }
 
     except (socket.gaierror, OSError) as e:
@@ -150,7 +193,9 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
             "email": email,
             "status": "failed",
             "message": f"Cannot connect to {host}:{port} - {str(e)}",
-            "provider": provider_name
+            "provider": provider_name,
+            "host": host,
+            "port": port,
         }
 
     except Exception as e:
@@ -158,7 +203,9 @@ def check_imap_login(email: str, password: str, host: str = None, port: int = 99
             "email": email,
             "status": "failed",
             "message": f"Unexpected error: {str(e)}",
-            "provider": provider_name
+            "provider": provider_name,
+            "host": host,
+            "port": port,
         }
 
 

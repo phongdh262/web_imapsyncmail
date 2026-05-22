@@ -24,6 +24,7 @@ class TestDetectProvider:
         ("user@yahoo.com", "imap.mail.yahoo.com", "Yahoo"),
         ("user@yahoo.co.jp", "imap.mail.yahoo.co.jp", "Yahoo Japan"),
         ("user@zoho.com", "imap.zoho.com", "Zoho"),
+        ("user@zohomail.com", "imap.zoho.com", "Zoho"),
         ("user@icloud.com", "imap.mail.me.com", "iCloud"),
         ("user@me.com", "imap.mail.me.com", "iCloud"),
         ("user@aol.com", "imap.aol.com", "AOL"),
@@ -74,6 +75,16 @@ class TestCheckImapLogin:
         r = check_imap_login("user@yandex.com", "wrongpass")
         assert r["status"] == "failed"
         assert "Authentication failed" in r["message"]
+
+    @patch('check_credentials.imaplib.IMAP4_SSL')
+    def test_zoho_auth_fail_mentions_application_specific_password(self, mock_imap):
+        mock_inst = MagicMock()
+        mock_inst.login.side_effect = imaplib.IMAP4.error("AUTHENTICATIONFAILED")
+        mock_imap.return_value = mock_inst
+        r = check_imap_login("user@zoho.com", "wrongpass")
+        assert r["status"] == "failed"
+        assert "Application-Specific Password" in r["message"]
+        assert r["host"] == "imap.zoho.com"
 
     @patch('check_credentials.imaplib.IMAP4_SSL')
     def test_timeout(self, mock_imap):

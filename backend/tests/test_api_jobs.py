@@ -47,16 +47,36 @@ class TestJobCRUD:
         r = c.delete(f"/api/jobs/{jid}", headers={"X-CSRF-Token": csrf})
         assert r.status_code == 200
 
-    def test_delete_running_job_blocked(self, sample_job):
-        """DB-05: Cannot delete a running job."""
+    def test_delete_job_blocked_when_mailbox_is_active(self, sample_job, db_session):
+        """DB-05: Cannot delete a job while a mailbox is still active."""
         c, csrf, jid, _ = sample_job
+        from database import Mailbox
+        db_session.add(Mailbox(
+            job_id=jid,
+            source_user="src@gmail.com",
+            source_pass="p1",
+            target_user="tgt@example.com",
+            target_pass="p2",
+            status="running",
+        ))
+        db_session.commit()
         r = c.delete(f"/api/jobs/{jid}", headers={"X-CSRF-Token": csrf})
         assert r.status_code == 400
-        assert "running" in r.json()["detail"].lower()
+        assert "active" in r.json()["detail"].lower()
 
-    def test_delete_all_jobs_blocked_when_running(self, sample_job):
-        """Cannot delete all when jobs are running."""
-        c, csrf, _, _ = sample_job
+    def test_delete_all_jobs_blocked_when_running(self, sample_job, db_session):
+        """Cannot delete all when mailboxes are still active."""
+        c, csrf, jid, _ = sample_job
+        from database import Mailbox
+        db_session.add(Mailbox(
+            job_id=jid,
+            source_user="src@gmail.com",
+            source_pass="p1",
+            target_user="tgt@example.com",
+            target_pass="p2",
+            status="running",
+        ))
+        db_session.commit()
         r = c.delete("/api/jobs", headers={"X-CSRF-Token": csrf})
         assert r.status_code == 400
 
@@ -161,6 +181,29 @@ class TestProcessControl:
         r2 = c.post(f"/api/mailboxes/{mb_id}/stop", headers={"X-CSRF-Token": csrf})
         assert r2.status_code == 200
 
+    @patch("main.kill_sync", return_value=False)
+    @patch("main.executor")
+    def test_stop_mailbox_requests_soft_stop_when_process_not_found(self, mock_exec, mock_kill, sample_job, db_session):
+        """PR-04B: Stop falls back to a DB-based stop request."""
+        c, csrf, jid, _ = sample_job
+        r = c.post(f"/api/jobs/{jid}/mailboxes", json={
+            "source_user": "s@g.com", "source_pass": "p",
+            "target_user": "t@y.com", "target_pass": "p"
+        }, headers={"X-CSRF-Token": csrf})
+        mb_id = r.json()["mailbox_id"]
+
+        from database import Mailbox
+        mailbox = db_session.query(Mailbox).filter(Mailbox.id == mb_id).first()
+        mailbox.status = "running"
+        db_session.commit()
+
+        r2 = c.post(f"/api/mailboxes/{mb_id}/stop", headers={"X-CSRF-Token": csrf})
+        assert r2.status_code == 200
+        db_session.refresh(mailbox)
+        assert mailbox.status == "stopping"
+        assert mailbox.message == "Stop requested by user"
+        mock_kill.assert_called_once_with(mb_id)
+
     @patch("main.executor")
     def test_retry_mailbox(self, mock_exec, sample_job):
         """PR-05: Retry a failed mailbox."""
@@ -176,11 +219,23 @@ class TestProcessControl:
         assert r2.status_code == 200
         assert r2.json()["status"] == "pending"
 
-    def test_cancel_job(self, sample_job):
-        """PR-06: Cancel all running mailboxes."""
+    @patch("main.executor")
+    def test_cancel_job(self, mock_exec, sample_job, db_session):
+        """PR-06: Cancel pending mailboxes before they start."""
         c, csrf, jid, _ = sample_job
+        r_add = c.post(f"/api/jobs/{jid}/mailboxes", json={
+            "source_user": "s@g.com", "source_pass": "p",
+            "target_user": "t@y.com", "target_pass": "p"
+        }, headers={"X-CSRF-Token": csrf})
+        mb_id = r_add.json()["mailbox_id"]
         r = c.post(f"/api/jobs/{jid}/cancel", headers={"X-CSRF-Token": csrf})
         assert r.status_code == 200
+        assert r.json()["cancelled"] == 1
+
+        from database import Mailbox
+        mailbox = db_session.query(Mailbox).filter(Mailbox.id == mb_id).first()
+        assert mailbox.status == "failed"
+        assert mailbox.message == "Cancelled before start"
 
 # =====================================================================
 # Stats & Health (DB-01, SYS-01)

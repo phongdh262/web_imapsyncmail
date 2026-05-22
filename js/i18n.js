@@ -597,8 +597,14 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
                 },
                 providers: {
                     autoDetect: '🔍 Tự nhận diện từ email',
+                    zoho: '✉️ Zoho Mail',
+                    zohoWorkplace: '🏢 Zoho Workplace / Domain riêng',
                     office365: '📘 Outlook / Office 365',
                     custom: '🔧 Tùy chỉnh...'
+                },
+                providerHints: {
+                    zoho: 'Zoho IMAP: <code>imap.zoho.com:993</code> (SSL). SMTP: <code>smtp.zoho.com:465</code> (SSL) hoặc <code>587</code> (TLS). Nếu bật MFA, hãy dùng <strong>Application-Specific Password 12 ký tự</strong> và nhớ bật IMAP access trong Zoho Mail.',
+                    zohoWorkplace: 'Zoho Workplace / domain riêng thường dùng <code>imappro.zoho.com:993</code> (SSL). SMTP tương ứng là <code>smtppro.zoho.com:465</code> (SSL) hoặc <code>587</code> (TLS). Nếu bật MFA hoặc SAML, hãy dùng <strong>Application-Specific Password</strong>.'
                 },
                 bulk: {
                     title: 'Kiểm tra credential hàng loạt',
@@ -806,6 +812,7 @@ source_user_2@example.com,source_pass_2,target_user_2@example.com,target_pass_2<
             },
             status: {
                 running: 'Đang chạy',
+                stopping: 'Đang dừng',
                 completed: 'Hoàn tất',
                 success: 'Thành công',
                 failed: 'Lỗi',

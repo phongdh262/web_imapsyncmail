@@ -68,6 +68,7 @@ const getPresetProviderLabel = (provider) => ({
     gmail: 'Gmail',
     office365: 'Office 365',
     yandex: 'Yandex',
+    zoho: 'Zoho',
     outlook: 'Outlook',
     h01: 'H01',
     h02: 'H02'
@@ -1590,6 +1591,7 @@ const initJobDetail = async () => {
             const getStatusBadge = (status) => {
                 const statusMap = {
                     'running': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
+                    'stopping': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800',
                     'completed': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
                     'success': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
                     'failed': 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
@@ -2336,6 +2338,7 @@ const serverPresets = {
     gmail: { host: 'imap.gmail.com', port: 993, security: 'SSL/TLS' },
     office365: { host: 'outlook.office365.com', port: 993, security: 'SSL/TLS' },
     yandex: { host: 'imap.yandex.com', port: 993, security: 'SSL/TLS' },
+    zoho: { host: 'imap.zoho.com', port: 993, security: 'SSL/TLS' },
     outlook: { host: 'imap-mail.outlook.com', port: 993, security: 'SSL/TLS' },
     h01: { host: 'h01.azdigimail.com', port: 993, security: 'SSL/TLS' },
     h02: { host: 'h02.azdigimail.com', port: 993, security: 'SSL/TLS' }

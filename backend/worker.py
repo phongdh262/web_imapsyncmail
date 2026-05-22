@@ -5,6 +5,7 @@ import sys
 import stat
 import glob
 import shutil
+import select
 
 # Add current directory to sys.path to ensure modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +17,26 @@ from database import SessionLocal, Mailbox, engine, Job
 
 # Global registry for running processes {mailbox_id: process_object}
 active_processes = {}
+
+STOP_REQUESTED_MESSAGE = "Stop requested by user"
+CANCEL_REQUESTED_MESSAGE = "Cancel requested by user"
+STOPPED_BY_USER_MESSAGE = "Stopped by user"
+CANCELLED_BY_USER_MESSAGE = "Cancelled by user"
+STOPPED_BEFORE_START_MESSAGE = "Stopped before start"
+CANCELLED_BEFORE_START_MESSAGE = "Cancelled before start"
+
+SOFT_STOP_REQUEST_MESSAGES = {
+    STOP_REQUESTED_MESSAGE,
+    CANCEL_REQUESTED_MESSAGE,
+}
+PRESTART_STOP_MESSAGES = {
+    STOPPED_BEFORE_START_MESSAGE,
+    CANCELLED_BEFORE_START_MESSAGE,
+}
+FINAL_STOP_MESSAGE_BY_REQUEST = {
+    STOP_REQUESTED_MESSAGE: STOPPED_BY_USER_MESSAGE,
+    CANCEL_REQUESTED_MESSAGE: CANCELLED_BY_USER_MESSAGE,
+}
 
 IMAPSYNC_BINARY = os.getenv("IMAPSYNC_BINARY") or shutil.which("imapsync") or "imapsync"
 IMAPSYNC_TIMEOUT = max(60, int(os.getenv("IMAPSYNC_TIMEOUT", "180")))
@@ -230,6 +251,27 @@ def kill_sync(mailbox_id: int):
             return False
     return False
 
+
+def _is_stop_requested(mailbox: Mailbox) -> bool:
+    return mailbox.status == 'stopping' and mailbox.message in SOFT_STOP_REQUEST_MESSAGES
+
+
+def _resolve_stop_message(mailbox: Mailbox) -> str:
+    return FINAL_STOP_MESSAGE_BY_REQUEST.get(mailbox.message, STOPPED_BY_USER_MESSAGE)
+
+
+def _sleep_with_stop_check(db: Session, mailbox: Mailbox, delay_seconds: int) -> str | None:
+    deadline = time.time() + delay_seconds
+    while time.time() < deadline:
+        try:
+            db.refresh(mailbox)
+            if _is_stop_requested(mailbox):
+                return _resolve_stop_message(mailbox)
+        except Exception:
+            pass
+        time.sleep(min(1, max(0, deadline - time.time())))
+    return None
+
 def run_imapsync(mailbox_id: int):
     """
     Executes the real imapsync process.
@@ -250,6 +292,10 @@ def run_imapsync(mailbox_id: int):
     pass1_path = None
     pass2_path = None
     try:
+        db.refresh(mailbox)
+        if mailbox.status == 'failed' and mailbox.message in PRESTART_STOP_MESSAGES:
+            return
+
         mailbox.status = 'running'
         mailbox.message = "Starting imapsync..."
         db.commit()
@@ -296,6 +342,7 @@ def run_imapsync(mailbox_id: int):
         import re
         total_bytes = 0
         final_returncode = None
+        stop_result_message = None
 
         for attempt in range(MAX_RETRIES + 1):
             # --- Retry delay (skip for first attempt) ---
@@ -304,7 +351,16 @@ def run_imapsync(mailbox_id: int):
                 mailbox.message = f"Retry {attempt}/{MAX_RETRIES}: Restarting sync in {delay}s after error (code {final_returncode})..."
                 mailbox.status = 'running'
                 db.commit()
-                time.sleep(delay)
+                stop_result_message = _sleep_with_stop_check(db, mailbox, delay)
+                if stop_result_message:
+                    final_returncode = -15
+                    break
+
+            db.refresh(mailbox)
+            if _is_stop_requested(mailbox):
+                stop_result_message = _resolve_stop_message(mailbox)
+                final_returncode = -15
+                break
 
             # Open log file: "w" for first attempt, "a" for retries
             open_mode = "w" if attempt == 0 else "a"
@@ -349,21 +405,45 @@ def run_imapsync(mailbox_id: int):
                 total_msgs = 0
                 last_progress = -1
                 last_db_pulse = time.time()
+                last_control_check = 0
                 attempt_bytes = 0
                 
                 while True:
-                    line = process.stdout.readline()
-                    if not line and process.poll() is not None:
-                        break
-                    
+                    now = time.time()
+                    if now - last_control_check >= 1:
+                        try:
+                            db.refresh(mailbox)
+                            if _is_stop_requested(mailbox):
+                                stop_result_message = _resolve_stop_message(mailbox)
+                                log_file.write(f"[WORKER] {mailbox.message}. Sending SIGTERM.\n")
+                                log_file.flush()
+                                if process.poll() is None:
+                                    process.terminate()
+                            last_control_check = now
+                        except Exception:
+                            pass
+
+                    ready = []
+                    try:
+                        if process.stdout:
+                            ready, _, _ = select.select([process.stdout], [], [], 1.0)
+                    except Exception:
+                        ready = [process.stdout] if process.stdout else []
+
+                    if ready:
+                        line = process.stdout.readline()
+                    else:
+                        line = ""
+
                     if not line:
+                        if process.poll() is not None:
+                            break
                         continue
 
                     line_stripped = line.strip()
                     log_file.write(line)
                     log_file.flush()
                     
-                    now = time.time()
                     # Pulse DB every 10 seconds even if no progress match, just to show activity
                     if now - last_db_pulse > 10:
                         try:
@@ -452,7 +532,9 @@ def run_imapsync(mailbox_id: int):
                     del active_processes[mailbox_id]
 
             # --- Decide: retry or break ---
-            if final_returncode == 0:
+            if stop_result_message:
+                break
+            elif final_returncode == 0:
                 # Success — no retry needed
                 break
             elif final_returncode in (111, 112, 113, 114, 115, 116):
@@ -476,7 +558,10 @@ def run_imapsync(mailbox_id: int):
             mailbox.data_transferred = total_bytes
             job.data_transferred += total_bytes
         
-        if final_returncode == 0:
+        if stop_result_message:
+            mailbox.status = 'failed'
+            mailbox.message = stop_result_message
+        elif final_returncode == 0:
             mailbox.status = 'success'
             mailbox.progress = 100
             retried_note = f" (after {attempt} retries)" if attempt > 0 else ""
@@ -532,10 +617,18 @@ def run_imapsync(mailbox_id: int):
 
             job.completed = completed_count
             job.failed = failed_count
-            
-            # Check completion
-            if (job.completed + job.failed) >= job.total_mailboxes:
-                job.status = 'completed'
+
+            active_count = db.query(Mailbox).filter(
+                Mailbox.job_id == job.id,
+                Mailbox.status.in_(['running', 'pending', 'stopping'])
+            ).count()
+
+            if active_count > 0:
+                job.status = 'running'
+            elif job.total_mailboxes > 0 and (job.completed + job.failed) >= job.total_mailboxes:
+                job.status = 'failed' if job.completed == 0 and job.failed > 0 else 'completed'
+            elif job.total_mailboxes == 0:
+                job.status = 'pending'
 
         db.commit()
         db.close()

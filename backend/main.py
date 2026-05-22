@@ -32,10 +32,19 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from database import SessionLocal, engine, Job, Mailbox, User, get_db, init_db
 from auth import Token, get_current_user, create_access_token, verify_password, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES, create_csrf_token, SESSION_COOKIE_NAME, CSRF_COOKIE_NAME, verify_csrf
 from pydantic import BaseModel
-from worker import run_imapsync, cleanup_stale_passfiles
+from worker import (
+    run_imapsync,
+    cleanup_stale_passfiles,
+    kill_sync,
+    STOP_REQUESTED_MESSAGE,
+    CANCEL_REQUESTED_MESSAGE,
+    STOPPED_BEFORE_START_MESSAGE,
+    CANCELLED_BEFORE_START_MESSAGE,
+)
 
 ROOT_ADMIN_DEFAULT_USERNAME = "phongdh"
 MANAGED_USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]{3,32}$")
+ACTIVE_MAILBOX_STATUSES = ("running", "pending", "stopping")
 
 
 def get_root_admin_username() -> str:
@@ -337,14 +346,16 @@ def _sync_job_runtime(job: Job, status_counts: dict) -> bool:
     failed_count = int(status_counts.get("failed", 0))
     running_count = int(status_counts.get("running", 0))
     pending_count = int(status_counts.get("pending", 0))
+    stopping_count = int(status_counts.get("stopping", 0))
 
-    observed_total = success_count + warning_count + failed_count + running_count + pending_count
+    active_count = running_count + pending_count + stopping_count
+    observed_total = success_count + warning_count + failed_count + active_count
     total_mailboxes = observed_total if observed_total > 0 else int(job.total_mailboxes or 0)
     completed_count = success_count + warning_count
 
     if total_mailboxes == 0:
         desired_status = job.status or "pending"
-    elif running_count > 0:
+    elif active_count > 0:
         desired_status = "running"
     elif pending_count > 0 and (completed_count + failed_count) < total_mailboxes:
         desired_status = "running"
@@ -368,6 +379,28 @@ def _sync_job_runtime(job: Job, status_counts: dict) -> bool:
         changed = True
 
     return changed
+
+
+def _count_active_mailboxes(db: Session, job_id: Optional[str] = None) -> int:
+    query = db.query(Mailbox).filter(Mailbox.status.in_(ACTIVE_MAILBOX_STATUSES))
+    if job_id:
+        query = query.filter(Mailbox.job_id == job_id)
+    return query.count()
+
+
+def _request_mailbox_stop(mailbox: Mailbox, request_message: str, before_start_message: str) -> bool:
+    if mailbox.status == 'running':
+        mailbox.status = 'stopping'
+        mailbox.message = request_message
+        return True
+
+    if mailbox.status == 'pending':
+        mailbox.status = 'failed'
+        mailbox.message = before_start_message
+        mailbox.progress = 0
+        return True
+
+    return False
 
 
 # Root-admin User Management API
@@ -670,12 +703,11 @@ async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: Uploa
 
 @app.delete("/api/jobs")
 def delete_all_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
-    # Check if any jobs are currently running
-    active_jobs = db.query(Job).filter(Job.status == "running").count()
-    if active_jobs > 0:
+    active_mailboxes = _count_active_mailboxes(db)
+    if active_mailboxes > 0:
         raise HTTPException(
             status_code=400, 
-            detail=f"Cannot delete history while {active_jobs} jobs are still running. Please stop them first."
+            detail=f"Cannot delete history while {active_mailboxes} mailboxes are still active. Please stop them first."
         )
     
     try:
@@ -708,8 +740,9 @@ def delete_single_job(job_id: str, db: Session = Depends(get_db), current_user: 
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    if job.status == "running":
-        raise HTTPException(status_code=400, detail="Cannot delete a job that is currently running. Please stop it first.")
+    active_mailboxes = _count_active_mailboxes(db, job_id)
+    if active_mailboxes > 0:
+        raise HTTPException(status_code=400, detail="Cannot delete a job that still has active mailboxes. Please stop them first.")
     
     try:
         # 1. Delete associated log files
@@ -945,22 +978,28 @@ def verify_job_password(job_id: str, data: PasswordVerify, response: Response, d
 
 @app.post("/api/mailboxes/{mailbox_id}/stop")
 def stop_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
-    from worker import kill_sync
-    # Kill the process
-    success = kill_sync(mailbox_id)
-    
-    # Update DB immediately (in case worker doesn't correct it fast enough)
     mb = db.query(Mailbox).filter(Mailbox.id == mailbox_id).first()
-    if mb and mb.status == 'running':
-        mb.status = 'failed'
-        mb.message = 'Stopped by user'
+    if not mb:
+        raise HTTPException(status_code=404, detail="Mailbox not found")
+
+    stop_requested = _request_mailbox_stop(mb, STOP_REQUESTED_MESSAGE, STOPPED_BEFORE_START_MESSAGE)
+    if stop_requested:
         db.commit()
-        
-    if success:
-        return {"message": "Process terminated"}
+        success = kill_sync(mailbox_id)
     else:
-        # Could be already stopped
-        return {"message": "Process not found or already stopped"}
+        success = False
+
+    job = db.query(Job).filter(Job.id == mb.job_id).first()
+    if job:
+        counts_by_job = _load_mailbox_status_counts(db, [job.id])
+        if _sync_job_runtime(job, counts_by_job.get(job.id, {})):
+            db.commit()
+
+    if stop_requested and success:
+        return {"message": "Process termination requested"}
+    if stop_requested:
+        return {"message": "Stop requested"}
+    return {"message": "Mailbox is not active"}
 
 @app.post("/api/mailboxes/{mailbox_id}/retry")
 def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
@@ -1002,33 +1041,34 @@ def retry_mailbox_sync(mailbox_id: int, db: Session = Depends(get_db), current_u
 @app.post("/api/jobs/{job_id}/cancel")
 def cancel_job(job_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     """Cancel all running mailboxes in a job"""
-    from worker import kill_sync
-    
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    # Get all running mailboxes
-    running_mailboxes = db.query(Mailbox).filter(
+    active_mailboxes = db.query(Mailbox).filter(
         Mailbox.job_id == job_id, 
-        Mailbox.status == 'running'
+        Mailbox.status.in_(('running', 'pending'))
     ).all()
     
     cancelled_count = 0
-    for mb in running_mailboxes:
-        success = kill_sync(mb.id)
-        if success:
-            mb.status = 'failed'
-            mb.message = 'Cancelled by user'
+    running_ids_to_signal = []
+    for mb in active_mailboxes:
+        requested = _request_mailbox_stop(mb, CANCEL_REQUESTED_MESSAGE, CANCELLED_BEFORE_START_MESSAGE)
+        if requested:
             cancelled_count += 1
-    
-    # Update job status
-    if cancelled_count > 0:
-        job.status = 'failed'
-    
+            if mb.status == 'stopping':
+                running_ids_to_signal.append(mb.id)
+
     db.commit()
-    
-    return {"message": f"Cancelled {cancelled_count} mailboxes", "cancelled": cancelled_count}
+
+    for mailbox_id in running_ids_to_signal:
+        kill_sync(mailbox_id)
+
+    counts_by_job = _load_mailbox_status_counts(db, [job.id])
+    if _sync_job_runtime(job, counts_by_job.get(job.id, {})):
+        db.commit()
+
+    return {"message": f"Cancellation requested for {cancelled_count} mailboxes", "cancelled": cancelled_count}
 
 # --- Check Credentials API (Public, Rate-Limited) ---
 from check_credentials import check_imap_login, check_bulk, detect_provider, PROVIDER_MAP
