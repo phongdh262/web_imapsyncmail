@@ -582,7 +582,8 @@ window.deleteAllJobs = async () => {
     if (!await ensureAdminAuth()) return;
     window.showConfirm(tr('runtime.dashboard.deleteAllConfirm', {}, 'Are you sure you want to delete ALL jobs and logs? This action cannot be undone.'), async () => {
         try {
-            const res = await request(`${API_BASE}/jobs`, { method: 'DELETE' });
+            const forceQuery = canCurrentAdminManageUsers() ? '?force=true' : '';
+            const res = await request(`${API_BASE}/jobs${forceQuery}`, { method: 'DELETE' });
             if (res.status === 401) {
                 await ensureAdminAuth();
                 throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));
@@ -607,7 +608,8 @@ window.deleteSingleJob = async (jobId, jobName) => {
     if (!await ensureAdminAuth()) return;
     window.showConfirm(tr('runtime.dashboard.deleteJobConfirm', { jobName }, `Are you sure you want to delete "${jobName}"? This will permanently remove its logs.`), async () => {
         try {
-            const res = await request(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' });
+            const forceQuery = canCurrentAdminManageUsers() ? '?force=true' : '';
+            const res = await request(`${API_BASE}/jobs/${jobId}${forceQuery}`, { method: 'DELETE' });
             if (res.status === 401) {
                 await ensureAdminAuth();
                 throw new Error(tr('runtime.auth.adminRequired', {}, 'Admin login required'));

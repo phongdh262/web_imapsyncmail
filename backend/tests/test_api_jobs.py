@@ -80,6 +80,42 @@ class TestJobCRUD:
         r = c.delete("/api/jobs", headers={"X-CSRF-Token": csrf})
         assert r.status_code == 400
 
+    def test_root_admin_can_force_delete_single_active_job(self, sample_job, db_session):
+        """Root admin can force delete an active job."""
+        c, csrf, jid, _ = sample_job
+        from database import Mailbox, Job
+        db_session.add(Mailbox(
+            job_id=jid,
+            source_user="src@gmail.com",
+            source_pass="p1",
+            target_user="tgt@example.com",
+            target_pass="p2",
+            status="running",
+        ))
+        db_session.commit()
+
+        r = c.delete(f"/api/jobs/{jid}?force=true", headers={"X-CSRF-Token": csrf})
+        assert r.status_code == 200
+        assert db_session.query(Job).filter(Job.id == jid).first() is None
+
+    def test_root_admin_can_force_delete_all_active_jobs(self, sample_job, db_session):
+        """Root admin can force delete all jobs even when some are active."""
+        c, csrf, jid, _ = sample_job
+        from database import Mailbox, Job
+        db_session.add(Mailbox(
+            job_id=jid,
+            source_user="src@gmail.com",
+            source_pass="p1",
+            target_user="tgt@example.com",
+            target_pass="p2",
+            status="running",
+        ))
+        db_session.commit()
+
+        r = c.delete("/api/jobs?force=true", headers={"X-CSRF-Token": csrf})
+        assert r.status_code == 200
+        assert db_session.query(Job).count() == 0
+
     def test_get_job_not_found(self, admin_client):
         """404 for non-existent job."""
         c, _ = admin_client

@@ -403,6 +403,29 @@ def _request_mailbox_stop(mailbox: Mailbox, request_message: str, before_start_m
     return False
 
 
+def _resolve_force_delete(force: bool, current_user: User) -> bool:
+    if not force:
+        return False
+    if not is_root_admin_username(current_user.username):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only root admin can force delete active jobs",
+        )
+    return True
+
+
+def _terminate_known_job_processes(db: Session, job_id: Optional[str] = None):
+    query = db.query(Mailbox.id, Mailbox.status).filter(Mailbox.status.in_(('running', 'stopping')))
+    if job_id:
+        query = query.filter(Mailbox.job_id == job_id)
+
+    for mailbox_id, _status in query.all():
+        try:
+            kill_sync(mailbox_id)
+        except Exception:
+            pass
+
+
 # Root-admin User Management API
 @app.get("/api/admin/users", response_model=List[ManagedUserResponse])
 def list_admin_users(db: Session = Depends(get_db), current_user: User = Depends(require_root_admin)):
@@ -702,15 +725,19 @@ async def upload_csv(job_id: str, background_tasks: BackgroundTasks, file: Uploa
     return {"message": f"Started {count} mailboxes"}
 
 @app.delete("/api/jobs")
-def delete_all_jobs(db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
+def delete_all_jobs(force: bool = Query(False), db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
+    force_delete = _resolve_force_delete(force, current_user)
     active_mailboxes = _count_active_mailboxes(db)
-    if active_mailboxes > 0:
+    if active_mailboxes > 0 and not force_delete:
         raise HTTPException(
             status_code=400, 
             detail=f"Cannot delete history while {active_mailboxes} mailboxes are still active. Please stop them first."
         )
     
     try:
+        if force_delete:
+            _terminate_known_job_processes(db)
+
         # Delete Log Files
         import shutil
         log_dir = "logs"
@@ -735,16 +762,20 @@ def delete_all_jobs(db: Session = Depends(get_db), current_user: User = Depends(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/jobs/{job_id}")
-def delete_single_job(job_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
+def delete_single_job(job_id: str, force: bool = Query(False), db: Session = Depends(get_db), current_user: User = Depends(get_current_user), _: None = Depends(verify_csrf)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
+    force_delete = _resolve_force_delete(force, current_user)
     active_mailboxes = _count_active_mailboxes(db, job_id)
-    if active_mailboxes > 0:
+    if active_mailboxes > 0 and not force_delete:
         raise HTTPException(status_code=400, detail="Cannot delete a job that still has active mailboxes. Please stop them first.")
     
     try:
+        if force_delete:
+            _terminate_known_job_processes(db, job_id)
+
         # 1. Delete associated log files
         mailboxes = db.query(Mailbox).filter(Mailbox.job_id == job_id).all()
         for mb in mailboxes:
