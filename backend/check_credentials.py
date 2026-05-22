@@ -7,6 +7,7 @@ import imaplib
 import ssl
 import socket
 import logging
+from typing import Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ PROVIDER_MAP = {
 TIMEOUT = 15  # seconds
 
 
-def infer_provider_from_host(host: str) -> dict | None:
+def infer_provider_from_host(host: str) -> Optional[dict]:
     normalized = (host or "").strip().lower()
     if not normalized:
         return None

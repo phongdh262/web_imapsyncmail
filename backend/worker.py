@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import tempfile
 import signal
+from typing import Optional
 from sqlalchemy.orm import Session
 from database import SessionLocal, Mailbox, engine, Job
 
@@ -260,7 +261,7 @@ def _resolve_stop_message(mailbox: Mailbox) -> str:
     return FINAL_STOP_MESSAGE_BY_REQUEST.get(mailbox.message, STOPPED_BY_USER_MESSAGE)
 
 
-def _sleep_with_stop_check(db: Session, mailbox: Mailbox, delay_seconds: int) -> str | None:
+def _sleep_with_stop_check(db: Session, mailbox: Mailbox, delay_seconds: int) -> Optional[str]:
     deadline = time.time() + delay_seconds
     while time.time() < deadline:
         try:
